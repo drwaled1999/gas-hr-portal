@@ -1,180 +1,203 @@
-import React, { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Bell,
-  Users,
-  BriefcaseBusiness,
-  FolderKanban,
-  ShieldCheck,
-  ClipboardList,
-  LogOut,
-  Search,
-  Plus
-} from 'lucide-react';
-
-const logoSrc = '/LOGO-GAS.jpg';
+import { useMemo, useState } from "react";
+import "./styles.css";
 
 type Employee = {
-  id: string;
-  name: string;
+  id: number;
+  employeeCode: string;
+  fullName: string;
   department: string;
   jobTitle: string;
-  nationality: 'Saudi' | 'Non-Saudi';
-  project: string;
+  nationality: string;
+  projectName: string;
   packageName: string;
-  role: 'HR' | 'HR Admin' | 'Admin' | 'Admin Assistant';
-  annualRemaining: string;
+  systemRole: string;
+  status: string;
+  leave: {
+    total: number;
+    used: number;
+    remaining: number;
+    sick: number;
+    emergency: number;
+  };
   notes: string[];
 };
 
-type User = {
-  username: string;
-  fullName: string;
-  role: string;
-};
-
-const demoUsers: Record<string, User> = {
-  hrmanager: { username: 'hrmanager', fullName: 'Mohammed Faisal', role: 'HR Manager' },
-  walid: { username: 'walid', fullName: 'Walid Khalaf', role: 'HR Admin' },
-  admin: { username: 'admin', fullName: 'Admin User', role: 'Admin' }
-};
+type Page =
+  | "dashboard"
+  | "employees"
+  | "add"
+  | "permissions"
+  | "audit"
+  | "notifications"
+  | "reports";
 
 const initialEmployees: Employee[] = [
   {
-    id: 'GAS-1182',
-    name: 'Walid Khalaf',
-    department: 'HR',
-    jobTitle: 'HR Admin',
-    nationality: 'Saudi',
-    project: 'Zuluf',
-    packageName: 'Package 12',
-    role: 'HR Admin',
-    annualRemaining: '14 Days',
-    notes: ['Supports time sheet updates.']
+    id: 1,
+    employeeCode: "GAS-1182",
+    fullName: "Walid Khalaf",
+    department: "HR",
+    jobTitle: "HR Admin",
+    nationality: "Saudi",
+    projectName: "Zuluf",
+    packageName: "Package 12",
+    systemRole: "HR Admin",
+    status: "Active",
+    leave: { total: 21, used: 7, remaining: 14, sick: 2, emergency: 1 },
+    notes: ["Supports time sheet updates."],
   },
   {
-    id: 'GAS-1450',
-    name: 'Sara Khan',
-    department: 'Admin',
-    jobTitle: 'Admin Assistant',
-    nationality: 'Non-Saudi',
-    project: 'Operations Support',
-    packageName: 'Package 08',
-    role: 'Admin Assistant',
-    annualRemaining: '5 Days',
-    notes: ['Assigned to leave coordination support.']
-  }
+    id: 2,
+    employeeCode: "GAS-1450",
+    fullName: "Sara Khan",
+    department: "Admin",
+    jobTitle: "Admin Assistant",
+    nationality: "Non-Saudi",
+    projectName: "Operations Support",
+    packageName: "Package 08",
+    systemRole: "Admin Assistant",
+    status: "Active",
+    leave: { total: 21, used: 16, remaining: 5, sick: 1, emergency: 0 },
+    notes: ["Assigned to leave coordination support."],
+  },
 ];
 
-function SplashScreen() {
-  return (
-    <motion.div className="splash" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="splash-card">
-        <img src={logoSrc} alt="GAS" className="logo large" />
-        <h1>HR & Admin Leave Access Portal</h1>
-        <p>GAS Arabian Services</p>
-      </div>
-    </motion.div>
-  );
-}
-
 export default function App() {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-  const [form, setForm] = useState({ username: '', password: '' });
-  const [loginError, setLoginError] = useState('');
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [page, setPage] = useState<Page>("dashboard");
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
-  const [query, setQuery] = useState('');
-  const [projectFilter, setProjectFilter] = useState('all');
-  const [packageFilter, setPackageFilter] = useState('all');
-  const [showAdd, setShowAdd] = useState(false);
-  const [newEmployee, setNewEmployee] = useState<Employee>({
-    id: '',
-    name: '',
-    department: '',
-    jobTitle: '',
-    nationality: 'Saudi',
-    project: '',
-    packageName: '',
-    role: 'Admin Assistant',
-    annualRemaining: '0 Days',
-    notes: []
-  });
+  const [selectedId, setSelectedId] = useState<number>(1);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+  const [department, setDepartment] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [nationality, setNationality] = useState("Saudi");
+  const [projectName, setProjectName] = useState("");
+  const [packageName, setPackageName] = useState("");
+  const [systemRole, setSystemRole] = useState("Admin Assistant");
+  const [note, setNote] = useState("");
 
-  React.useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1800);
-    return () => clearTimeout(t);
-  }, []);
+  const selectedEmployee =
+    employees.find((e) => e.id === selectedId) ?? employees[0];
 
-  const saudiCount = employees.filter((e) => e.nationality === 'Saudi').length;
-  const projects = Array.from(new Set(employees.map((e) => e.project))).filter(Boolean);
-  const packages = Array.from(new Set(employees.map((e) => e.packageName))).filter(Boolean);
+  const stats = useMemo(() => {
+    const saudi = employees.filter((e) => e.nationality === "Saudi").length;
+    const projects = new Set(employees.map((e) => e.projectName)).size;
+    const lowLeave = employees.filter((e) => e.leave.remaining <= 5).length;
+    return {
+      total: employees.length,
+      saudi,
+      projects,
+      lowLeave,
+    };
+  }, [employees]);
 
-  const filtered = useMemo(() => {
-    return employees.filter((e) => {
-      const matchProject = projectFilter === 'all' || e.project === projectFilter;
-      const matchPackage = packageFilter === 'all' || e.packageName === packageFilter;
-      const q = query.toLowerCase();
-      const matchQuery = !q || [e.id, e.name, e.department, e.jobTitle, e.project, e.packageName]
-        .join(' ')
-        .toLowerCase()
-        .includes(q);
-      return matchProject && matchPackage && matchQuery;
-    });
-  }, [employees, query, projectFilter, packageFilter]);
+  const navItems: { key: Page; label: string }[] = [
+    { key: "dashboard", label: "Dashboard" },
+    { key: "employees", label: "Employees" },
+    { key: "add", label: "Add Employee" },
+    { key: "permissions", label: "Permissions" },
+    { key: "audit", label: "Audit Log" },
+    { key: "notifications", label: "Notifications" },
+    { key: "reports", label: "Reports" },
+  ];
 
-  const handleLogin = () => {
-    if (!form.username || !form.password) {
-      setLoginError('Please enter username and password.');
+  function handleLogin() {
+    if (!username || !password) {
+      alert("Enter username and password");
       return;
     }
-    const found = demoUsers[form.username.toLowerCase()];
-    if (!found) {
-      setLoginError('Invalid demo username.');
+    setLoggedIn(true);
+  }
+
+  function handleLogout() {
+    setLoggedIn(false);
+    setUsername("");
+    setPassword("");
+  }
+
+  function addEmployee() {
+    if (!name || !code || !projectName || !packageName) {
+      alert("Please fill Employee Code, Name, Project and Package");
       return;
     }
-    setUser(found);
-    setLoginError('');
-  };
 
-  const addEmployee = () => {
-    if (!newEmployee.id || !newEmployee.name || !newEmployee.project || !newEmployee.packageName) return;
-    setEmployees([{ ...newEmployee, notes: newEmployee.notes.length ? newEmployee.notes : ['New employee added.'] }, ...employees]);
-    setShowAdd(false);
-    setNewEmployee({
-      id: '', name: '', department: '', jobTitle: '', nationality: 'Saudi', project: '', packageName: '', role: 'Admin Assistant', annualRemaining: '0 Days', notes: []
-    });
-  };
+    const used = 0;
+    const total = 21;
+    const newEmployee: Employee = {
+      id: Date.now(),
+      employeeCode: code,
+      fullName: name,
+      department,
+      jobTitle,
+      nationality,
+      projectName,
+      packageName,
+      systemRole,
+      status: "Active",
+      leave: {
+        total,
+        used,
+        remaining: total - used,
+        sick: 0,
+        emergency: 0,
+      },
+      notes: note ? [note] : [],
+    };
 
-  if (loading) return <SplashScreen />;
+    setEmployees((prev) => [newEmployee, ...prev]);
+    setSelectedId(newEmployee.id);
+    setPage("employees");
 
-  if (!user) {
+    setName("");
+    setCode("");
+    setDepartment("");
+    setJobTitle("");
+    setNationality("Saudi");
+    setProjectName("");
+    setPackageName("");
+    setSystemRole("Admin Assistant");
+    setNote("");
+  }
+
+  function addNote() {
+    if (!selectedEmployee || !note.trim()) return;
+
+    setEmployees((prev) =>
+      prev.map((emp) =>
+        emp.id === selectedEmployee.id
+          ? { ...emp, notes: [note, ...emp.notes] }
+          : emp
+      )
+    );
+    setNote("");
+  }
+
+  if (!loggedIn) {
     return (
       <div className="login-page">
-        <div className="login-hero">
-          <img src={logoSrc} alt="GAS" className="logo" />
-          <h1>GAS HR Leave Portal</h1>
-          <p>Initial demo for management approval</p>
-          <div className="hero-stats">
-            <div><Users size={18}/> Saudi Employees: {saudiCount}</div>
-            <div><FolderKanban size={18}/> Projects: {projects.length}</div>
-            <div><BriefcaseBusiness size={18}/> Packages: {packages.length}</div>
-            <div><ShieldCheck size={18}/> Access Control: Enabled</div>
-          </div>
-        </div>
         <div className="login-card">
-          <img src={logoSrc} alt="GAS" className="logo small" />
-          <h2>Sign in</h2>
-          <input placeholder="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
-          <input placeholder="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-          {loginError && <div className="error">{loginError}</div>}
-          <button className="primary" onClick={handleLogin}>Sign In</button>
-          <div className="demo-box">
-            <strong>Demo accounts</strong>
-            <div>hrmanager / any password</div>
-            <div>walid / any password</div>
-            <div>admin / any password</div>
+          <h1>GAS HR Leave Portal</h1>
+          <p className="muted">Team Fahad Zaidan Alshammari</p>
+          <p className="muted">Prepared by Walid Khalaf Alshammari</p>
+
+          <div className="form-group">
+            <label>Username</label>
+            <input value={username} onChange={(e) => setUsername(e.target.value)} />
           </div>
+
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <button onClick={handleLogin}>Sign In</button>
         </div>
       </div>
     );
@@ -183,125 +206,162 @@ export default function App() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand">
-          <img src={logoSrc} alt="GAS" className="logo small" />
-          <div>
-            <div className="brand-title">GAS Portal</div>
-            <div className="brand-sub">HR Leave Management</div>
-          </div>
-        </div>
-        <div className="menu-item active">Dashboard</div>
-        <div className="menu-item">Employees</div>
-        <div className="menu-item">Audit Log</div>
-        <div className="menu-item">Notifications</div>
+        <h2>GAS Portal</h2>
+        {navItems.map((item) => (
+          <button
+            key={item.key}
+            className={page === item.key ? "nav-btn active" : "nav-btn"}
+            onClick={() => setPage(item.key)}
+          >
+            {item.label}
+          </button>
+        ))}
       </aside>
 
       <main className="content">
-        <header className="topbar">
+        <div className="topbar">
           <div>
-            <h2>Dashboard</h2>
-            <p>Welcome back, {user.fullName}</p>
+            <strong>{page.toUpperCase()}</strong>
           </div>
-          <div className="topbar-actions">
-            <div className="search-box"><Search size={16} /><input placeholder="Search employee, project, package" value={query} onChange={(e) => setQuery(e.target.value)} /></div>
-            <button className="outline" onClick={() => setUser(null)}><LogOut size={16} /> Logout</button>
-          </div>
-        </header>
+          <button onClick={handleLogout}>Logout</button>
+        </div>
 
-        <section className="stats-grid">
-          <div className="stat-card"><Users size={18}/><div><strong>{employees.length}</strong><span>Total Employees</span></div></div>
-          <div className="stat-card"><BriefcaseBusiness size={18}/><div><strong>{saudiCount}</strong><span>Saudi Employees</span></div></div>
-          <div className="stat-card"><FolderKanban size={18}/><div><strong>{projects.length}</strong><span>Projects</span></div></div>
-          <div className="stat-card"><Bell size={18}/><div><strong>2</strong><span>Notifications</span></div></div>
-        </section>
-
-        <section className="panel">
-          <div className="panel-header">
-            <div>
-              <h3>Employee Directory</h3>
-              <p>Initial demo version for internal review</p>
+        {page === "dashboard" && (
+          <div className="grid four">
+            <div className="card stat">
+              <h3>{stats.total}</h3>
+              <p>Total Employees</p>
             </div>
-            <div className="panel-actions">
-              <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)}>
-                <option value="all">All Projects</option>
-                {projects.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-              <select value={packageFilter} onChange={(e) => setPackageFilter(e.target.value)}>
-                <option value="all">All Packages</option>
-                {packages.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-              <button className="primary" onClick={() => setShowAdd(!showAdd)}><Plus size={16}/> Add Employee</button>
+            <div className="card stat">
+              <h3>{stats.saudi}</h3>
+              <p>Saudi Employees</p>
+            </div>
+            <div className="card stat">
+              <h3>{stats.projects}</h3>
+              <p>Projects</p>
+            </div>
+            <div className="card stat">
+              <h3>{stats.lowLeave}</h3>
+              <p>Low Leave Balance</p>
             </div>
           </div>
+        )}
 
-          {showAdd && (
-            <div className="add-form">
-              <input placeholder="Employee ID" value={newEmployee.id} onChange={(e) => setNewEmployee({ ...newEmployee, id: e.target.value })} />
-              <input placeholder="Full Name" value={newEmployee.name} onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })} />
-              <input placeholder="Department" value={newEmployee.department} onChange={(e) => setNewEmployee({ ...newEmployee, department: e.target.value })} />
-              <input placeholder="Job Title" value={newEmployee.jobTitle} onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })} />
-              <select value={newEmployee.nationality} onChange={(e) => setNewEmployee({ ...newEmployee, nationality: e.target.value as Employee['nationality'] })}>
-                <option value="Saudi">Saudi</option>
-                <option value="Non-Saudi">Non-Saudi</option>
-              </select>
-              <input placeholder="Project Name" value={newEmployee.project} onChange={(e) => setNewEmployee({ ...newEmployee, project: e.target.value })} />
-              <input placeholder="Package" value={newEmployee.packageName} onChange={(e) => setNewEmployee({ ...newEmployee, packageName: e.target.value })} />
-              <select value={newEmployee.role} onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value as Employee['role'] })}>
-                <option>HR</option>
-                <option>HR Admin</option>
-                <option>Admin</option>
-                <option>Admin Assistant</option>
-              </select>
-              <button className="primary" onClick={addEmployee}>Save Employee</button>
-            </div>
-          )}
-
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Department</th>
-                  <th>Job Title</th>
-                  <th>Nationality</th>
-                  <th>Project</th>
-                  <th>Package</th>
-                  <th>Role</th>
-                  <th>Leave</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((e) => (
-                  <tr key={e.id}>
-                    <td>{e.id}</td>
-                    <td>{e.name}</td>
-                    <td>{e.department}</td>
-                    <td>{e.jobTitle}</td>
-                    <td>{e.nationality}</td>
-                    <td>{e.project}</td>
-                    <td>{e.packageName}</td>
-                    <td>{e.role}</td>
-                    <td>{e.annualRemaining}</td>
+        {page === "employees" && (
+          <div className="grid two">
+            <div className="card">
+              <h3>Employees List</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Project</th>
+                    <th>Remaining</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                </thead>
+                <tbody>
+                  {employees.map((emp) => (
+                    <tr key={emp.id} onClick={() => setSelectedId(emp.id)}>
+                      <td>{emp.employeeCode}</td>
+                      <td>{emp.fullName}</td>
+                      <td>{emp.projectName}</td>
+                      <td>{emp.leave.remaining}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-        <section className="two-col">
-          <div className="panel small">
-            <h3><ClipboardList size={18}/> Audit Preview</h3>
-            <div className="list-item">Annual leave balance updated — Ahmed Al Qahtani</div>
-            <div className="list-item">Job title changed — Walid Khalaf</div>
+            <div className="card">
+              <h3>Employee Details</h3>
+              {selectedEmployee && (
+                <>
+                  <p><strong>Name:</strong> {selectedEmployee.fullName}</p>
+                  <p><strong>Job Title:</strong> {selectedEmployee.jobTitle}</p>
+                  <p><strong>Department:</strong> {selectedEmployee.department}</p>
+                  <p><strong>Project:</strong> {selectedEmployee.projectName}</p>
+                  <p><strong>Package:</strong> {selectedEmployee.packageName}</p>
+                  <p><strong>Total Leave:</strong> {selectedEmployee.leave.total}</p>
+                  <p><strong>Used Leave:</strong> {selectedEmployee.leave.used}</p>
+                  <p><strong>Remaining Leave:</strong> {selectedEmployee.leave.remaining}</p>
+
+                  <div className="form-group">
+                    <label>Add Note</label>
+                    <textarea value={note} onChange={(e) => setNote(e.target.value)} />
+                  </div>
+                  <button onClick={addNote}>Add Note</button>
+
+                  <div className="notes">
+                    {selectedEmployee.notes.map((n, i) => (
+                      <div key={i} className="note-box">{n}</div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-          <div className="panel small">
-            <h3><Bell size={18}/> Notifications Preview</h3>
-            <div className="list-item">Leave balance updated by HR Admin</div>
-            <div className="list-item">New employee added in Operations</div>
+        )}
+
+        {page === "add" && (
+          <div className="card form-card">
+            <h3>Add Employee</h3>
+            <div className="grid two">
+              <div className="form-group">
+                <label>Employee Code</label>
+                <input value={code} onChange={(e) => setCode(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Full Name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Department</label>
+                <input value={department} onChange={(e) => setDepartment(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Job Title</label>
+                <input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Nationality</label>
+                <select value={nationality} onChange={(e) => setNationality(e.target.value)}>
+                  <option>Saudi</option>
+                  <option>Non-Saudi</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>System Role</label>
+                <select value={systemRole} onChange={(e) => setSystemRole(e.target.value)}>
+                  <option>HR</option>
+                  <option>HR Admin</option>
+                  <option>Admin</option>
+                  <option>Admin Assistant</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Project</label>
+                <input value={projectName} onChange={(e) => setProjectName(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Package</label>
+                <input value={packageName} onChange={(e) => setPackageName(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Initial Note</label>
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} />
+            </div>
+
+            <button onClick={addEmployee}>Create Employee</button>
           </div>
-        </section>
+        )}
+
+        {page === "permissions" && <div className="card"><h3>Permissions</h3><p>HR Manager can manage roles and permissions here.</p></div>}
+        {page === "audit" && <div className="card"><h3>Audit Log</h3><p>Recent actions will appear here.</p></div>}
+        {page === "notifications" && <div className="card"><h3>Notifications</h3><p>System notifications will appear here.</p></div>}
+        {page === "reports" && <div className="card"><h3>Reports</h3><p>Employee leave reports will appear here.</p></div>}
       </main>
     </div>
   );
