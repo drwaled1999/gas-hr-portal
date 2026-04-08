@@ -547,25 +547,31 @@ function ProjectFilesPage({ projects, filesByProject, setFilesByProject }) {
   );
 }
 
-function AttendancePage() {
+function AttendancePage({ employees, projects }) {
+  const activeEmployees = employees.filter((e) => e.status === "Active").length;
+  const reviewItems = employees.filter((e) => e.status === "Pending Review").length;
+
   return (
     <div className="page-stack-v4">
       <GlassCard className="section-hero-v4"><div><div className="eyebrow-v4 dark">Attendance control</div><h2>Attendance</h2><p>Monitor daily attendance issues, late arrival, missing punches and attendance follow-up.</p></div></GlassCard>
       <div className="dashboard-grid-v4-a">
         <GlassCard><SectionTitle title="Attendance Summary" description="Essential attendance blocks needed by HR." /><div className="module-grid-v4"><div className="module-card-v4 static"><Fingerprint size={18} /><span>Missing punch review</span></div><div className="module-card-v4 static"><Clock3 size={18} /><span>Late arrival tracking</span></div><div className="module-card-v4 static"><CalendarCheck2 size={18} /><span>Shift attendance</span></div><div className="module-card-v4 static"><AlertTriangle size={18} /><span>Absence exceptions</span></div></div></GlassCard>
-        <GlassCard><SectionTitle title="Recommended HR Use" description="Useful controls for attendance administration." /><div className="metric-list-v4"><div className="metric-row-v4"><span>Late arrivals today</span><strong>4</strong></div><div className="metric-row-v4"><span>Missing punches</span><strong>2</strong></div><div className="metric-row-v4"><span>Open attendance cases</span><strong>3</strong></div></div></GlassCard>
+        <GlassCard><SectionTitle title="Recommended HR Use" description="Useful controls for attendance administration." /><div className="metric-list-v4"><div className="metric-row-v4"><span>Employees tracked</span><strong>{employees.length}</strong></div><div className="metric-row-v4"><span>Active today</span><strong>{activeEmployees}</strong></div><div className="metric-row-v4"><span>Projects covered</span><strong>{projects.length}</strong></div><div className="metric-row-v4"><span>Open attendance cases</span><strong>{reviewItems}</strong></div></div></GlassCard>
       </div>
     </div>
   );
 }
 
-function PayrollPage() {
+function PayrollPage({ employees, projects }) {
+  const readyItems = employees.filter((e) => e.status !== "Pending Review").length;
+  const leaveImpact = employees.filter((e) => e.usedLeave > 0).length;
+
   return (
     <div className="page-stack-v4">
       <GlassCard className="section-hero-v4"><div><div className="eyebrow-v4 dark">Payroll preparation</div><h2>Payroll</h2><p>Track payroll preparation items, leave impact, attendance deductions and salary cycle notes.</p></div></GlassCard>
       <div className="dashboard-grid-v4-a">
         <GlassCard><SectionTitle title="Payroll Blocks" description="Core payroll-related sections HR usually needs." /><div className="module-grid-v4"><div className="module-card-v4 static"><ReceiptText size={18} /><span>Monthly payroll review</span></div><div className="module-card-v4 static"><CircleDollarSign size={18} /><span>Deduction control</span></div><div className="module-card-v4 static"><CalendarRange size={18} /><span>Leave impact</span></div><div className="module-card-v4 static"><FileSpreadsheet size={18} /><span>Export summary</span></div></div></GlassCard>
-        <GlassCard><SectionTitle title="Cycle Summary" description="Fast visibility for payroll cycle management." /><div className="metric-list-v4"><div className="metric-row-v4"><span>Employees in payroll</span><strong>64</strong></div><div className="metric-row-v4"><span>Deductions to review</span><strong>5</strong></div><div className="metric-row-v4"><span>Pending salary notes</span><strong>2</strong></div></div></GlassCard>
+        <GlassCard><SectionTitle title="Cycle Summary" description="Fast visibility for payroll cycle management." /><div className="metric-list-v4"><div className="metric-row-v4"><span>Employees in payroll</span><strong>{employees.length}</strong></div><div className="metric-row-v4"><span>Leave impact items</span><strong>{leaveImpact}</strong></div><div className="metric-row-v4"><span>Projects included</span><strong>{projects.length}</strong></div><div className="metric-row-v4"><span>Ready for processing</span><strong>{readyItems}</strong></div></div></GlassCard>
       </div>
     </div>
   );
@@ -678,8 +684,8 @@ export default function HRPortalRedesign() {
             {activePage === "requests" && <RequestsPage employees={employees} requests={requests} setRequests={setRequests} projects={projects} />}
             {activePage === "projects" && <ProjectsPage projects={projects} setProjects={setProjects} employees={employees} />}
             {activePage === "files" && <ProjectFilesPage projects={projects} filesByProject={filesByProject} setFilesByProject={setFilesByProject} />}
-            {activePage === "attendance" && <AttendancePage />}
-            {activePage === "payroll" && <PayrollPage />}
+            {activePage === "attendance" && <AttendancePage employees={employees} projects={projects} />}
+            {activePage === "payroll" && <PayrollPage employees={employees} projects={projects} />}
             {activePage === "reports" && <ReportsPage />}
             {activePage === "settings" && <SettingsPage />}
           </div>
