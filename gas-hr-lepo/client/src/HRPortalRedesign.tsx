@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
@@ -24,29 +24,78 @@ import {
   UserPlus,
   CalendarDays,
   Briefcase,
+  CheckCircle2,
+  XCircle,
+  Phone,
+  Mail,
+  UserCog,
+  Bell,
+  BadgeCheck,
 } from "lucide-react";
-import "./styles.css";
 
 const users = {
   hrmanager: {
     password: "123456",
     name: "Walid Khalaf Alshammari",
     role: "HR Manager",
-    project: "All Projects",
+    email: "hr@gas.com",
   },
   walid: {
     password: "123456",
     name: "Walid Khalaf",
     role: "HR Admin",
-    project: "Qatif",
+    email: "admin@gas.com",
   },
   sara: {
     password: "123456",
     name: "Sara Ali",
     role: "Admin Assistant",
-    project: "Qassim",
+    email: "assistant@gas.com",
   },
 };
+
+const initialProjects = [
+  {
+    id: "qatif",
+    name: "Qatif Project",
+    code: "QAT-01",
+    manager: "Mohammed Al Qahtani",
+    phone: "+966 55 222 3344",
+    email: "qatif.manager@gas.com",
+    color: "#0f4c81",
+    status: "Active",
+  },
+  {
+    id: "qassim",
+    name: "Qassim Project",
+    code: "QAS-02",
+    manager: "Saeed Al Mutairi",
+    phone: "+966 54 777 1200",
+    email: "qassim.manager@gas.com",
+    color: "#2155a3",
+    status: "Active",
+  },
+  {
+    id: "zuluf",
+    name: "Zuluf Project",
+    code: "ZUL-03",
+    manager: "Nasser Al Otaibi",
+    phone: "+966 50 841 7701",
+    email: "zuluf.manager@gas.com",
+    color: "#16396b",
+    status: "Active",
+  },
+  {
+    id: "jubail",
+    name: "Jubail Project",
+    code: "JUB-04",
+    manager: "Adel Ibrahim",
+    phone: "+966 53 990 8431",
+    email: "jubail.manager@gas.com",
+    color: "#243b53",
+    status: "Review",
+  },
+];
 
 const initialEmployees = [
   {
@@ -54,240 +103,217 @@ const initialEmployees = [
     name: "Ahmed Salem",
     employeeId: "GAS-2038",
     role: "Store Worker",
-    project: "Qatif",
+    projectId: "qatif",
     nationality: "Saudi",
     annualBalance: 30,
     usedLeave: 9,
     permissionsUsed: 3,
     status: "Active",
+    manager: "Mohammed Al Qahtani",
   },
   {
     id: 2,
     name: "Muteb Al Bishi",
     employeeId: "GAS-2036",
     role: "Store Worker",
-    project: "Qatif",
+    projectId: "qatif",
     nationality: "Saudi",
     annualBalance: 30,
     usedLeave: 4,
     permissionsUsed: 1,
     status: "Active",
+    manager: "Mohammed Al Qahtani",
   },
   {
     id: 3,
     name: "Faisal Al Harbi",
     employeeId: "GAS-2194",
     role: "Site Administrator",
-    project: "Zuluf",
+    projectId: "zuluf",
     nationality: "Saudi",
     annualBalance: 35,
     usedLeave: 12,
     permissionsUsed: 6,
     status: "On Leave",
+    manager: "Nasser Al Otaibi",
   },
   {
     id: 4,
     name: "Rashid Al Qahtani",
     employeeId: "GAS-2210",
     role: "Coordinator",
-    project: "Qassim",
+    projectId: "qassim",
     nationality: "Saudi",
     annualBalance: 30,
     usedLeave: 7,
     permissionsUsed: 2,
     status: "Active",
+    manager: "Saeed Al Mutairi",
   },
   {
     id: 5,
     name: "Mahmoud Adel",
     employeeId: "GAS-2288",
     role: "Timekeeper",
-    project: "Jubail",
+    projectId: "jubail",
     nationality: "Egyptian",
     annualBalance: 30,
     usedLeave: 17,
     permissionsUsed: 5,
     status: "Pending Review",
-  },
-];
-
-const initialProjects = [
-  {
-    id: "qatif",
-    name: "Qatif",
-    manager: "Mohammed Al Qahtani",
-    phone: "+966 55 222 3344",
-    employees: 18,
-    files: [
-      {
-        id: 1,
-        category: "Leave",
-        title: "Annual Leave - Ahmed Salem.pdf",
-        note: "Submitted for April review",
-        status: "Pending",
-      },
-      {
-        id: 2,
-        category: "Takleef",
-        title: "Night Shift Assignment - Week 2.pdf",
-        note: "Approved by project manager",
-        status: "Approved",
-      },
-    ],
-  },
-  {
-    id: "qassim",
-    name: "Qassim",
-    manager: "Saeed Al Mutairi",
-    phone: "+966 54 777 1200",
-    employees: 12,
-    files: [
-      {
-        id: 3,
-        category: "Leave",
-        title: "Emergency Leave - Rashid.pdf",
-        note: "Family emergency",
-        status: "Approved",
-      },
-    ],
-  },
-  {
-    id: "zuluf",
-    name: "Zuluf",
-    manager: "Nasser Al Otaibi",
-    phone: "+966 50 841 7701",
-    employees: 9,
-    files: [],
-  },
-  {
-    id: "jubail",
-    name: "Jubail",
     manager: "Adel Ibrahim",
-    phone: "+966 53 990 8431",
-    employees: 15,
-    files: [],
+  },
+  {
+    id: 6,
+    name: "Waleed Nasser",
+    employeeId: "GAS-2350",
+    role: "HR Coordinator",
+    projectId: "qassim",
+    nationality: "Saudi",
+    annualBalance: 30,
+    usedLeave: 2,
+    permissionsUsed: 1,
+    status: "Active",
+    manager: "Saeed Al Mutairi",
   },
 ];
 
 const initialRequests = [
   {
     id: 1,
+    employeeId: 3,
     employee: "Faisal Al Harbi",
-    type: "Leave",
-    project: "Zuluf",
+    type: "Annual Leave",
+    projectId: "zuluf",
     days: 5,
     status: "Pending",
     date: "2026-04-09",
+    note: "Family travel",
   },
   {
     id: 2,
+    employeeId: 4,
     employee: "Rashid Al Qahtani",
     type: "Permission",
-    project: "Qassim",
+    projectId: "qassim",
     days: 1,
     status: "Approved",
     date: "2026-04-08",
+    note: "Medical appointment",
   },
   {
     id: 3,
+    employeeId: 1,
     employee: "Ahmed Salem",
     type: "Takleef",
-    project: "Qatif",
+    projectId: "qatif",
     days: 2,
     status: "In Review",
     date: "2026-04-11",
+    note: "Night shift assignment",
+  },
+  {
+    id: 4,
+    employeeId: 2,
+    employee: "Muteb Al Bishi",
+    type: "Annual Leave",
+    projectId: "qatif",
+    days: 3,
+    status: "Pending",
+    date: "2026-04-12",
+    note: "Personal leave",
   },
 ];
+
+const initialFiles = {
+  qatif: [
+    { id: 1, category: "Leave", title: "Annual Leave - Ahmed Salem.pdf", note: "Submitted for April review", status: "Pending" },
+    { id: 2, category: "Takleef", title: "Night Shift Assignment - Week 2.pdf", note: "Approved by project manager", status: "Approved" },
+  ],
+  qassim: [
+    { id: 3, category: "Leave", title: "Emergency Leave - Rashid.pdf", note: "Family emergency", status: "Approved" },
+  ],
+  zuluf: [],
+  jubail: [],
+};
 
 const sidebarItems = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "employees", label: "Employees", icon: Users },
-  { key: "leaves", label: "Leaves & Takleef", icon: Plane },
+  { key: "leaveBalances", label: "Leave Balances", icon: Wallet },
+  { key: "approvals", label: "Approvals", icon: BadgeCheck },
+  { key: "requests", label: "Leaves & Takleef", icon: Plane },
   { key: "projects", label: "Projects", icon: FolderKanban },
-  { key: "permissions", label: "Permissions", icon: ShieldCheck },
   { key: "files", label: "Project Files", icon: FolderOpen },
   { key: "reports", label: "Reports", icon: FileText },
   { key: "settings", label: "Settings", icon: KeyRound },
 ];
 
-function BrandMark({ small = false }: { small?: boolean }) {
+function projectName(projects, id) {
+  return projects.find((p) => p.id === id)?.name || "Unknown Project";
+}
+
+function BrandMark({ small = false }) {
   return (
     <div className={`brand-mark ${small ? "small" : ""}`}>
-      <div className="brand-mark-inner">
+      <div className="brand-inner">
         <div className="brand-main">GAS</div>
-        <div className="brand-sub">HR</div>
+        <div className="brand-sub">HR SYSTEM</div>
       </div>
     </div>
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  let className = "badge-status";
-  if (status === "Active" || status === "Approved") className += " success";
-  else if (status === "Pending" || status === "On Leave") className += " warning";
-  else if (status === "Pending Review") className += " danger";
-  else if (status === "In Review") className += " info";
-
-  return <span className={className}>{status}</span>;
+function StatusBadge({ status }) {
+  const map = {
+    Active: "success",
+    Approved: "success",
+    Pending: "warning",
+    "On Leave": "warning",
+    "Pending Review": "danger",
+    Rejected: "danger",
+    "In Review": "info",
+    Review: "info",
+  };
+  return <span className={`status-badge ${map[status] || "neutral"}`}>{status}</span>;
 }
 
-function StatCard({
-  icon: Icon,
-  title,
-  value,
-  helper,
-}: {
-  icon: any;
-  title: string;
-  value: string | number;
-  helper: string;
-}) {
+function Card({ children, className = "" }) {
+  return <div className={`card ${className}`}>{children}</div>;
+}
+
+function SectionHeader({ title, description, action }) {
   return (
-    <div className="card stat-card">
+    <div className="section-header">
       <div>
-        <div className="muted">{title}</div>
-        <div className="stat-value">{value}</div>
-        <div className="muted small-text">{helper}</div>
+        <h3>{title}</h3>
+        {description ? <p>{description}</p> : null}
       </div>
-      <div className="icon-box">
-        <Icon size={20} />
-      </div>
+      {action ? <div>{action}</div> : null}
     </div>
   );
 }
 
-function SectionCard({
-  title,
-  description,
-  right,
-  children,
-}: {
-  title: string;
-  description?: string;
-  right?: React.ReactNode;
-  children: React.ReactNode;
-}) {
+function StatCard({ icon: Icon, title, value, helper }) {
   return (
-    <div className="card section-card">
-      <div className="section-header">
-        <div>
-          <h3>{title}</h3>
-          {description ? <p>{description}</p> : null}
-        </div>
-        {right ? <div>{right}</div> : null}
+    <Card className="stat-card">
+      <div>
+        <div className="muted-label">{title}</div>
+        <div className="stat-value">{value}</div>
+        <div className="muted-text">{helper}</div>
       </div>
-      {children}
-    </div>
+      <div className="icon-shell"><Icon size={20} /></div>
+    </Card>
   );
 }
 
-function LoginScreen({ onLogin }: { onLogin: (user: any) => void }) {
+function LoginScreen({ onLogin }) {
   const [username, setUsername] = useState("hrmanager");
   const [password, setPassword] = useState("123456");
   const [error, setError] = useState("");
 
   const submit = () => {
-    const found = users[username as keyof typeof users];
+    const found = users[username];
     if (!found || found.password !== password) {
       setError("Invalid username or password");
       return;
@@ -298,91 +324,76 @@ function LoginScreen({ onLogin }: { onLogin: (user: any) => void }) {
 
   return (
     <div className="login-page">
-      <div className="login-shell">
-        <div className="login-left">
-          <div className="login-overlay" />
-          <div className="login-left-inner">
-            <div className="hero-top">
-              <BrandMark />
-              <div>
-                <div className="eyebrow">Enterprise Human Resources</div>
-                <div className="hero-brand-title">GAS Workforce Portal</div>
-              </div>
+      <div className="login-shell-pro">
+        <div className="login-left-pro">
+          <div className="orb orb-a" />
+          <div className="orb orb-b" />
+          <div className="orb orb-c" />
+          <div className="login-brand-row">
+            <BrandMark />
+            <div>
+              <div className="caps">Enterprise Human Capital Platform</div>
+              <div className="login-brand-title">GAS Workforce Suite</div>
             </div>
+          </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="hero-copy"
-            >
-              <h1>Modern HR portal for projects, employees, leave management and approvals.</h1>
-              <p>
-                Professional internal platform for employee records, manual leave balances,
-                permissions, takleef requests, project sections, HR files and management reporting.
-              </p>
-            </motion.div>
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="hero-copy-pro">
+            <h1>HR platform designed like modern enterprise systems.</h1>
+            <p>
+              Full workspace for employee records, annual leave balances, approvals, project ownership,
+              manager contacts, internal HR requests and structured project files.
+            </p>
+          </motion.div>
 
-            <div className="hero-stats">
-              <div className="hero-stat">
-                <span>Employees</span>
-                <strong>54</strong>
-              </div>
-              <div className="hero-stat">
-                <span>Projects</span>
-                <strong>4</strong>
-              </div>
-              <div className="hero-stat">
-                <span>Open Requests</span>
-                <strong>13</strong>
-              </div>
-              <div className="hero-stat">
-                <span>Leave Balance</span>
-                <strong>126</strong>
-              </div>
+          <div className="hero-panel-grid">
+            <div className="glass-card">
+              <span>Total Employees</span>
+              <strong>64</strong>
+            </div>
+            <div className="glass-card">
+              <span>Project Sites</span>
+              <strong>4</strong>
+            </div>
+            <div className="glass-card">
+              <span>Pending Approvals</span>
+              <strong>6</strong>
+            </div>
+            <div className="glass-card">
+              <span>Balance Control</span>
+              <strong>Live</strong>
             </div>
           </div>
         </div>
 
-        <div className="login-right">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="login-card"
-          >
-            <div className="login-title-row">
+        <div className="login-right-pro">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="login-panel-pro">
+            <div className="login-panel-head">
               <BrandMark small />
               <div>
-                <h2>Welcome back</h2>
-                <p>Secure sign in to the HR control center</p>
+                <h2>Sign in</h2>
+                <p>Secure access to the HR operating system</p>
               </div>
             </div>
 
-            <div className="form-group">
+            <div className="field-group">
               <label>Username</label>
               <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Enter your username" />
             </div>
 
-            <div className="form-group">
+            <div className="field-group">
               <label>Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-              />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" />
             </div>
 
-            {error ? <div className="alert-error">{error}</div> : null}
+            {error ? <div className="error-box">{error}</div> : null}
 
-            <button className="btn btn-dark full" onClick={submit}>
-              Sign In to Dashboard
-            </button>
+            <button className="btn primary full" onClick={submit}>Sign In to Workspace</button>
 
-            <div className="demo-box">
-              <div className="demo-title">Demo access</div>
-              <div className="demo-line"><strong>HR Manager:</strong> hrmanager / 123456</div>
-              <div className="demo-line"><strong>HR Admin:</strong> walid / 123456</div>
-              <div className="demo-line"><strong>Admin Assistant:</strong> sara / 123456</div>
+            <div className="demo-panel">
+              <div className="demo-title">Demo accounts</div>
+              <div><strong>HR Manager:</strong> hrmanager / 123456</div>
+              <div><strong>HR Admin:</strong> walid / 123456</div>
+              <div><strong>Admin Assistant:</strong> sara / 123456</div>
             </div>
           </motion.div>
         </div>
@@ -391,47 +402,30 @@ function LoginScreen({ onLogin }: { onLogin: (user: any) => void }) {
   );
 }
 
-function DashboardHome({
-  employees,
-  projects,
-  requests,
-}: {
-  employees: any[];
-  projects: any[];
-  requests: any[];
-}) {
-  const remainingLeave = useMemo(() => {
-    return employees.reduce((sum, emp) => sum + Math.max(emp.annualBalance - emp.usedLeave, 0), 0);
-  }, [employees]);
+function DashboardPage({ employees, projects, requests, setActivePage }) {
+  const remainingLeave = employees.reduce((sum, e) => sum + Math.max(e.annualBalance - e.usedLeave, 0), 0);
+  const pendingApprovals = requests.filter((r) => r.status === "Pending" || r.status === "In Review").length;
 
   return (
-    <div className="page-stack">
+    <div className="page-grid-stack">
       <div className="stats-grid">
-        <StatCard icon={Users} title="Total Employees" value={employees.length} helper="Across all project sections" />
-        <StatCard icon={Building2} title="Project Sites" value={projects.length} helper="Live site-based workspaces" />
-        <StatCard icon={ClipboardCheck} title="Open Requests" value={requests.length} helper="Leaves, permissions and takleef" />
-        <StatCard icon={Wallet} title="Remaining Leave" value={remainingLeave} helper="Calculated from manual balances" />
+        <StatCard icon={Users} title="Employees" value={employees.length} helper="Distributed across all projects" />
+        <StatCard icon={Building2} title="Projects" value={projects.length} helper="Project-based HR control" />
+        <StatCard icon={ClipboardCheck} title="Pending Approvals" value={pendingApprovals} helper="Leaves, permissions and takleef" />
+        <StatCard icon={Wallet} title="Remaining Leave" value={remainingLeave} helper="Manual annual balances" />
       </div>
 
-      <div className="dashboard-grid">
-        <SectionCard
-          title="HR Operations Overview"
-          description="Daily control view for employees, requests and project HR status"
-          right={<button className="btn btn-light">View Analytics</button>}
-        >
-          <div className="mini-stat-grid">
-            <div className="mini-stat-box">
-              <span>Active Employees</span>
-              <strong>{employees.filter((e) => e.status === "Active").length}</strong>
-            </div>
-            <div className="mini-stat-box">
-              <span>Employees on Leave</span>
-              <strong>{employees.filter((e) => e.status === "On Leave").length}</strong>
-            </div>
-            <div className="mini-stat-box">
-              <span>Pending HR Review</span>
-              <strong>{employees.filter((e) => e.status === "Pending Review").length}</strong>
-            </div>
+      <div className="dashboard-main-grid">
+        <Card>
+          <SectionHeader
+            title="Executive Overview"
+            description="Enterprise summary for HR operations, annual leave, projects and pending actions."
+            action={<button className="btn secondary" onClick={() => setActivePage("approvals")}>Open Approvals</button>}
+          />
+          <div className="mini-kpi-grid">
+            <div className="mini-kpi"><span>Active Employees</span><strong>{employees.filter((e) => e.status === "Active").length}</strong></div>
+            <div className="mini-kpi"><span>Employees On Leave</span><strong>{employees.filter((e) => e.status === "On Leave").length}</strong></div>
+            <div className="mini-kpi"><span>Projects In Review</span><strong>{projects.filter((p) => p.status === "Review").length}</strong></div>
           </div>
 
           <div className="table-wrap">
@@ -440,17 +434,20 @@ function DashboardHome({
                 <tr>
                   <th>Employee</th>
                   <th>Project</th>
-                  <th>Role</th>
-                  <th>Leave Balance</th>
+                  <th>Manager</th>
+                  <th>Balance</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {employees.slice(0, 5).map((emp) => (
+                {employees.slice(0, 6).map((emp) => (
                   <tr key={emp.id}>
-                    <td>{emp.name}</td>
-                    <td>{emp.project}</td>
-                    <td>{emp.role}</td>
+                    <td>
+                      <div className="strong">{emp.name}</div>
+                      <div className="sub">{emp.role}</div>
+                    </td>
+                    <td>{projectName(projects, emp.projectId)}</td>
+                    <td>{emp.manager}</td>
                     <td>{emp.annualBalance - emp.usedLeave} days</td>
                     <td><StatusBadge status={emp.status} /></td>
                   </tr>
@@ -458,109 +455,92 @@ function DashboardHome({
               </tbody>
             </table>
           </div>
-        </SectionCard>
+        </Card>
 
-        <div className="right-stack">
-          <SectionCard title="Today's Alerts" description="Items that need direct HR attention">
-            <div className="alert-list">
-              <div className="alert-item">
-                <div className="icon-box"><AlertTriangle size={18} /></div>
+        <div className="stack-col">
+          <Card>
+            <SectionHeader title="Priority Alerts" description="Items that need HR attention today." />
+            <div className="alert-list-pro">
+              <button className="alert-card-btn" onClick={() => setActivePage("approvals")}>
+                <div className="icon-shell small"><AlertTriangle size={18} /></div>
                 <div>
-                  <strong>2 leave requests pending approval</strong>
-                  <p>Review before end of day</p>
+                  <strong>{pendingApprovals} requests awaiting review</strong>
+                  <p>Open approval workspace</p>
                 </div>
-              </div>
-
-              <div className="alert-item">
-                <div className="icon-box"><Clock3 size={18} /></div>
+              </button>
+              <button className="alert-card-btn" onClick={() => setActivePage("leaveBalances")}>
+                <div className="icon-shell small"><Wallet size={18} /></div>
                 <div>
-                  <strong>1 manual balance needs update</strong>
-                  <p>Employee record mismatch found</p>
+                  <strong>Annual leave balances require updates</strong>
+                  <p>Edit balances per employee</p>
                 </div>
-              </div>
-
-              <div className="alert-item">
-                <div className="icon-box"><FolderOpen size={18} /></div>
+              </button>
+              <button className="alert-card-btn" onClick={() => setActivePage("projects")}>
+                <div className="icon-shell small"><FolderOpen size={18} /></div>
                 <div>
-                  <strong>Project file awaiting upload</strong>
-                  <p>Qassim leave attachment missing</p>
+                  <strong>Projects require structured assignment</strong>
+                  <p>Manage employees per project</p>
                 </div>
-              </div>
+              </button>
             </div>
-          </SectionCard>
+          </Card>
 
-          <SectionCard title="Quick Actions">
-            <div className="action-list">
-              {[
-                "Add employee record",
-                "Register leave manually",
-                "Upload project document",
-                "Generate monthly report",
-              ].map((item) => (
-                <button key={item} className="action-btn">
-                  <span>{item}</span>
-                  <ChevronRight size={18} />
-                </button>
-              ))}
+          <Card>
+            <SectionHeader title="Quick Actions" />
+            <div className="quick-actions-grid">
+              <button className="action-pro" onClick={() => setActivePage("employees")}><UserPlus size={18} /><span>Add employee</span><ChevronRight size={16} /></button>
+              <button className="action-pro" onClick={() => setActivePage("requests")}><Plane size={18} /><span>Create leave request</span><ChevronRight size={16} /></button>
+              <button className="action-pro" onClick={() => setActivePage("files")}><FolderOpen size={18} /><span>Upload project record</span><ChevronRight size={16} /></button>
+              <button className="action-pro" onClick={() => setActivePage("reports")}><FileText size={18} /><span>Review reports</span><ChevronRight size={16} /></button>
             </div>
-          </SectionCard>
+          </Card>
         </div>
       </div>
     </div>
   );
 }
 
-function EmployeesPage({
-  employees,
-  setEmployees,
-}: {
-  employees: any[];
-  setEmployees: any;
-}) {
+function EmployeesPage({ employees, setEmployees, projects }) {
   const [form, setForm] = useState({
     name: "",
     employeeId: "",
     role: "",
-    project: "Qatif",
+    projectId: projects[0]?.id || "",
     nationality: "Saudi",
     annualBalance: 30,
     usedLeave: 0,
     permissionsUsed: 0,
+    status: "Active",
   });
 
   const addEmployee = () => {
     if (!form.name || !form.employeeId || !form.role) return;
-
-    setEmployees((prev: any[]) => [
+    const proj = projects.find((p) => p.id === form.projectId);
+    setEmployees((prev) => [
       ...prev,
       {
         id: Date.now(),
         ...form,
-        annualBalance: Number(form.annualBalance),
-        usedLeave: Number(form.usedLeave),
-        permissionsUsed: Number(form.permissionsUsed),
-        status: "Active",
+        manager: proj?.manager || "",
       },
     ]);
-
     setForm({
       name: "",
       employeeId: "",
       role: "",
-      project: "Qatif",
+      projectId: projects[0]?.id || "",
       nationality: "Saudi",
       annualBalance: 30,
       usedLeave: 0,
       permissionsUsed: 0,
+      status: "Active",
     });
   };
 
   return (
-    <div className="split-grid">
-      <SectionCard
-        title="Employee Directory"
-        description="Track employee records, roles, projects and manual leave balances"
-      >
+    <div className="two-col-layout">
+      <Card>
+        <SectionHeader title="Employees Directory" description="Project-linked employee master records with manager ownership." />
         <div className="table-wrap">
           <table>
             <thead>
@@ -568,21 +548,18 @@ function EmployeesPage({
                 <th>Name</th>
                 <th>ID</th>
                 <th>Project</th>
-                <th>Leave Used</th>
-                <th>Remaining</th>
+                <th>Manager</th>
+                <th>Balance</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {employees.map((emp) => (
                 <tr key={emp.id}>
-                  <td>
-                    <div className="table-strong">{emp.name}</div>
-                    <div className="table-sub">{emp.role}</div>
-                  </td>
+                  <td><div className="strong">{emp.name}</div><div className="sub">{emp.role}</div></td>
                   <td>{emp.employeeId}</td>
-                  <td>{emp.project}</td>
-                  <td>{emp.usedLeave} days</td>
+                  <td>{projectName(projects, emp.projectId)}</td>
+                  <td>{emp.manager}</td>
                   <td>{emp.annualBalance - emp.usedLeave} days</td>
                   <td><StatusBadge status={emp.status} /></td>
                 </tr>
@@ -590,195 +567,175 @@ function EmployeesPage({
             </tbody>
           </table>
         </div>
-      </SectionCard>
+      </Card>
 
-      <SectionCard
-        title="Add Employee"
-        description="All employee details and leave balances can be edited manually"
-      >
-        <div className="form-grid">
-          <div className="form-group">
-            <label>Name</label>
-            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          </div>
-
-          <div className="form-group">
-            <label>Employee ID</label>
-            <input value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })} />
-          </div>
-
-          <div className="form-group">
-            <label>Role / Category</label>
-            <input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} />
-          </div>
-
-          <div className="form-group">
-            <label>Project</label>
-            <select value={form.project} onChange={(e) => setForm({ ...form, project: e.target.value })}>
-              <option>Qatif</option>
-              <option>Qassim</option>
-              <option>Zuluf</option>
-              <option>Jubail</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Nationality</label>
-            <input value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} />
-          </div>
-
-          <div className="form-group">
-            <label>Annual Leave</label>
-            <input
-              type="number"
-              value={form.annualBalance}
-              onChange={(e) => setForm({ ...form, annualBalance: Number(e.target.value) })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Used Days</label>
-            <input
-              type="number"
-              value={form.usedLeave}
-              onChange={(e) => setForm({ ...form, usedLeave: Number(e.target.value) })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Permissions Used</label>
-            <input
-              type="number"
-              value={form.permissionsUsed}
-              onChange={(e) => setForm({ ...form, permissionsUsed: Number(e.target.value) })}
-            />
-          </div>
+      <Card>
+        <SectionHeader title="Add Employee" description="Create a new employee and assign them to a specific project." />
+        <div className="form-grid-2">
+          <div className="field-group"><label>Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+          <div className="field-group"><label>Employee ID</label><input value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })} /></div>
+          <div className="field-group"><label>Role</label><input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} /></div>
+          <div className="field-group"><label>Project</label><select value={form.projectId} onChange={(e) => setForm({ ...form, projectId: e.target.value })}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+          <div className="field-group"><label>Nationality</label><input value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} /></div>
+          <div className="field-group"><label>Status</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option>Active</option><option>On Leave</option><option>Pending Review</option></select></div>
+          <div className="field-group"><label>Annual Leave</label><input type="number" value={form.annualBalance} onChange={(e) => setForm({ ...form, annualBalance: Number(e.target.value) })} /></div>
+          <div className="field-group"><label>Used Leave</label><input type="number" value={form.usedLeave} onChange={(e) => setForm({ ...form, usedLeave: Number(e.target.value) })} /></div>
         </div>
-
-        <button className="btn btn-dark full" onClick={addEmployee}>
-          <UserPlus size={18} />
-          Save Employee Record
-        </button>
-      </SectionCard>
+        <button className="btn primary full" onClick={addEmployee}><UserPlus size={18} />Save Employee</button>
+      </Card>
     </div>
   );
 }
 
-function LeavesPage({
-  employees,
-  setEmployees,
-  requests,
-  setRequests,
-}: {
-  employees: any[];
-  setEmployees: any;
-  requests: any[];
-  setRequests: any;
-}) {
+function LeaveBalancesPage({ employees, setEmployees, projects }) {
   const [selectedId, setSelectedId] = useState(String(employees[0]?.id || ""));
-  const [manualDays, setManualDays] = useState(1);
-  const [requestType, setRequestType] = useState("Leave");
-  const [note, setNote] = useState("");
+  const [annualBalance, setAnnualBalance] = useState(employees[0]?.annualBalance || 30);
+  const [usedLeave, setUsedLeave] = useState(employees[0]?.usedLeave || 0);
 
   const selectedEmployee = employees.find((e) => String(e.id) === selectedId);
 
-  const applyManualLeave = () => {
-    if (!selectedEmployee) return;
+  React.useEffect(() => {
+    if (selectedEmployee) {
+      setAnnualBalance(selectedEmployee.annualBalance);
+      setUsedLeave(selectedEmployee.usedLeave);
+    }
+  }, [selectedId]);
 
-    setEmployees((prev: any[]) =>
-      prev.map((emp) =>
-        emp.id === selectedEmployee.id
-          ? { ...emp, usedLeave: emp.usedLeave + Number(manualDays), status: "On Leave" }
-          : emp
-      )
-    );
-
-    setRequests((prev: any[]) => [
-      {
-        id: Date.now(),
-        employee: selectedEmployee.name,
-        type: requestType,
-        project: selectedEmployee.project,
-        days: Number(manualDays),
-        status: "Pending",
-        date: new Date().toISOString().slice(0, 10),
-        note,
-      },
-      ...prev,
-    ]);
-
-    setManualDays(1);
-    setNote("");
+  const saveBalance = () => {
+    setEmployees((prev) => prev.map((emp) => String(emp.id) === selectedId ? { ...emp, annualBalance: Number(annualBalance), usedLeave: Number(usedLeave) } : emp));
   };
 
   return (
-    <div className="split-grid">
-      <SectionCard
-        title="Manual Leave & Takleef Entry"
-        description="Add leave days manually and deduct them automatically from employee balance"
-      >
-        <div className="form-grid">
-          <div className="form-group">
-            <label>Employee</label>
-            <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
+    <div className="two-col-layout">
+      <Card>
+        <SectionHeader title="Annual Leave Balances" description="Manually control the annual leave allocation and consumption for each employee." />
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Project</th>
+                <th>Annual Balance</th>
+                <th>Used Leave</th>
+                <th>Remaining</th>
+              </tr>
+            </thead>
+            <tbody>
               {employees.map((emp) => (
-                <option key={emp.id} value={String(emp.id)}>
-                  {emp.name} - {emp.project}
-                </option>
+                <tr key={emp.id}>
+                  <td>{emp.name}</td>
+                  <td>{projectName(projects, emp.projectId)}</td>
+                  <td>{emp.annualBalance}</td>
+                  <td>{emp.usedLeave}</td>
+                  <td>{Math.max(emp.annualBalance - emp.usedLeave, 0)}</td>
+                </tr>
               ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Type</label>
-            <select value={requestType} onChange={(e) => setRequestType(e.target.value)}>
-              <option>Leave</option>
-              <option>Takleef</option>
-              <option>Permission</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Days</label>
-            <input
-              type="number"
-              value={manualDays}
-              onChange={(e) => setManualDays(Number(e.target.value))}
-            />
-          </div>
-
-          <div className="form-group full-span">
-            <label>Note</label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Leave details, approval note or takleef information"
-            />
-          </div>
+            </tbody>
+          </table>
         </div>
+      </Card>
 
-        {selectedEmployee ? (
-          <div className="summary-box">
-            <div className="summary-title">Current balance for {selectedEmployee.name}</div>
-            <div>Annual balance: {selectedEmployee.annualBalance} days</div>
-            <div>Used leave: {selectedEmployee.usedLeave} days</div>
-            <div>
-              Remaining after entry:{" "}
-              {Math.max(selectedEmployee.annualBalance - (selectedEmployee.usedLeave + Number(manualDays || 0)), 0)} days
+      <Card>
+        <SectionHeader title="Update Balance" description="Select any employee and update leave values directly." />
+        <div className="field-group"><label>Employee</label><select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>{employees.map((emp) => <option key={emp.id} value={String(emp.id)}>{emp.name} - {projectName(projects, emp.projectId)}</option>)}</select></div>
+        <div className="form-grid-2">
+          <div className="field-group"><label>Annual Leave Allocation</label><input type="number" value={annualBalance} onChange={(e) => setAnnualBalance(Number(e.target.value))} /></div>
+          <div className="field-group"><label>Used Leave</label><input type="number" value={usedLeave} onChange={(e) => setUsedLeave(Number(e.target.value))} /></div>
+        </div>
+        {selectedEmployee ? <div className="summary-box"><div className="summary-title">{selectedEmployee.name}</div><div>Project: {projectName(projects, selectedEmployee.projectId)}</div><div>Remaining after save: {Math.max(annualBalance - usedLeave, 0)} days</div></div> : null}
+        <button className="btn primary full" onClick={saveBalance}><Wallet size={18} />Save Leave Balance</button>
+      </Card>
+    </div>
+  );
+}
+
+function ApprovalsPage({ requests, setRequests, employees, setEmployees, projects }) {
+  const handleDecision = (requestId, status) => {
+    const target = requests.find((r) => r.id === requestId);
+    if (!target) return;
+
+    setRequests((prev) => prev.map((req) => req.id === requestId ? { ...req, status } : req));
+
+    if (status === "Approved" && target.type === "Annual Leave") {
+      setEmployees((prev) => prev.map((emp) => emp.id === target.employeeId ? { ...emp, usedLeave: emp.usedLeave + Number(target.days), status: "On Leave" } : emp));
+    }
+  };
+
+  const pending = requests.filter((r) => r.status === "Pending" || r.status === "In Review");
+
+  return (
+    <Card>
+      <SectionHeader title="Approval Workspace" description="Review and approve annual leave, permissions and takleef requests." />
+      <div className="approval-grid">
+        {pending.length === 0 ? <div className="empty-state">No pending approvals right now.</div> : pending.map((req) => {
+          const emp = employees.find((e) => e.id === req.employeeId);
+          return (
+            <div key={req.id} className="approval-card">
+              <div className="approval-top">
+                <div>
+                  <h4>{req.employee}</h4>
+                  <p>{req.type} • {projectName(projects, req.projectId)}</p>
+                </div>
+                <StatusBadge status={req.status} />
+              </div>
+              <div className="approval-body">
+                <div><strong>Days:</strong> {req.days}</div>
+                <div><strong>Date:</strong> {req.date}</div>
+                <div><strong>Note:</strong> {req.note}</div>
+                {emp ? <div><strong>Current balance:</strong> {Math.max(emp.annualBalance - emp.usedLeave, 0)} days</div> : null}
+              </div>
+              <div className="approval-actions">
+                <button className="btn success" onClick={() => handleDecision(req.id, "Approved")}><CheckCircle2 size={18} />Approve</button>
+                <button className="btn danger" onClick={() => handleDecision(req.id, "Rejected")}><XCircle size={18} />Reject</button>
+              </div>
             </div>
-          </div>
-        ) : null}
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
 
-        <button className="btn btn-dark full" onClick={applyManualLeave}>
-          <CalendarDays size={18} />
-          Submit Manual Entry
-        </button>
-      </SectionCard>
+function RequestsPage({ employees, requests, setRequests, projects }) {
+  const [form, setForm] = useState({
+    employeeId: String(employees[0]?.id || ""),
+    type: "Annual Leave",
+    days: 1,
+    note: "",
+  });
 
-      <SectionCard
-        title="Request Tracker"
-        description="Leaves, permissions and takleef submissions by project"
-      >
+  const createRequest = () => {
+    const emp = employees.find((e) => String(e.id) === form.employeeId);
+    if (!emp) return;
+    setRequests((prev) => [{
+      id: Date.now(),
+      employeeId: emp.id,
+      employee: emp.name,
+      type: form.type,
+      projectId: emp.projectId,
+      days: Number(form.days),
+      status: "Pending",
+      date: new Date().toISOString().slice(0, 10),
+      note: form.note,
+    }, ...prev]);
+    setForm({ employeeId: String(employees[0]?.id || ""), type: "Annual Leave", days: 1, note: "" });
+  };
+
+  return (
+    <div className="two-col-layout">
+      <Card>
+        <SectionHeader title="Submit Leave / Takleef Request" description="Create annual leave, permission or takleef requests for employees." />
+        <div className="form-grid-2">
+          <div className="field-group"><label>Employee</label><select value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })}>{employees.map((emp) => <option key={emp.id} value={String(emp.id)}>{emp.name} - {projectName(projects, emp.projectId)}</option>)}</select></div>
+          <div className="field-group"><label>Type</label><select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}><option>Annual Leave</option><option>Permission</option><option>Takleef</option></select></div>
+          <div className="field-group"><label>Days</label><input type="number" value={form.days} onChange={(e) => setForm({ ...form, days: Number(e.target.value) })} /></div>
+          <div className="field-group full-span"><label>Note</label><textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Request details" /></div>
+        </div>
+        <button className="btn primary full" onClick={createRequest}><Plane size={18} />Create Request</button>
+      </Card>
+
+      <Card>
+        <SectionHeader title="Request Tracker" description="All HR requests by project and current decision state." />
         <div className="table-wrap">
           <table>
             <thead>
@@ -796,7 +753,7 @@ function LeavesPage({
                 <tr key={req.id}>
                   <td>{req.employee}</td>
                   <td>{req.type}</td>
-                  <td>{req.project}</td>
+                  <td>{projectName(projects, req.projectId)}</td>
                   <td>{req.days}</td>
                   <td>{req.date}</td>
                   <td><StatusBadge status={req.status} /></td>
@@ -805,332 +762,296 @@ function LeavesPage({
             </tbody>
           </table>
         </div>
-      </SectionCard>
+      </Card>
     </div>
   );
 }
 
-function ProjectsPage({
-  projects,
-  setProjects,
-}: {
-  projects: any[];
-  setProjects: any;
-}) {
+function ProjectsPage({ projects, setProjects, employees }) {
   const [activeProject, setActiveProject] = useState(projects[0]?.id || "");
-  const [fileForm, setFileForm] = useState({
-    category: "Leave",
-    title: "",
-    note: "",
-  });
+  const [manager, setManager] = useState(projects[0]?.manager || "");
+  const [phone, setPhone] = useState(projects[0]?.phone || "");
+  const [email, setEmail] = useState(projects[0]?.email || "");
 
   const project = projects.find((p) => p.id === activeProject);
+  const projectEmployees = employees.filter((e) => e.projectId === activeProject);
 
-  const addFileRecord = () => {
-    if (!project || !fileForm.title) return;
+  React.useEffect(() => {
+    const p = projects.find((x) => x.id === activeProject);
+    if (p) {
+      setManager(p.manager);
+      setPhone(p.phone);
+      setEmail(p.email);
+    }
+  }, [activeProject, projects]);
 
-    setProjects((prev: any[]) =>
-      prev.map((p) =>
-        p.id === activeProject
-          ? {
-              ...p,
-              files: [
-                ...p.files,
-                {
-                  id: Date.now(),
-                  category: fileForm.category,
-                  title: fileForm.title,
-                  note: fileForm.note,
-                  status: "Pending",
-                },
-              ],
-            }
-          : p
-      )
-    );
-
-    setFileForm({
-      category: "Leave",
-      title: "",
-      note: "",
-    });
+  const saveManagerInfo = () => {
+    setProjects((prev) => prev.map((p) => p.id === activeProject ? { ...p, manager, phone, email } : p));
   };
 
   return (
-    <div className="projects-layout">
-      <SectionCard
-        title="Project Sections"
-        description="Each project has its own leave, takleef and HR file space"
-      >
-        <div className="project-list">
-          {projects.map((projectItem) => (
-            <button
-              key={projectItem.id}
-              className={`project-pill ${activeProject === projectItem.id ? "active" : ""}`}
-              onClick={() => setActiveProject(projectItem.id)}
-            >
-              <div className="table-strong">{projectItem.name}</div>
-              <div className="table-sub">{projectItem.employees} employees</div>
+    <div className="project-page-layout">
+      <Card>
+        <SectionHeader title="Project Structure" description="Each project has its own employees, manager and contact information." />
+        <div className="project-tabs">
+          {projects.map((item) => (
+            <button key={item.id} className={`project-tab ${activeProject === item.id ? "active" : ""}`} onClick={() => setActiveProject(item.id)}>
+              <div className="strong">{item.name}</div>
+              <div className="sub">{item.code}</div>
             </button>
           ))}
         </div>
-      </SectionCard>
+      </Card>
 
-      <div className="page-stack">
-        <SectionCard
-          title={`${project?.name || ""} Files`}
-          description="Project-specific records, leave documents and takleef files"
-          right={
-            <div className="manager-box">
-              <strong>{project?.manager}</strong>
-              <span>{project?.phone}</span>
-            </div>
-          }
-        >
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Category</label>
-              <select
-                value={fileForm.category}
-                onChange={(e) => setFileForm({ ...fileForm, category: e.target.value })}
-              >
-                <option>Leave</option>
-                <option>Takleef</option>
-                <option>Permission</option>
-                <option>Other</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>File title</label>
-              <input
-                value={fileForm.title}
-                onChange={(e) => setFileForm({ ...fileForm, title: e.target.value })}
-                placeholder="example.pdf"
-              />
-            </div>
-
-            <div className="form-group full-span">
-              <label>Note</label>
-              <textarea
-                value={fileForm.note}
-                onChange={(e) => setFileForm({ ...fileForm, note: e.target.value })}
-                placeholder="Add review note or document summary"
-              />
-            </div>
+      <div className="two-col-layout">
+        <Card>
+          <SectionHeader title={`${project?.name || ""} Manager`} description="Primary manager and contact details for this project." />
+          <div className="form-grid-2">
+            <div className="field-group"><label>Manager Name</label><input value={manager} onChange={(e) => setManager(e.target.value)} /></div>
+            <div className="field-group"><label>Phone Number</label><input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+            <div className="field-group full-span"><label>Email</label><input value={email} onChange={(e) => setEmail(e.target.value)} /></div>
           </div>
+          <div className="contact-row">
+            <div className="contact-pill"><UserCog size={16} />{manager}</div>
+            <div className="contact-pill"><Phone size={16} />{phone}</div>
+            <div className="contact-pill"><Mail size={16} />{email}</div>
+          </div>
+          <button className="btn primary full" onClick={saveManagerInfo}>Save Project Contact</button>
+        </Card>
 
-          <button className="btn btn-dark full" onClick={addFileRecord}>
-            <FolderOpen size={18} />
-            Add File Record
-          </button>
-        </SectionCard>
-
-        <SectionCard title="Recorded Files">
+        <Card>
+          <SectionHeader title="Employees in Project" description="Only employees assigned to this project are shown below." />
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Category</th>
-                  <th>Title</th>
-                  <th>Note</th>
+                  <th>Employee</th>
+                  <th>Role</th>
+                  <th>ID</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {(project?.files || []).map((file) => (
-                  <tr key={file.id}>
-                    <td>{file.category}</td>
-                    <td>{file.title}</td>
-                    <td>{file.note}</td>
-                    <td><StatusBadge status={file.status} /></td>
+                {projectEmployees.map((emp) => (
+                  <tr key={emp.id}>
+                    <td>{emp.name}</td>
+                    <td>{emp.role}</td>
+                    <td>{emp.employeeId}</td>
+                    <td><StatusBadge status={emp.status} /></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </SectionCard>
+        </Card>
       </div>
     </div>
   );
 }
 
-function PlaceholderPage({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+function ProjectFilesPage({ projects, filesByProject, setFilesByProject }) {
+  const [activeProject, setActiveProject] = useState(projects[0]?.id || "");
+  const [form, setForm] = useState({ category: "Leave", title: "", note: "" });
+
+  const project = projects.find((p) => p.id === activeProject);
+  const items = filesByProject[activeProject] || [];
+
+  const addFile = () => {
+    if (!form.title) return;
+    setFilesByProject((prev) => ({
+      ...prev,
+      [activeProject]: [
+        ...(prev[activeProject] || []),
+        { id: Date.now(), category: form.category, title: form.title, note: form.note, status: "Pending" },
+      ],
+    }));
+    setForm({ category: "Leave", title: "", note: "" });
+  };
+
   return (
-    <SectionCard title={title} description={description}>
+    <div className="two-col-layout">
+      <Card>
+        <SectionHeader title="Project Files" description="Separate leave and task records for each project." />
+        <div className="field-group"><label>Project</label><select value={activeProject} onChange={(e) => setActiveProject(e.target.value)}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+        <div className="manager-card-lite"><strong>{project?.manager}</strong><span>{project?.phone}</span></div>
+        <div className="form-grid-2">
+          <div className="field-group"><label>Category</label><select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}><option>Leave</option><option>Takleef</option><option>Permission</option><option>Other</option></select></div>
+          <div className="field-group"><label>File Title</label><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="example.pdf" /></div>
+          <div className="field-group full-span"><label>Note</label><textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Document note" /></div>
+        </div>
+        <button className="btn primary full" onClick={addFile}><FolderOpen size={18} />Add File Record</button>
+      </Card>
+
+      <Card>
+        <SectionHeader title={`${project?.name || ""} Records`} description="Files attached to the selected project section." />
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Title</th>
+                <th>Note</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((file) => (
+                <tr key={file.id}>
+                  <td>{file.category}</td>
+                  <td>{file.title}</td>
+                  <td>{file.note}</td>
+                  <td><StatusBadge status={file.status} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function PlaceholderPage({ title, description }) {
+  return (
+    <Card>
+      <SectionHeader title={title} description={description} />
       <div className="placeholder-grid">
-        <div className="placeholder-card">
-          <Briefcase size={18} />
-          <span>Custom form blocks</span>
-        </div>
-        <div className="placeholder-card">
-          <ClipboardCheck size={18} />
-          <span>Approval workflows</span>
-        </div>
-        <div className="placeholder-card">
-          <FileText size={18} />
-          <span>Printable reports</span>
-        </div>
+        <div className="placeholder-box"><Briefcase size={18} /><span>Enterprise-ready widgets</span></div>
+        <div className="placeholder-box"><ClipboardCheck size={18} /><span>Approval workflows</span></div>
+        <div className="placeholder-box"><FileText size={18} /><span>Printable summary cards</span></div>
       </div>
-    </SectionCard>
+    </Card>
   );
 }
 
 export default function HRPortalRedesign() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [activePage, setActivePage] = useState("dashboard");
   const [employees, setEmployees] = useState(initialEmployees);
   const [projects, setProjects] = useState(initialProjects);
   const [requests, setRequests] = useState(initialRequests);
+  const [filesByProject, setFilesByProject] = useState(initialFiles);
   const [mobileSidebar, setMobileSidebar] = useState(false);
 
-  if (!currentUser) {
-    return <LoginScreen onLogin={setCurrentUser} />;
-  }
+  if (!currentUser) return <><style>{styles}</style><LoginScreen onLogin={setCurrentUser} /></>;
 
   return (
-    <div className="portal-shell">
-      <aside className={`sidebar ${mobileSidebar ? "open" : ""}`}>
-        <div className="sidebar-top">
-          <div className="sidebar-brand">
-            <BrandMark />
+    <>
+      <style>{styles}</style>
+      <div className="app-shell-pro">
+        <AnimatePresence>
+          {(mobileSidebar || window.innerWidth > 960) && (
+            <motion.aside initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className={`sidebar-pro ${mobileSidebar ? "show" : ""}`}>
+              <div className="sidebar-top-pro">
+                <div className="sidebar-brand-row">
+                  <BrandMark />
+                  <div>
+                    <div className="sidebar-title-pro">GAS Portal</div>
+                    <div className="sidebar-sub-pro">Human Capital Workspace</div>
+                  </div>
+                </div>
+
+                <div className="profile-card-pro">
+                  <div className="avatar-pro">WK</div>
+                  <div>
+                    <div className="strong light">{currentUser.name}</div>
+                    <div className="sub light">{currentUser.role}</div>
+                  </div>
+                </div>
+              </div>
+
+              <nav className="nav-pro">
+                {sidebarItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button key={item.key} className={`nav-btn-pro ${activePage === item.key ? "active" : ""}`} onClick={() => { setActivePage(item.key); setMobileSidebar(false); }}>
+                      <Icon size={18} />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+              <div className="project-strip">
+                <div className="caps light">Project Sections</div>
+                {projects.map((p) => <div key={p.id} className="project-chip-dark">{p.name}</div>)}
+              </div>
+
+              <button className="btn secondary full" onClick={() => setCurrentUser(null)}><LogOut size={18} />Logout</button>
+            </motion.aside>
+          )}
+        </AnimatePresence>
+
+        <main className="main-pro">
+          <Card className="topbar-pro">
             <div>
-              <div className="sidebar-brand-title">GAS Portal</div>
-              <div className="sidebar-brand-sub">Enterprise HR Workspace</div>
+              <button className="menu-btn-pro" onClick={() => setMobileSidebar(!mobileSidebar)}><Menu size={18} /></button>
+              <div className="caps dark">Human Resources Platform</div>
+              <h1 className="page-title-pro">
+                {activePage === "dashboard" && "Executive HR Dashboard"}
+                {activePage === "employees" && "Employee Management"}
+                {activePage === "leaveBalances" && "Annual Leave Balance Control"}
+                {activePage === "approvals" && "Approvals Workspace"}
+                {activePage === "requests" && "Leaves, Permissions & Takleef"}
+                {activePage === "projects" && "Project Structure & Ownership"}
+                {activePage === "files" && "Project Files Registry"}
+                {activePage === "reports" && "Reports Center"}
+                {activePage === "settings" && "System Settings"}
+              </h1>
+              <p className="topbar-sub">Signed in as {currentUser.name} ({currentUser.role})</p>
             </div>
-          </div>
-
-          <div className="profile-box">
-            <div className="avatar-circle">WK</div>
-            <div>
-              <div className="table-strong">{currentUser.name}</div>
-              <div className="table-sub">{currentUser.role}</div>
+            <div className="topbar-actions-pro">
+              <div className="search-pro"><Search size={16} /><input placeholder="Search employees, projects, approvals..." /></div>
+              <button className="btn secondary"><Bell size={16} />Alerts</button>
+              <button className="btn primary" onClick={() => setActivePage("requests")}><Plus size={16} />New Request</button>
             </div>
+          </Card>
+
+          <div className="content-stack">
+            {activePage === "dashboard" && <DashboardPage employees={employees} projects={projects} requests={requests} setActivePage={setActivePage} />}
+            {activePage === "employees" && <EmployeesPage employees={employees} setEmployees={setEmployees} projects={projects} />}
+            {activePage === "leaveBalances" && <LeaveBalancesPage employees={employees} setEmployees={setEmployees} projects={projects} />}
+            {activePage === "approvals" && <ApprovalsPage requests={requests} setRequests={setRequests} employees={employees} setEmployees={setEmployees} projects={projects} />}
+            {activePage === "requests" && <RequestsPage employees={employees} requests={requests} setRequests={setRequests} projects={projects} />}
+            {activePage === "projects" && <ProjectsPage projects={projects} setProjects={setProjects} employees={employees} />}
+            {activePage === "files" && <ProjectFilesPage projects={projects} filesByProject={filesByProject} setFilesByProject={setFilesByProject} />}
+            {activePage === "reports" && <PlaceholderPage title="Reports Center" description="Printable monthly HR reports, leave reports and project summaries." />}
+            {activePage === "settings" && <PlaceholderPage title="System Settings" description="Adjust HR options, interface controls and configurable data blocks." />}
           </div>
-        </div>
-
-        <nav className="sidebar-nav">
-          {sidebarItems.map((item) => {
-            const Icon = item.icon;
-            const active = activePage === item.key;
-
-            return (
-              <button
-                key={item.key}
-                className={`nav-item ${active ? "active" : ""}`}
-                onClick={() => {
-                  setActivePage(item.key);
-                  setMobileSidebar(false);
-                }}
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="sidebar-projects">
-          <div className="sidebar-label">Project Sections</div>
-          {projects.map((p) => (
-            <div key={p.id} className="project-mini">
-              {p.name}
-            </div>
-          ))}
-        </div>
-
-        <button className="btn btn-light full" onClick={() => setCurrentUser(null)}>
-          <LogOut size={18} />
-          Logout
-        </button>
-      </aside>
-
-      <main className="main-content">
-        <div className="topbar">
-          <div>
-            <button className="mobile-menu-btn" onClick={() => setMobileSidebar(!mobileSidebar)}>
-              <Menu size={18} />
-            </button>
-            <div className="eyebrow dark">Human Resources Dashboard</div>
-            <h1 className="page-title">
-              {activePage === "dashboard" && "Executive HR Dashboard"}
-              {activePage === "employees" && "Employee Management"}
-              {activePage === "leaves" && "Leaves, Permissions & Takleef"}
-              {activePage === "projects" && "Project-Based HR Sections"}
-              {activePage === "permissions" && "Permissions Center"}
-              {activePage === "files" && "Project Files"}
-              {activePage === "reports" && "Reports Center"}
-              {activePage === "settings" && "System Settings"}
-            </h1>
-            <p className="page-subtitle">
-              Signed in as {currentUser.name} ({currentUser.role})
-            </p>
-          </div>
-
-          <div className="topbar-actions">
-            <div className="search-box">
-              <Search size={16} />
-              <input placeholder="Search employees, requests, files..." />
-            </div>
-            <button className="btn btn-light">
-              <Filter size={16} />
-              Filter
-            </button>
-            <button className="btn btn-dark">
-              <Plus size={16} />
-              New Record
-            </button>
-          </div>
-        </div>
-
-        {activePage === "dashboard" && (
-          <DashboardHome employees={employees} projects={projects} requests={requests} />
-        )}
-
-        {activePage === "employees" && (
-          <EmployeesPage employees={employees} setEmployees={setEmployees} />
-        )}
-
-        {activePage === "leaves" && (
-          <LeavesPage
-            employees={employees}
-            setEmployees={setEmployees}
-            requests={requests}
-            setRequests={setRequests}
-          />
-        )}
-
-        {(activePage === "projects" || activePage === "files") && (
-          <ProjectsPage projects={projects} setProjects={setProjects} />
-        )}
-
-        {activePage === "permissions" && (
-          <PlaceholderPage
-            title="Permissions Center"
-            description="Track short permissions, approvals and employee permission consumption manually."
-          />
-        )}
-
-        {activePage === "reports" && (
-          <PlaceholderPage
-            title="Reports Center"
-            description="Prepare monthly attendance, leave summaries, project file logs and printable HR reports."
-          />
-        )}
-
-        {activePage === "settings" && (
-          <PlaceholderPage
-            title="System Settings"
-            description="Control portal settings, project structure and editable HR options."
-          />
-        )}
-      </main>
-    </div>
+        </main>
+      </div>
+    </>
   );
 }
+
+const styles = `
+:root{--bg:#eef3f8;--card:#fff;--border:#e6ebf2;--text:#0f172a;--muted:#64748b;--nav:#061331;--nav2:#0a204a;--primary:#0f172a;--primary2:#183b72;--success:#059669;--warning:#d97706;--danger:#dc2626;--info:#2563eb; font-family:Inter,Arial,sans-serif}
+*{box-sizing:border-box} html,body,#root{margin:0;min-height:100%;background:var(--bg)} body{margin:0;color:var(--text)} button,input,select,textarea{font:inherit}
+.card{background:var(--card);border:1px solid var(--border);border-radius:28px;box-shadow:0 16px 40px rgba(15,23,42,.05);padding:26px}
+.btn{height:48px;border:none;border-radius:16px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;cursor:pointer;transition:.18s ease}.btn:hover{transform:translateY(-1px)} .btn.primary{background:linear-gradient(135deg,#0f172a,#173d72);color:#fff}.btn.secondary{background:#fff;color:#0f172a;border:1px solid #d8e0ea}.btn.success{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}.btn.danger{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}.full{width:100%}
+.brand-mark{height:66px;width:66px;border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:#020617;box-shadow:0 18px 40px rgba(2,6,23,.25)} .brand-mark.small{height:48px;width:48px;border-radius:18px}.brand-inner{width:100%;height:100%;display:grid;place-items:center;background:radial-gradient(circle at top left,rgba(59,130,246,.6),transparent 45%),linear-gradient(135deg,#020617,#0f172a,#111827)} .brand-main{font-size:27px;font-weight:900;line-height:1;color:#fff}.brand-mark.small .brand-main{font-size:18px}.brand-sub{font-size:8px;letter-spacing:.25em;color:#dbeafe;text-align:center}
+.caps{font-size:12px;letter-spacing:.26em;text-transform:uppercase}.caps.light{color:#b9c8e8}.caps.dark{color:#64748b}.muted-label{font-size:14px;color:#64748b}.muted-text{font-size:14px;color:#64748b;margin-top:8px}.strong{font-weight:700}.strong.light{color:#fff}.sub{color:#64748b;font-size:13px;margin-top:4px}.sub.light{color:#c9d4ea}
+.login-page{min-height:100vh;padding:24px;background:radial-gradient(circle at top left,rgba(59,130,246,.15),transparent 20%),radial-gradient(circle at bottom right,rgba(15,23,42,.12),transparent 32%),linear-gradient(135deg,#e8eef6,#f8fbff,#dde8fb)}
+.login-shell-pro{max-width:1480px;min-height:calc(100vh - 48px);margin:0 auto;display:grid;grid-template-columns:1.08fr .92fr;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.55);border-radius:36px;overflow:hidden;backdrop-filter:blur(16px);box-shadow:0 32px 90px rgba(15,23,42,.18)}
+.login-left-pro{position:relative;padding:42px;background:linear-gradient(145deg,#020617 0%,#0e1b38 40%,#0a2b5f 100%);color:#fff;display:flex;flex-direction:column;overflow:hidden}.orb{position:absolute;border-radius:999px;filter:blur(20px);opacity:.5}.orb-a{width:240px;height:240px;background:#2563eb;top:-80px;left:-50px}.orb-b{width:220px;height:220px;background:#1d4ed8;right:-60px;top:40px}.orb-c{width:260px;height:260px;background:#0ea5e9;bottom:-120px;left:20%}
+.login-brand-row{display:flex;align-items:center;gap:16px;position:relative;z-index:2}.login-brand-title{font-size:28px;font-weight:800;margin-top:8px}.hero-copy-pro{max-width:760px;margin-top:82px;position:relative;z-index:2}.hero-copy-pro h1{margin:0 0 20px;font-size:58px;line-height:1.04;letter-spacing:-.04em;font-weight:900}.hero-copy-pro p{margin:0;max-width:700px;font-size:20px;line-height:1.8;color:#cfdbef}.hero-panel-grid{margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;position:relative;z-index:2}.glass-card{padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.08);backdrop-filter:blur(14px)}.glass-card span{display:block;color:#d4deef;font-size:14px}.glass-card strong{display:block;margin-top:12px;font-size:34px}
+.login-right-pro{display:flex;align-items:center;justify-content:center;padding:34px}.login-panel-pro{width:100%;max-width:560px;background:#fff;border:1px solid #e2e8f0;border-radius:32px;padding:38px;box-shadow:0 30px 90px -35px rgba(15,23,42,.35)}.login-panel-head{display:flex;align-items:center;gap:16px;margin-bottom:30px}.login-panel-head h2{margin:0;font-size:42px;letter-spacing:-.03em;font-weight:900}.login-panel-head p{margin:8px 0 0;color:#64748b}
+.field-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}.field-group label{font-size:14px;font-weight:700;color:#334155} .field-group input,.field-group select,.field-group textarea,.search-pro input{width:100%;border:1px solid #d7e0ea;border-radius:16px;background:#fff;color:#0f172a;outline:none;transition:.18s ease}.field-group input,.field-group select,.search-pro input{height:50px;padding:0 16px}.field-group textarea{min-height:120px;padding:14px 16px;resize:vertical}.field-group input:focus,.field-group select:focus,.field-group textarea:focus,.search-pro input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(147,197,253,.2)}
+.demo-panel{margin-top:22px;border-radius:24px;border:1px solid #e5ebf3;background:#f8fbff;padding:20px;color:#475569}.demo-title{font-weight:800;margin-bottom:12px}.error-box{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:12px 14px;border-radius:16px;margin-bottom:16px}
+.app-shell-pro{min-height:100vh;display:grid;grid-template-columns:320px 1fr;background:var(--bg)} .sidebar-pro{padding:24px;background:radial-gradient(circle at top left,rgba(96,165,250,.16),transparent 25%),radial-gradient(circle at bottom right,rgba(37,99,235,.18),transparent 22%),linear-gradient(180deg,#04102b 0%,#081938 45%,#092a59 100%);color:#fff;display:flex;flex-direction:column;gap:22px}.sidebar-brand-row{display:flex;align-items:center;gap:14px}.sidebar-title-pro{font-size:34px;font-weight:900;line-height:1;letter-spacing:-.04em}.sidebar-sub-pro{font-size:13px;color:#cdd8ea;margin-top:6px}.profile-card-pro{display:flex;gap:14px;align-items:center;padding:16px;border-radius:24px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08)} .avatar-pro{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.15);font-weight:800}
+.nav-pro{display:flex;flex-direction:column;gap:10px}.nav-btn-pro{height:50px;border:none;border-radius:18px;background:transparent;color:#e7eefc;display:flex;align-items:center;gap:12px;padding:0 16px;font-weight:700;cursor:pointer;text-align:left}.nav-btn-pro:hover{background:rgba(255,255,255,.08)}.nav-btn-pro.active{background:#fff;color:#0f172a;box-shadow:0 16px 35px rgba(2,6,23,.18)} .project-strip{margin-top:8px}.project-chip-dark{padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e5eefc;margin-top:10px;font-size:14px}
+.main-pro{padding:22px}.topbar-pro{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}.page-title-pro{margin:6px 0 0;font-size:46px;line-height:1.02;letter-spacing:-.04em}.topbar-sub{margin:10px 0 0;color:#64748b;font-size:18px}.topbar-actions-pro{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.search-pro{min-width:320px;height:50px;border-radius:16px;border:1px solid #d7e0ea;background:#fff;padding:0 14px;display:flex;align-items:center;gap:10px}.search-pro input{border:none;box-shadow:none;background:transparent;padding:0}.content-stack,.page-grid-stack,.stack-col{display:flex;flex-direction:column;gap:22px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.stat-card{display:flex;justify-content:space-between;align-items:flex-start}.stat-value{font-size:38px;font-weight:900;letter-spacing:-.03em;margin-top:10px}.icon-shell{width:46px;height:46px;border-radius:16px;background:#0f172a;color:#fff;display:grid;place-items:center;flex-shrink:0}.icon-shell.small{width:40px;height:40px}
+.section-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px}.section-header h3{margin:0;font-size:30px;line-height:1.05;letter-spacing:-.03em}.section-header p{margin:8px 0 0;color:#64748b;line-height:1.7}.dashboard-main-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:22px}.mini-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}.mini-kpi{background:#f8fbff;border:1px solid #e6edf7;border-radius:22px;padding:18px}.mini-kpi span{font-size:14px;color:#64748b}.mini-kpi strong{display:block;margin-top:12px;font-size:32px}
+.alert-list-pro{display:flex;flex-direction:column;gap:14px}.alert-card-btn{width:100%;display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:20px;border:1px solid #e6edf7;background:#fff;cursor:pointer;text-align:left}.alert-card-btn p{margin:6px 0 0;color:#64748b}.quick-actions-grid{display:grid;gap:12px}.action-pro{width:100%;display:flex;align-items:center;gap:12px;justify-content:space-between;padding:16px;border-radius:18px;border:1px solid #dce4ee;background:#fff;cursor:pointer;font-weight:700}.action-pro span{flex:1;text-align:left}
+.two-col-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:22px}.form-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.full-span{grid-column:1/-1}.summary-box{padding:18px;border-radius:22px;background:#f8fbff;border:1px solid #e6edf7;color:#475569;line-height:1.8;margin-bottom:18px}.summary-title{font-weight:900;color:#0f172a;margin-bottom:6px}
+.project-page-layout{display:flex;flex-direction:column;gap:22px}.project-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.project-tab{padding:16px;border-radius:20px;border:1px solid #e6edf7;background:#fff;cursor:pointer;text-align:left}.project-tab.active{background:linear-gradient(135deg,#0f172a,#173d72);color:#fff;border-color:#173d72}.project-tab.active .sub,.project-tab.active .strong{color:#fff}.contact-row{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px}.contact-pill{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#f8fbff;border:1px solid #e6edf7;color:#334155}.manager-card-lite{padding:16px;border-radius:22px;background:#f8fbff;border:1px solid #e6edf7;display:flex;flex-direction:column;gap:6px;color:#475569;margin-bottom:18px}
+.approval-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.approval-card{padding:18px;border-radius:24px;border:1px solid #e6edf7;background:#fff}.approval-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.approval-top h4{margin:0;font-size:20px}.approval-top p{margin:8px 0 0;color:#64748b}.approval-body{margin-top:14px;display:grid;gap:10px;color:#334155}.approval-actions{display:flex;gap:10px;margin-top:18px}.empty-state{padding:30px;border-radius:22px;background:#f8fbff;border:1px dashed #cbd5e1;color:#64748b;text-align:center}
+.placeholder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.placeholder-box{display:flex;align-items:center;gap:10px;padding:18px;border-radius:22px;border:1px solid #e6edf7;background:#f8fbff;font-weight:700;color:#334155}
+.status-badge{display:inline-flex;align-items:center;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid transparent}.status-badge.success{background:#ecfdf5;color:#047857;border-color:#a7f3d0}.status-badge.warning{background:#fffbeb;color:#b45309;border-color:#fde68a}.status-badge.danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca}.status-badge.info{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.status-badge.neutral{background:#f8fafc;color:#475569;border-color:#e2e8f0}
+.table-wrap{overflow:auto} table{width:100%;border-collapse:collapse} th,td{text-align:left;padding:15px 14px;border-bottom:1px solid #edf2f7;font-size:14px;vertical-align:middle} th{color:#64748b;font-weight:800;white-space:nowrap} td{color:#0f172a}
+.menu-btn-pro{display:none;width:42px;height:42px;border-radius:14px;border:1px solid #dce4ee;background:#fff;margin-bottom:10px;align-items:center;justify-content:center;cursor:pointer}
+@media (max-width:1280px){.stats-grid,.project-tabs,.hero-panel-grid,.approval-grid,.placeholder-grid{grid-template-columns:repeat(2,1fr)}.dashboard-main-grid,.two-col-layout,.login-shell-pro{grid-template-columns:1fr}}
+@media (max-width:960px){.app-shell-pro{grid-template-columns:1fr}.sidebar-pro{position:fixed;left:0;top:0;bottom:0;width:300px;z-index:100;transform:translateX(-100%);transition:.22s ease}.sidebar-pro.show{transform:translateX(0)}.menu-btn-pro{display:inline-flex}.topbar-pro{flex-direction:column}.topbar-actions-pro{width:100%}.search-pro{min-width:100%}.project-page-layout,.form-grid-2,.mini-kpi-grid{grid-template-columns:1fr}.page-title-pro{font-size:36px}.hero-copy-pro h1{font-size:40px}}
+@media (max-width:640px){.login-page,.main-pro{padding:14px}.card,.login-panel-pro,.login-left-pro{padding:18px}.stats-grid,.hero-panel-grid,.approval-grid,.placeholder-grid{grid-template-columns:1fr}.page-title-pro{font-size:30px}.hero-copy-pro{margin-top:42px}.hero-copy-pro h1{font-size:30px}.login-panel-head h2{font-size:34px}}
+`;
