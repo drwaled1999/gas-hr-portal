@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import "./styles.css";
 
 type Role = "HR Manager" | "HR" | "HR Admin" | "Admin" | "Admin Assistant";
-type Page = "dashboard" | "employees" | "leaves" | "projects" | "permissions" | "files" | "reports" | "settings";
-type PermissionKey = "view_dashboard" | "view_employees" | "manage_leaves" | "manage_projects" | "manage_permissions" | "view_reports" | "manage_files" | "manage_settings";
+type Page = "dashboard" | "employees" | "leaves" | "projects" | "add" | "permissions" | "files" | "reports" | "settings";
+type PermissionKey = "view_dashboard" | "view_employees" | "add_employee" | "manage_leaves" | "manage_projects" | "manage_permissions" | "view_reports" | "manage_files" | "manage_settings";
 
 type Project = { id:number; name:string; packageName:string; location:string; managerName:string; managerPhone:string; colorTag:string; };
 type LeaveEntry = { id:number; type:"Annual"|"Sick"|"Emergency"|"Takleef"; days:number; startDate:string; endDate:string; note:string; };
@@ -33,8 +33,8 @@ const employeeSeed: Employee[] = [
 ];
 
 const usersSeed: UserAccess[] = [
-  { id:1, fullName:"Walid Khalaf Alshammari", username:"hrmanager", role:"HR Manager", permissions:["view_dashboard","view_employees","manage_leaves","manage_projects","manage_permissions","view_reports","manage_files","manage_settings"] },
-  { id:2, fullName:"Walid Khalaf", username:"walid", role:"HR Admin", permissions:["view_dashboard","view_employees","manage_leaves","manage_projects","view_reports","manage_files"] },
+  { id:1, fullName:"Walid Khalaf Alshammari", username:"hrmanager", role:"HR Manager", permissions:["view_dashboard","view_employees","add_employee","manage_leaves","manage_projects","manage_permissions","view_reports","manage_files","manage_settings"] },
+  { id:2, fullName:"Walid Khalaf", username:"walid", role:"HR Admin", permissions:["view_dashboard","view_employees","add_employee","manage_leaves","manage_projects","view_reports","manage_files"] },
   { id:3, fullName:"Sara Khan", username:"sara", role:"Admin Assistant", permissions:["view_dashboard","view_employees"] },
 ];
 
