@@ -2,8 +2,27 @@ import { useEffect, useMemo, useState } from "react";
 import "./styles.css";
 
 type Role = "HR Manager" | "HR" | "HR Admin" | "Admin" | "Admin Assistant";
-type Page = "dashboard" | "employees" | "projects" | "add" | "permissions" | "audit" | "notifications" | "reports";
-type PermissionKey = "view_dashboard" | "view_employees" | "edit_leaves" | "add_employee" | "assign_permissions" | "view_audit" | "view_reports";
+type PermissionKey =
+  | "view_dashboard"
+  | "view_employees"
+  | "edit_leaves"
+  | "add_employee"
+  | "assign_permissions"
+  | "view_audit"
+  | "view_reports"
+  | "manage_projects"
+  | "manage_leave_requests";
+
+type Page =
+  | "dashboard"
+  | "employees"
+  | "leaves"
+  | "projects"
+  | "add"
+  | "permissions"
+  | "audit"
+  | "notifications"
+  | "reports";
 
 type Project = {
   id: number;
@@ -12,6 +31,15 @@ type Project = {
   managerName: string;
   managerPhone: string;
   location: string;
+};
+
+type LeaveEntry = {
+  id: number;
+  type: "Annual" | "Sick" | "Emergency" | "Takleef";
+  days: number;
+  startDate: string;
+  endDate: string;
+  note: string;
 };
 
 type Employee = {
@@ -32,6 +60,7 @@ type Employee = {
     sick: number;
     emergency: number;
   };
+  leaveEntries: LeaveEntry[];
   notes: string[];
 };
 
@@ -41,6 +70,16 @@ type UserAccess = {
   username: string;
   role: Role;
   permissions: PermissionKey[];
+};
+
+type ProjectFile = {
+  id: number;
+  projectName: string;
+  category: "Leave" | "Takleef";
+  fileName: string;
+  uploadedBy: string;
+  note: string;
+  uploadedAt: string;
 };
 
 const logoPath = "/LOGO-GAS.jpg";
@@ -53,6 +92,8 @@ const permissionLabels: Record<PermissionKey, string> = {
   assign_permissions: "Assign Permissions",
   view_audit: "View Audit Log",
   view_reports: "View Reports",
+  manage_projects: "Manage Projects",
+  manage_leave_requests: "Manage Leave / Takleef",
 };
 
 const projectsData: Project[] = [
@@ -62,14 +103,66 @@ const projectsData: Project[] = [
 ];
 
 const initialEmployees: Employee[] = [
-  { id: 1, employeeCode: "GAS-1182", fullName: "Walid Khalaf", department: "HR", jobTitle: "HR Admin", nationality: "Saudi", projectName: "Qassim", packageName: "Package 12", systemRole: "HR Admin", status: "Active", leave: { total: 21, used: 7, remaining: 14, sick: 2, emergency: 1 }, notes: ["Supports time sheet updates.", "Can coordinate with Admin Assistants."] },
-  { id: 2, employeeCode: "GAS-1450", fullName: "Sara Khan", department: "Admin", jobTitle: "Admin Assistant", nationality: "Non-Saudi", projectName: "Qatif", packageName: "Package 08", systemRole: "Admin Assistant", status: "Active", leave: { total: 21, used: 16, remaining: 5, sick: 1, emergency: 0 }, notes: ["Assigned to leave coordination support."] },
-  { id: 3, employeeCode: "GAS-2036", fullName: "Ahmed Al Qahtani", department: "Operations", jobTitle: "Store Worker", nationality: "Saudi", projectName: "Shadqam", packageName: "Package 16", systemRole: "Admin", status: "Active", leave: { total: 21, used: 12, remaining: 9, sick: 0, emergency: 1 }, notes: ["Attendance is consistent.", "Low risk profile."] },
+  {
+    id: 1,
+    employeeCode: "GAS-1182",
+    fullName: "Walid Khalaf",
+    department: "HR",
+    jobTitle: "HR Admin",
+    nationality: "Saudi",
+    projectName: "Qassim",
+    packageName: "Package 12",
+    systemRole: "HR Admin",
+    status: "Active",
+    leave: { total: 30, used: 7, remaining: 23, sick: 2, emergency: 1 },
+    leaveEntries: [
+      { id: 11, type: "Annual", days: 5, startDate: "2026-03-01", endDate: "2026-03-05", note: "Annual leave" },
+      { id: 12, type: "Emergency", days: 1, startDate: "2026-03-18", endDate: "2026-03-18", note: "Family emergency" },
+      { id: 13, type: "Sick", days: 1, startDate: "2026-03-27", endDate: "2026-03-27", note: "Medical rest" },
+    ],
+    notes: ["Supports time sheet updates.", "Can coordinate with Admin Assistants."],
+  },
+  {
+    id: 2,
+    employeeCode: "GAS-1450",
+    fullName: "Sara Khan",
+    department: "Admin",
+    jobTitle: "Admin Assistant",
+    nationality: "Non-Saudi",
+    projectName: "Qatif",
+    packageName: "Package 08",
+    systemRole: "Admin Assistant",
+    status: "Active",
+    leave: { total: 30, used: 16, remaining: 14, sick: 1, emergency: 0 },
+    leaveEntries: [
+      { id: 21, type: "Annual", days: 15, startDate: "2026-02-01", endDate: "2026-02-15", note: "Annual leave" },
+      { id: 22, type: "Sick", days: 1, startDate: "2026-03-10", endDate: "2026-03-10", note: "Medical leave" },
+    ],
+    notes: ["Assigned to leave coordination support."],
+  },
+  {
+    id: 3,
+    employeeCode: "GAS-2036",
+    fullName: "Ahmed Al Qahtani",
+    department: "Operations",
+    jobTitle: "Store Worker",
+    nationality: "Saudi",
+    projectName: "Shadqam",
+    packageName: "Package 16",
+    systemRole: "Admin",
+    status: "Active",
+    leave: { total: 30, used: 12, remaining: 18, sick: 0, emergency: 1 },
+    leaveEntries: [
+      { id: 31, type: "Annual", days: 11, startDate: "2026-01-05", endDate: "2026-01-15", note: "Annual leave" },
+      { id: 32, type: "Emergency", days: 1, startDate: "2026-03-22", endDate: "2026-03-22", note: "Urgent matter" },
+    ],
+    notes: ["Attendance is consistent.", "Low risk profile."],
+  },
 ];
 
 const initialUsers: UserAccess[] = [
-  { id: 1, fullName: "Walid Khalaf Alshammari", username: "hrmanager", role: "HR Manager", permissions: ["view_dashboard","view_employees","edit_leaves","add_employee","assign_permissions","view_audit","view_reports"] },
-  { id: 2, fullName: "Walid Khalaf", username: "walid", role: "HR Admin", permissions: ["view_dashboard","view_employees","edit_leaves","add_employee","view_reports"] },
+  { id: 1, fullName: "Walid Khalaf Alshammari", username: "hrmanager", role: "HR Manager", permissions: ["view_dashboard","view_employees","edit_leaves","add_employee","assign_permissions","view_audit","view_reports","manage_projects","manage_leave_requests"] },
+  { id: 2, fullName: "Walid Khalaf", username: "walid", role: "HR Admin", permissions: ["view_dashboard","view_employees","edit_leaves","add_employee","view_reports","manage_leave_requests"] },
   { id: 3, fullName: "Sara Khan", username: "sara", role: "Admin Assistant", permissions: ["view_dashboard","view_employees"] },
 ];
 
@@ -79,20 +172,40 @@ const passwords: Record<string, string> = {
   sara: "123456",
 };
 
+const initialProjectFiles: ProjectFile[] = [
+  { id: 1, projectName: "Qatif", category: "Leave", fileName: "qatif_leave_request_march.pdf", uploadedBy: "Walid Khalaf", note: "March leave request", uploadedAt: "2026-04-07 09:30" },
+  { id: 2, projectName: "Qatif", category: "Takleef", fileName: "qatif_takleef_week_2.pdf", uploadedBy: "Walid Khalaf", note: "Site takleef sheet", uploadedAt: "2026-04-07 11:15" },
+  { id: 3, projectName: "Qassim", category: "Leave", fileName: "qassim_leave_record.pdf", uploadedBy: "HR Manager", note: "Approved leave files", uploadedAt: "2026-04-06 08:45" },
+];
+
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserAccess | null>(null);
   const [loginError, setLoginError] = useState("");
   const [page, setPage] = useState<Page>("dashboard");
+  const [projectView, setProjectView] = useState<string>(projectsData[0].name);
   const [search, setSearch] = useState("");
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
   const [systemUsers, setSystemUsers] = useState<UserAccess[]>(initialUsers);
+  const [projectFiles, setProjectFiles] = useState<ProjectFile[]>(initialProjectFiles);
   const [selectedId, setSelectedId] = useState<number>(1);
   const [selectedUserId, setSelectedUserId] = useState<number>(2);
   const [noteText, setNoteText] = useState("");
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [leaveForm, setLeaveForm] = useState({ total: 0, used: 0, sick: 0, emergency: 0 });
+  const [manualLeaveForm, setManualLeaveForm] = useState({
+    type: "Annual" as LeaveEntry["type"],
+    days: 1,
+    startDate: "",
+    endDate: "",
+    note: "",
+  });
+  const [projectFileForm, setProjectFileForm] = useState({
+    category: "Leave" as ProjectFile["category"],
+    fileName: "",
+    note: "",
+  });
   const [addForm, setAddForm] = useState({
     employeeCode: "",
     fullName: "",
@@ -112,6 +225,7 @@ export default function App() {
 
   const selectedEmployee = employees.find((emp) => emp.id === selectedId) ?? employees[0];
   const selectedSystemUser = systemUsers.find((u) => u.id === selectedUserId) ?? systemUsers[0];
+  const currentProject = projectsData.find((p) => p.name === projectView) ?? projectsData[0];
 
   useEffect(() => {
     if (selectedEmployee) {
@@ -152,9 +266,14 @@ export default function App() {
     });
   }, [employees]);
 
+  const projectSpecificFiles = useMemo(() => {
+    return projectFiles.filter((f) => f.projectName === projectView);
+  }, [projectFiles, projectView]);
+
   const navItems: { key: Page; label: string }[] = [
     { key: "dashboard", label: "Dashboard" },
     { key: "employees", label: "Employees" },
+    { key: "leaves", label: "Leaves & Takleef" },
     { key: "projects", label: "Projects" },
     { key: "add", label: "Add Employee" },
     { key: "permissions", label: "Permissions" },
@@ -177,6 +296,7 @@ export default function App() {
     setCurrentUser(user);
     setLoginError("");
     setIsAuthenticated(true);
+    setProjectView(user.role === "HR Manager" ? projectsData[0].name : employees.find(e => e.fullName === user.fullName)?.projectName || projectsData[0].name);
   }
 
   function handleLogout() {
@@ -203,7 +323,8 @@ export default function App() {
       packageName: addForm.packageName,
       systemRole: addForm.systemRole,
       status: "Active",
-      leave: { total: 21, used: 0, remaining: 21, sick: 0, emergency: 0 },
+      leave: { total: 30, used: 0, remaining: 30, sick: 0, emergency: 0 },
+      leaveEntries: [],
       notes: addForm.note ? [addForm.note] : [],
     };
 
@@ -253,9 +374,50 @@ export default function App() {
     );
   }
 
+  function addLeaveEntry() {
+    if (!selectedEmployee) return;
+    const days = Math.max(Number(manualLeaveForm.days) || 0, 0);
+    if (!days) return;
+
+    setEmployees((prev) =>
+      prev.map((emp) => {
+        if (emp.id !== selectedEmployee.id) return emp;
+        const newUsed = emp.leave.used + days;
+        const newSick = manualLeaveForm.type === "Sick" ? emp.leave.sick + days : emp.leave.sick;
+        const newEmergency = manualLeaveForm.type === "Emergency" ? emp.leave.emergency + days : emp.leave.emergency;
+        const newEntry: LeaveEntry = {
+          id: Date.now(),
+          type: manualLeaveForm.type,
+          days,
+          startDate: manualLeaveForm.startDate,
+          endDate: manualLeaveForm.endDate,
+          note: manualLeaveForm.note,
+        };
+        return {
+          ...emp,
+          leave: {
+            total: emp.leave.total,
+            used: newUsed,
+            remaining: Math.max(emp.leave.total - newUsed, 0),
+            sick: newSick,
+            emergency: newEmergency,
+          },
+          leaveEntries: [newEntry, ...emp.leaveEntries],
+        };
+      })
+    );
+
+    setManualLeaveForm({
+      type: "Annual",
+      days: 1,
+      startDate: "",
+      endDate: "",
+      note: "",
+    });
+  }
+
   function togglePermission(userId: number, permission: PermissionKey) {
     if (!currentUser || currentUser.role !== "HR Manager") return;
-
     let updatedCurrentUser: UserAccess | null = null;
     setSystemUsers((prev) =>
       prev.map((user) => {
@@ -274,12 +436,29 @@ export default function App() {
     if (updatedCurrentUser) setCurrentUser(updatedCurrentUser);
   }
 
+  function addProjectFile() {
+    if (!projectFileForm.fileName.trim()) return;
+    const record: ProjectFile = {
+      id: Date.now(),
+      projectName: projectView,
+      category: projectFileForm.category,
+      fileName: projectFileForm.fileName,
+      uploadedBy: currentUser?.fullName || "User",
+      note: projectFileForm.note,
+      uploadedAt: new Date().toLocaleString(),
+    };
+    setProjectFiles((prev) => [record, ...prev]);
+    setProjectFileForm({ category: "Leave", fileName: "", note: "" });
+  }
+
   if (loading) {
     return (
       <div className="splash-screen">
         <div className="splash-glow" />
         <div className="splash-card">
-          <img src={logoPath} alt="GAS Logo" className="splash-logo" />
+          <div className="logo-fade-wrap">
+            <img src={logoPath} alt="GAS Logo" className="splash-logo" />
+          </div>
           <h1>GAS HR Leave Portal</h1>
           <p>Loading secure HR workspace...</p>
           <div className="loader"><span /></div>
@@ -293,10 +472,16 @@ export default function App() {
       <div className="login-page">
         <div className="login-shell">
           <div className="login-left">
-            <img src={logoPath} alt="GAS Logo" className="login-logo" />
+            <div className="login-brand">
+              <img src={logoPath} alt="GAS Logo" className="login-logo" />
+              <div className="login-badge">Internal Enterprise HR System</div>
+            </div>
             <div className="login-copy">
               <h1>GAS HR Leave Portal</h1>
-              <p>Complete HR platform for employee records, leave balances, permissions, projects, responsible managers and operational visibility.</p>
+              <p>
+                Complete HR platform for employee records, leave balances, takleef tracking,
+                project sections, permissions, responsible managers and operational visibility.
+              </p>
             </div>
             <div className="login-kpis">
               <div className="login-kpi"><span>Total Employees</span><strong>{stats.total}</strong></div>
@@ -322,21 +507,12 @@ export default function App() {
 
               <div className="form-group">
                 <label>Username</label>
-                <input
-                  value={loginForm.username}
-                  onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
-                  placeholder="Enter your username"
-                />
+                <input value={loginForm.username} onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))} placeholder="Enter your username" />
               </div>
 
               <div className="form-group">
                 <label>Password</label>
-                <input
-                  type="password"
-                  value={loginForm.password}
-                  onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
-                  placeholder="Enter your password"
-                />
+                <input type="password" value={loginForm.password} onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))} placeholder="Enter your password" />
               </div>
 
               {loginError && <div className="error-box">{loginError}</div>}
@@ -356,6 +532,18 @@ export default function App() {
     );
   }
 
+  const visibleNav = navItems.filter((item) => {
+    if (item.key === "dashboard") return hasPermission("view_dashboard");
+    if (item.key === "employees") return hasPermission("view_employees");
+    if (item.key === "leaves") return hasPermission("manage_leave_requests");
+    if (item.key === "add") return hasPermission("add_employee");
+    if (item.key === "permissions") return hasPermission("assign_permissions");
+    if (item.key === "audit") return hasPermission("view_audit");
+    if (item.key === "reports") return hasPermission("view_reports");
+    if (item.key === "projects") return hasPermission("manage_projects") || currentUser?.role === "HR Manager";
+    return true;
+  });
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -368,32 +556,27 @@ export default function App() {
         </div>
 
         <div className="nav-list">
-          {navItems
-            .filter((item) => {
-              if (item.key === "dashboard") return hasPermission("view_dashboard");
-              if (item.key === "employees") return hasPermission("view_employees");
-              if (item.key === "add") return hasPermission("add_employee");
-              if (item.key === "permissions") return hasPermission("assign_permissions");
-              if (item.key === "audit") return hasPermission("view_audit");
-              if (item.key === "reports") return hasPermission("view_reports");
-              return true;
-            })
-            .map((item) => (
-              <button
-                key={item.key}
-                className={page === item.key ? "nav-btn active" : "nav-btn"}
-                onClick={() => setPage(item.key)}
-              >
-                {item.label}
+          {visibleNav.map((item) => (
+            <button key={item.key} className={page === item.key ? "nav-btn active" : "nav-btn"} onClick={() => setPage(item.key)}>
+              {item.label}
+            </button>
+          ))}
+
+          <div className="project-submenu">
+            <div className="project-submenu-title">Projects</div>
+            {projectSummary.map((project) => (
+              <button key={project.id} className={projectView === project.name ? "project-link active" : "project-link"} onClick={() => { setProjectView(project.name); setPage("projects"); }}>
+                {project.name}
               </button>
             ))}
+          </div>
         </div>
       </aside>
 
       <main className="main-content">
         <div className="topbar">
           <div>
-            <h1 className="page-title">{navItems.find((n) => n.key === page)?.label}</h1>
+            <h1 className="page-title">{navItems.find((n) => n.key === page)?.label || "Projects"}</h1>
             <p className="muted">Signed in as {currentUser?.fullName} ({currentUser?.role})</p>
           </div>
           <button className="logout-btn" onClick={handleLogout}>Logout</button>
@@ -412,9 +595,7 @@ export default function App() {
               <div className="panel">
                 <h3>Project Summary</h3>
                 <table>
-                  <thead>
-                    <tr><th>Project</th><th>Manager</th><th>Phone</th><th>Employees</th></tr>
-                  </thead>
+                  <thead><tr><th>Project</th><th>Manager</th><th>Phone</th><th>Employees</th></tr></thead>
                   <tbody>
                     {projectSummary.map((project) => (
                       <tr key={project.id}>
@@ -430,9 +611,9 @@ export default function App() {
 
               <div className="panel">
                 <h3>Quick Insight</h3>
-                <div className="notification-box"><strong>Leave Visibility</strong><p>Remaining balances are visible per employee and highlighted when low.</p></div>
+                <div className="notification-box"><strong>Manual Leave Setup</strong><p>Annual leave balance can be set manually and increased as needed.</p></div>
                 <div className="notification-box"><strong>Permissions Control</strong><p>HR Manager can assign permissions for every user in the system.</p></div>
-                <div className="notification-box"><strong>Projects Coverage</strong><p>Each project displays its responsible manager and mobile number.</p></div>
+                <div className="notification-box"><strong>Project Sections</strong><p>Each project has its own leave and takleef file section for review.</p></div>
               </div>
             </div>
           </>
@@ -443,12 +624,7 @@ export default function App() {
             <div className="panel">
               <div className="panel-head">
                 <h3>Employee List</h3>
-                <input
-                  className="search-input"
-                  placeholder="Search by name, code, project or package"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+                <input className="search-input" placeholder="Search by name, code, project or package" value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
 
               <table>
@@ -509,10 +685,7 @@ export default function App() {
                     <div className="notes-list">
                       {selectedEmployee.notes.map((n, i) => <div key={i} className="note-box">{n}</div>)}
                     </div>
-                    <div className="form-group">
-                      <label>Add Note</label>
-                      <textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="Write a new note here" />
-                    </div>
+                    <div className="form-group"><label>Add Note</label><textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="Write a new note here" /></div>
                     <button className="primary-btn" onClick={addNote}>Add Note</button>
                   </div>
                 </>
@@ -521,21 +694,130 @@ export default function App() {
           </div>
         )}
 
-        {page === "projects" && (
-          <div className="project-grid">
-            {projectSummary.map((project) => (
-              <div key={project.id} className="panel project-card">
-                <div className="project-card-head">
-                  <h3>{project.name}</h3>
-                  <span className="project-badge">{project.packageName}</span>
+        {page === "leaves" && hasPermission("manage_leave_requests") && selectedEmployee && (
+          <div className="leave-page-layout">
+            <div className="panel">
+              <h3>Manual Leave Entry</h3>
+              <div className="employee-inline-header">
+                <div><strong>{selectedEmployee.fullName}</strong><span>{selectedEmployee.employeeCode}</span></div>
+                <div className="leave-chip">Remaining: {selectedEmployee.leave.remaining}</div>
+              </div>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Leave Type</label>
+                  <select value={manualLeaveForm.type} onChange={(e) => setManualLeaveForm((p) => ({ ...p, type: e.target.value as LeaveEntry["type"] }))}>
+                    <option>Annual</option>
+                    <option>Sick</option>
+                    <option>Emergency</option>
+                    <option>Takleef</option>
+                  </select>
                 </div>
-                <p className="muted">{project.location}</p>
-                <div className="project-manager"><strong>{project.managerName}</strong><span>{project.managerPhone}</span></div>
-                <div className="project-stats">
-                  <div><label>Employees</label><strong>{project.employeesCount}</strong></div>
+                <div className="form-group">
+                  <label>Days</label>
+                  <input type="number" value={manualLeaveForm.days} onChange={(e) => setManualLeaveForm((p) => ({ ...p, days: Number(e.target.value) }))} />
+                </div>
+                <div className="form-group">
+                  <label>Start Date</label>
+                  <input type="date" value={manualLeaveForm.startDate} onChange={(e) => setManualLeaveForm((p) => ({ ...p, startDate: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label>End Date</label>
+                  <input type="date" value={manualLeaveForm.endDate} onChange={(e) => setManualLeaveForm((p) => ({ ...p, endDate: e.target.value }))} />
                 </div>
               </div>
-            ))}
+              <div className="form-group">
+                <label>Note</label>
+                <textarea value={manualLeaveForm.note} onChange={(e) => setManualLeaveForm((p) => ({ ...p, note: e.target.value }))} />
+              </div>
+              <button className="primary-btn" onClick={addLeaveEntry}>Add Leave / Takleef Entry</button>
+            </div>
+
+            <div className="panel">
+              <h3>Leave History</h3>
+              <table>
+                <thead><tr><th>Type</th><th>Days</th><th>Start</th><th>End</th><th>Note</th></tr></thead>
+                <tbody>
+                  {selectedEmployee.leaveEntries.map((entry) => (
+                    <tr key={entry.id}>
+                      <td>{entry.type}</td>
+                      <td>{entry.days}</td>
+                      <td>{entry.startDate}</td>
+                      <td>{entry.endDate}</td>
+                      <td>{entry.note}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {page === "projects" && (
+          <div className="project-section-layout">
+            <div className="project-grid">
+              {projectSummary.map((project) => (
+                <div key={project.id} className={projectView === project.name ? "panel project-card active" : "panel project-card"} onClick={() => setProjectView(project.name)}>
+                  <div className="project-card-head">
+                    <h3>{project.name}</h3>
+                    <span className="project-badge">{project.packageName}</span>
+                  </div>
+                  <p className="muted">{project.location}</p>
+                  <div className="project-manager"><strong>{project.managerName}</strong><span>{project.managerPhone}</span></div>
+                  <div className="project-stats"><div><label>Employees</label><strong>{project.employeesCount}</strong></div></div>
+                </div>
+              ))}
+            </div>
+
+            <div className="panel">
+              <div className="project-header-bar">
+                <div>
+                  <h3>{currentProject.name} - Leave & Takleef Files</h3>
+                  <p className="muted">Files uploaded for this project are visible to HR Manager.</p>
+                </div>
+                <div className="project-contact-chip">
+                  <strong>{currentProject.managerName}</strong>
+                  <span>{currentProject.managerPhone}</span>
+                </div>
+              </div>
+
+              {hasPermission("manage_projects") || hasPermission("manage_leave_requests") ? (
+                <div className="upload-box">
+                  <div className="form-grid small-grid">
+                    <div className="form-group">
+                      <label>Category</label>
+                      <select value={projectFileForm.category} onChange={(e) => setProjectFileForm((p) => ({ ...p, category: e.target.value as ProjectFile["category"] }))}>
+                        <option>Leave</option>
+                        <option>Takleef</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>File Name</label>
+                      <input value={projectFileForm.fileName} onChange={(e) => setProjectFileForm((p) => ({ ...p, fileName: e.target.value }))} placeholder="example.pdf" />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Note</label>
+                    <textarea value={projectFileForm.note} onChange={(e) => setProjectFileForm((p) => ({ ...p, note: e.target.value }))} placeholder="Upload note" />
+                  </div>
+                  <button className="primary-btn" onClick={addProjectFile}>Add Project File Record</button>
+                </div>
+              ) : null}
+
+              <table>
+                <thead><tr><th>Category</th><th>File Name</th><th>Uploaded By</th><th>Note</th><th>Time</th></tr></thead>
+                <tbody>
+                  {projectSpecificFiles.map((file) => (
+                    <tr key={file.id}>
+                      <td>{file.category}</td>
+                      <td>{file.fileName}</td>
+                      <td>{file.uploadedBy}</td>
+                      <td>{file.note}</td>
+                      <td>{file.uploadedAt}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -586,11 +868,7 @@ export default function App() {
                   <div className="permission-list">
                     {(Object.keys(permissionLabels) as PermissionKey[]).map((permission) => (
                       <label key={permission} className="permission-item">
-                        <input
-                          type="checkbox"
-                          checked={selectedSystemUser.permissions.includes(permission)}
-                          onChange={() => togglePermission(selectedSystemUser.id, permission)}
-                        />
+                        <input type="checkbox" checked={selectedSystemUser.permissions.includes(permission)} onChange={() => togglePermission(selectedSystemUser.id, permission)} />
                         <span>{permissionLabels[permission]}</span>
                       </label>
                     ))}
@@ -618,9 +896,9 @@ export default function App() {
         {page === "notifications" && (
           <div className="panel">
             <h3>Notifications</h3>
-            <div className="notification-box"><strong>Low Leave Balance</strong><p>Sara Khan has only 5 remaining leave days.</p></div>
+            <div className="notification-box"><strong>Low Leave Balance</strong><p>Sara Khan has only 14 remaining leave days after recent updates.</p></div>
             <div className="notification-box"><strong>Permissions Updated</strong><p>HR Manager can assign permissions for all users.</p></div>
-            <div className="notification-box"><strong>Project Contacts Ready</strong><p>Responsible managers and phone numbers are visible by project.</p></div>
+            <div className="notification-box"><strong>Project Files Ready</strong><p>Each project now has its own section for leave and takleef records.</p></div>
           </div>
         )}
 
