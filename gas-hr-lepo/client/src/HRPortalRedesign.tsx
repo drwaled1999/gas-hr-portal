@@ -19,7 +19,6 @@ import {
   Plus,
   Menu,
   UserPlus,
-  CalendarDays,
   Briefcase,
   CheckCircle2,
   XCircle,
@@ -35,6 +34,14 @@ import {
   Clock3,
   TrendingUp,
   Layers3,
+  CalendarRange,
+  Fingerprint,
+  ReceiptText,
+  CalendarCheck2,
+  FileSpreadsheet,
+  ContactRound,
+  Settings2,
+  CircleDollarSign,
 } from "lucide-react";
 
 const users = {
@@ -85,10 +92,12 @@ const sidebarItems = [
   { key: "leaveBalances", label: "Leave Balances", icon: Wallet },
   { key: "approvals", label: "Approvals", icon: BadgeCheck },
   { key: "requests", label: "Leaves & Takleef", icon: Plane },
+  { key: "attendance", label: "Attendance", icon: Fingerprint },
+  { key: "payroll", label: "Payroll", icon: CircleDollarSign },
   { key: "projects", label: "Projects", icon: FolderKanban },
   { key: "files", label: "Project Files", icon: FolderOpen },
   { key: "reports", label: "Reports", icon: FileText },
-  { key: "settings", label: "Settings", icon: KeyRound },
+  { key: "settings", label: "Settings", icon: Settings2 },
 ];
 
 function projectName(projects, id) {
@@ -97,10 +106,10 @@ function projectName(projects, id) {
 
 function BrandMark({ small = false }) {
   return (
-    <div className={`brand-v3 ${small ? "small" : ""}`}>
-      <div className="brand-v3-inner">
-        <span className="brand-v3-main">GAS</span>
-        <span className="brand-v3-sub">HCM SUITE</span>
+    <div className={`brand-v4 ${small ? "small" : ""}`}>
+      <div className="brand-v4-inner">
+        <span className="brand-v4-main">GAS</span>
+        <span className="brand-v4-sub">HR PROJECT</span>
       </div>
     </div>
   );
@@ -117,16 +126,16 @@ function StatusBadge({ status }) {
     "In Review": "info",
     Review: "info",
   };
-  return <span className={`status-v3 ${map[status] || "neutral"}`}>{status}</span>;
+  return <span className={`status-v4 ${map[status] || "neutral"}`}>{status}</span>;
 }
 
 function GlassCard({ children, className = "" }) {
-  return <div className={`glass-card-v3 ${className}`}>{children}</div>;
+  return <div className={`glass-card-v4 ${className}`}>{children}</div>;
 }
 
 function SectionTitle({ title, description, action }) {
   return (
-    <div className="section-title-v3">
+    <div className="section-title-v4">
       <div>
         <h3>{title}</h3>
         {description ? <p>{description}</p> : null}
@@ -136,15 +145,27 @@ function SectionTitle({ title, description, action }) {
   );
 }
 
+function MiniStat({ icon: Icon, label, value }) {
+  return (
+    <div className="mini-stat-v4">
+      <div className="mini-stat-icon"><Icon size={16} /></div>
+      <div>
+        <div className="mini-stat-label">{label}</div>
+        <div className="mini-stat-value">{value}</div>
+      </div>
+    </div>
+  );
+}
+
 function KpiCard({ icon: Icon, label, value, trend }) {
   return (
-    <GlassCard className="kpi-card-v3">
-      <div className="kpi-card-top">
-        <div className="kpi-icon"><Icon size={18} /></div>
-        <div className="kpi-trend"><TrendingUp size={14} /> {trend}</div>
+    <GlassCard className="kpi-card-v4">
+      <div className="kpi-v4-top">
+        <div className="kpi-v4-icon"><Icon size={17} /></div>
+        <div className="kpi-v4-trend"><TrendingUp size={12} /> {trend}</div>
       </div>
-      <div className="kpi-label">{label}</div>
-      <div className="kpi-value">{value}</div>
+      <div className="kpi-v4-label">{label}</div>
+      <div className="kpi-v4-value">{value}</div>
     </GlassCard>
   );
 }
@@ -165,55 +186,58 @@ function LoginScreen({ onLogin }) {
   };
 
   return (
-    <div className="login-v3-page">
-      <div className="login-v3-shell">
-        <div className="login-v3-left">
-          <div className="aurora a1" />
-          <div className="aurora a2" />
-          <div className="aurora a3" />
-          <div className="login-v3-brand-row">
+    <div className="login-page-v4">
+      <div className="login-shell-v4">
+        <div className="login-left-v4">
+          <div className="hr-aurora one" />
+          <div className="hr-aurora two" />
+          <div className="hr-aurora three" />
+          <div className="login-brand-row-v4">
             <BrandMark />
             <div>
-              <div className="eyebrow-v3">Enterprise Human Capital Intelligence</div>
-              <div className="login-v3-brand-title">GAS Workforce OS</div>
+              <div className="eyebrow-v4 light">Human Resources Department (HR Project)</div>
+              <div className="login-brand-title-v4">GAS ARABIAN</div>
             </div>
           </div>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="login-v3-copy">
-            <h1>Premium HR system inspired by world-class enterprise software.</h1>
+
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="login-copy-v4">
+            <h1>Modern HR operating system for projects, records and approvals.</h1>
             <p>
-              Built for employee records, annual leave governance, approvals, project ownership,
-              manager contacts, HR files and executive workforce visibility.
+              Structured workspace for employee management, annual leave control, attendance,
+              payroll view, approvals, project files and HR reporting in one platform.
             </p>
           </motion.div>
-          <div className="login-v3-grid">
-            <div className="login-v3-tile"><span>Employees</span><strong>64</strong></div>
-            <div className="login-v3-tile"><span>Projects</span><strong>4</strong></div>
-            <div className="login-v3-tile"><span>Approvals</span><strong>6</strong></div>
-            <div className="login-v3-tile"><span>HR Ops</span><strong>Live</strong></div>
+
+          <div className="login-badges-v4">
+            <div className="login-badge-v4"><Users size={16} /><span>Employee Records</span></div>
+            <div className="login-badge-v4"><CalendarCheck2 size={16} /><span>Leave Governance</span></div>
+            <div className="login-badge-v4"><Fingerprint size={16} /><span>Attendance</span></div>
+            <div className="login-badge-v4"><ReceiptText size={16} /><span>Payroll View</span></div>
           </div>
         </div>
 
-        <div className="login-v3-right">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="login-v3-panel">
-            <div className="login-v3-head">
+        <div className="login-right-v4">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="login-panel-v4">
+            <div className="login-head-v4">
               <BrandMark small />
               <div>
-                <h2>Welcome back</h2>
-                <p>Secure sign in to the HR command center</p>
+                <h2>Sign in</h2>
+                <p>Secure access to GAS Arabian HR Project</p>
               </div>
             </div>
-            <div className="field-v3">
+
+            <div className="field-v4">
               <label>Username</label>
               <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Enter your username" />
             </div>
-            <div className="field-v3">
+            <div className="field-v4">
               <label>Password</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" />
             </div>
-            {error ? <div className="error-v3">{error}</div> : null}
-            <button className="btn-v3 primary full" onClick={submit}>Sign In to Workspace</button>
-            <div className="demo-v3">
-              <div className="demo-v3-title">Demo accounts</div>
+            {error ? <div className="error-v4">{error}</div> : null}
+            <button className="btn-v4 primary full" onClick={submit}>Sign In to Workspace</button>
+            <div className="demo-v4">
+              <div className="demo-v4-title">Demo accounts</div>
               <div><strong>HR Manager:</strong> hrmanager / 123456</div>
               <div><strong>HR Admin:</strong> walid / 123456</div>
               <div><strong>Admin Assistant:</strong> sara / 123456</div>
@@ -232,144 +256,79 @@ function DashboardPage({ employees, projects, requests, setActivePage }) {
   const pendingApprovals = requests.filter((r) => r.status === "Pending" || r.status === "In Review").length;
 
   return (
-    <div className="dashboard-v3">
-      <div className="hero-v3-grid">
-        <GlassCard className="hero-v3-main">
-          <div className="hero-v3-glow g1" />
-          <div className="hero-v3-glow g2" />
-          <div className="hero-v3-kicker">Executive command center</div>
-          <h2>Next-generation workforce intelligence dashboard.</h2>
+    <div className="page-stack-v4">
+      <GlassCard className="dashboard-hero-v4">
+        <div>
+          <div className="eyebrow-v4 dark">Human resources control center</div>
+          <h2>Executive HR Dashboard</h2>
           <p>
-            Enterprise-grade overview for approvals, leave governance, employee distribution,
-            project ownership and high-priority HR actions.
+            Balanced overview for approvals, leave balances, attendance follow-up, payroll preparation,
+            employee records and project ownership.
           </p>
-          <div className="hero-v3-actions">
-            <button className="btn-v3 primary" onClick={() => setActivePage("approvals")}><BadgeCheck size={18} /> Open approvals</button>
-            <button className="btn-v3 ghost" onClick={() => setActivePage("leaveBalances")}><Wallet size={18} /> Control balances</button>
+          <div className="hero-actions-v4">
+            <button className="btn-v4 primary" onClick={() => setActivePage("approvals")}><BadgeCheck size={16} /> Approvals</button>
+            <button className="btn-v4 secondary" onClick={() => setActivePage("leaveBalances")}><Wallet size={16} /> Leave Balances</button>
           </div>
-          <div className="hero-v3-mini-grid">
-            <div><span>Employees</span><strong>{employees.length}</strong></div>
-            <div><span>Projects</span><strong>{projects.length}</strong></div>
-            <div><span>Pending</span><strong>{pendingApprovals}</strong></div>
-          </div>
-        </GlassCard>
+        </div>
+        <div className="hero-mini-grid-v4">
+          <MiniStat icon={Users} label="Employees" value={employees.length} />
+          <MiniStat icon={Building2} label="Projects" value={projects.length} />
+          <MiniStat icon={ClipboardCheck} label="Pending" value={pendingApprovals} />
+          <MiniStat icon={Wallet} label="Remaining Leave" value={remainingLeave} />
+        </div>
+      </GlassCard>
 
-        <GlassCard className="hero-v3-side">
-          <div className="hero-side-top">
-            <span>Today's HR Pulse</span>
-            <StatusBadge status="Active" />
-          </div>
-          <div className="hero-side-value">{pendingApprovals}</div>
-          <div className="hero-side-title">Requests need decision</div>
-          <p>Approve or reject requests to keep field operations and workforce planning aligned.</p>
-          <div className="hero-side-bars">
-            <div className="bar-item"><span>Active employees</span><div className="bar-track"><div className="bar-fill" style={{ width: `${Math.min((activeEmployees / employees.length) * 100, 100)}%` }} /></div><strong>{activeEmployees}</strong></div>
-            <div className="bar-item"><span>On leave</span><div className="bar-track"><div className="bar-fill alt" style={{ width: `${Math.min((onLeaveEmployees / employees.length) * 100, 100)}%` }} /></div><strong>{onLeaveEmployees}</strong></div>
-          </div>
-        </GlassCard>
+      <div className="kpi-grid-v4">
+        <KpiCard icon={Users} label="Total Employees" value={employees.length} trend="Updated" />
+        <KpiCard icon={CalendarRange} label="Employees On Leave" value={onLeaveEmployees} trend="Tracked" />
+        <KpiCard icon={Fingerprint} label="Attendance Issues" value={3} trend="Needs review" />
+        <KpiCard icon={ReceiptText} label="Payroll Items" value={8} trend="Prepared" />
       </div>
 
-      <div className="kpi-grid-v3">
-        <KpiCard icon={Users} label="Total Employees" value={employees.length} trend="+12%" />
-        <KpiCard icon={Building2} label="Project Sites" value={projects.length} trend="Stable" />
-        <KpiCard icon={ClipboardCheck} label="Pending Approvals" value={pendingApprovals} trend="High focus" />
-        <KpiCard icon={Wallet} label="Remaining Leave" value={remainingLeave} trend="Live" />
-      </div>
-
-      <div className="dashboard-v3-grid-a">
-        <GlassCard className="panel-dark-v3">
-          <SectionTitle title="Approval Radar" description="High-priority requests arranged for executive review." action={<button className="btn-v3 ghost light" onClick={() => setActivePage("approvals")}>Review all</button>} />
-          <div className="radar-list-v3">
-            {requests.slice(0, 4).map((req, index) => (
-              <button key={req.id} className="radar-item-v3" onClick={() => setActivePage("approvals")}>
-                <div className="radar-index">0{index + 1}</div>
-                <div className="radar-main">
-                  <div className="radar-name">{req.employee}</div>
-                  <div className="radar-sub">{req.type} • {projectName(projects, req.projectId)}</div>
-                </div>
-                <div className="radar-side">
-                  <StatusBadge status={req.status} />
-                  <span>{req.days} day(s)</span>
-                </div>
-              </button>
-            ))}
-          </div>
+      <div className="dashboard-grid-v4-a">
+        <GlassCard>
+          <SectionTitle title="Priority Approvals" description="Requests that need direct HR action." action={<button className="btn-v4 secondary" onClick={() => setActivePage("approvals")}>Open</button>} />
+          <div className="table-wrap-v4 compact-table"><table><thead><tr><th>Employee</th><th>Type</th><th>Project</th><th>Status</th></tr></thead><tbody>{requests.slice(0, 5).map((req) => <tr key={req.id}><td>{req.employee}</td><td>{req.type}</td><td>{projectName(projects, req.projectId)}</td><td><StatusBadge status={req.status} /></td></tr>)}</tbody></table></div>
         </GlassCard>
 
         <GlassCard>
-          <SectionTitle title="Project Command Center" description="Project ownership, contact points and workforce load." />
-          <div className="project-cards-v3">
-            {projects.map((project) => {
-              const count = employees.filter((e) => e.projectId === project.id).length;
-              return (
-                <div key={project.id} className="project-card-v3">
-                  <div className="project-card-top">
-                    <div>
-                      <div className="project-code-v3">{project.code}</div>
-                      <h4>{project.name}</h4>
-                    </div>
-                    <StatusBadge status={project.status} />
-                  </div>
-                  <div className="project-owner-v3">{project.manager}</div>
-                  <div className="project-contact-v3">{project.phone}</div>
-                  <div className="project-foot-v3">
-                    <span>Assigned employees</span>
-                    <strong>{count}</strong>
-                  </div>
-                </div>
-              );
-            })}
+          <SectionTitle title="HR Operational Sections" description="Core modules required by HR teams." />
+          <div className="module-grid-v4">
+            <button className="module-card-v4" onClick={() => setActivePage("employees")}><Users size={18} /><span>Employee Management</span></button>
+            <button className="module-card-v4" onClick={() => setActivePage("leaveBalances")}><CalendarCheck2 size={18} /><span>Leave Control</span></button>
+            <button className="module-card-v4" onClick={() => setActivePage("attendance")}><Fingerprint size={18} /><span>Attendance</span></button>
+            <button className="module-card-v4" onClick={() => setActivePage("payroll")}><CircleDollarSign size={18} /><span>Payroll</span></button>
+            <button className="module-card-v4" onClick={() => setActivePage("projects")}><FolderKanban size={18} /><span>Projects</span></button>
+            <button className="module-card-v4" onClick={() => setActivePage("files")}><FolderOpen size={18} /><span>Project Files</span></button>
+            <div className="module-card-v4 static"><ContactRound size={18} /><span>Employee Documents</span></div>
+            <div className="module-card-v4 static"><ReceiptText size={18} /><span>Contracts & Renewals</span></div>
           </div>
         </GlassCard>
       </div>
 
-      <div className="dashboard-v3-grid-b">
+      <div className="dashboard-grid-v4-b">
         <GlassCard>
-          <SectionTitle title="Workforce Matrix" description="Live employee table with project ownership and leave visibility." action={<button className="btn-v3 secondary" onClick={() => setActivePage("employees")}>Open employees</button>} />
-          <div className="table-wrap-v3">
-            <table>
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Project</th>
-                  <th>Manager</th>
-                  <th>Balance</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employees.slice(0, 6).map((emp) => (
-                  <tr key={emp.id}>
-                    <td><div className="strong-v3">{emp.name}</div><div className="sub-v3">{emp.role}</div></td>
-                    <td>{projectName(projects, emp.projectId)}</td>
-                    <td>{emp.manager}</td>
-                    <td>{emp.annualBalance - emp.usedLeave} days</td>
-                    <td><StatusBadge status={emp.status} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <SectionTitle title="Workforce Overview" description="Employee records, project assignment and leave visibility." />
+          <div className="table-wrap-v4"><table><thead><tr><th>Employee</th><th>Project</th><th>Manager</th><th>Balance</th><th>Status</th></tr></thead><tbody>{employees.slice(0, 6).map((emp) => <tr key={emp.id}><td><div className="strong-v4">{emp.name}</div><div className="sub-v4">{emp.role}</div></td><td>{projectName(projects, emp.projectId)}</td><td>{emp.manager}</td><td>{emp.annualBalance - emp.usedLeave} days</td><td><StatusBadge status={emp.status} /></td></tr>)}</tbody></table></div>
         </GlassCard>
 
-        <div className="stack-v3">
+        <div className="stack-v4">
           <GlassCard>
-            <SectionTitle title="Live Metrics" description="Fast operational snapshot." />
-            <div className="metric-list-v3">
-              <div className="metric-row-v3"><span><Activity size={16} /> Active employees</span><strong>{activeEmployees}</strong></div>
-              <div className="metric-row-v3"><span><Clock3 size={16} /> Employees on leave</span><strong>{onLeaveEmployees}</strong></div>
-              <div className="metric-row-v3"><span><ShieldCheck size={16} /> Pending review</span><strong>{employees.filter((e) => e.status === "Pending Review").length}</strong></div>
-              <div className="metric-row-v3"><span><Layers3 size={16} /> Requests this cycle</span><strong>{requests.length}</strong></div>
+            <SectionTitle title="Live Metrics" description="Quick operational indicators." />
+            <div className="metric-list-v4">
+              <div className="metric-row-v4"><span><Activity size={15} /> Active employees</span><strong>{activeEmployees}</strong></div>
+              <div className="metric-row-v4"><span><Clock3 size={15} /> Employees on leave</span><strong>{onLeaveEmployees}</strong></div>
+              <div className="metric-row-v4"><span><ShieldCheck size={15} /> Pending approvals</span><strong>{pendingApprovals}</strong></div>
+              <div className="metric-row-v4"><span><BarChart3 size={15} /> Project records</span><strong>{Object.values(initialFiles).flat().length}</strong></div>
             </div>
           </GlassCard>
-
           <GlassCard>
-            <SectionTitle title="Quick Launch" description="Shortcut tiles for core workflows." />
-            <div className="launch-grid-v3">
-              <button className="launch-tile-v3" onClick={() => setActivePage("employees")}><UserPlus size={18} /><span>Add employee</span></button>
-              <button className="launch-tile-v3" onClick={() => setActivePage("requests")}><Plane size={18} /><span>Create request</span></button>
-              <button className="launch-tile-v3" onClick={() => setActivePage("projects")}><FolderKanban size={18} /><span>Project setup</span></button>
-              <button className="launch-tile-v3" onClick={() => setActivePage("reports")}><BarChart3 size={18} /><span>Reports</span></button>
+            <SectionTitle title="Quick Actions" description="Most-used HR actions." />
+            <div className="quick-grid-v4">
+              <button className="quick-card-v4" onClick={() => setActivePage("employees")}><UserPlus size={17} /> Add employee</button>
+              <button className="quick-card-v4" onClick={() => setActivePage("requests")}><Plane size={17} /> New request</button>
+              <button className="quick-card-v4" onClick={() => setActivePage("attendance")}><Fingerprint size={17} /> Attendance</button>
+              <button className="quick-card-v4" onClick={() => setActivePage("reports")}><FileSpreadsheet size={17} /> Reports</button>
             </div>
           </GlassCard>
         </div>
@@ -380,7 +339,6 @@ function DashboardPage({ employees, projects, requests, setActivePage }) {
 
 function EmployeesPage({ employees, setEmployees, projects }) {
   const [form, setForm] = useState({ name: "", employeeId: "", role: "", projectId: projects[0]?.id || "", nationality: "Saudi", annualBalance: 30, usedLeave: 0, permissionsUsed: 0, status: "Active" });
-
   const addEmployee = () => {
     if (!form.name || !form.employeeId || !form.role) return;
     const proj = projects.find((p) => p.id === form.projectId);
@@ -389,43 +347,32 @@ function EmployeesPage({ employees, setEmployees, projects }) {
   };
 
   return (
-    <div className="page-v3-stack">
-      <GlassCard className="page-hero-v3 employee-hero">
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4">
         <div>
-          <div className="hero-v3-kicker">Talent management</div>
-          <h2>Employee command center.</h2>
-          <p>Create employee records, assign them to projects, manage roles and keep HR ownership structured.</p>
-        </div>
-        <div className="hero-v3-mini-grid compact">
-          <div><span>Total employees</span><strong>{employees.length}</strong></div>
-          <div><span>Active</span><strong>{employees.filter((e) => e.status === "Active").length}</strong></div>
-          <div><span>Projects covered</span><strong>{projects.length}</strong></div>
+          <div className="eyebrow-v4 dark">Talent records</div>
+          <h2>Employee Management</h2>
+          <p>Create, assign and maintain employee records by project and manager ownership.</p>
         </div>
       </GlassCard>
-
-      <div className="two-col-v3">
+      <div className="two-col-v4">
         <GlassCard>
           <SectionTitle title="Employees Directory" description="Project-linked employee records with manager ownership and leave visibility." />
-          <div className="table-wrap-v3 premium-table-v3">
-            <table>
-              <thead><tr><th>Name</th><th>ID</th><th>Project</th><th>Manager</th><th>Balance</th><th>Status</th></tr></thead>
-              <tbody>{employees.map((emp) => <tr key={emp.id}><td><div className="strong-v3">{emp.name}</div><div className="sub-v3">{emp.role}</div></td><td>{emp.employeeId}</td><td>{projectName(projects, emp.projectId)}</td><td>{emp.manager}</td><td>{emp.annualBalance - emp.usedLeave} days</td><td><StatusBadge status={emp.status} /></td></tr>)}</tbody>
-            </table>
-          </div>
+          <div className="table-wrap-v4"><table><thead><tr><th>Name</th><th>ID</th><th>Project</th><th>Manager</th><th>Balance</th><th>Status</th></tr></thead><tbody>{employees.map((emp) => <tr key={emp.id}><td><div className="strong-v4">{emp.name}</div><div className="sub-v4">{emp.role}</div></td><td>{emp.employeeId}</td><td>{projectName(projects, emp.projectId)}</td><td>{emp.manager}</td><td>{emp.annualBalance - emp.usedLeave} days</td><td><StatusBadge status={emp.status} /></td></tr>)}</tbody></table></div>
         </GlassCard>
-        <GlassCard className="form-panel-v3">
+        <GlassCard>
           <SectionTitle title="Add Employee" description="Create a new employee and assign them to a specific project instantly." />
-          <div className="form-grid-v3">
-            <div className="field-v3"><label>Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-            <div className="field-v3"><label>Employee ID</label><input value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })} /></div>
-            <div className="field-v3"><label>Role</label><input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} /></div>
-            <div className="field-v3"><label>Project</label><select value={form.projectId} onChange={(e) => setForm({ ...form, projectId: e.target.value })}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
-            <div className="field-v3"><label>Nationality</label><input value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} /></div>
-            <div className="field-v3"><label>Status</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option>Active</option><option>On Leave</option><option>Pending Review</option></select></div>
-            <div className="field-v3"><label>Annual Leave</label><input type="number" value={form.annualBalance} onChange={(e) => setForm({ ...form, annualBalance: Number(e.target.value) })} /></div>
-            <div className="field-v3"><label>Used Leave</label><input type="number" value={form.usedLeave} onChange={(e) => setForm({ ...form, usedLeave: Number(e.target.value) })} /></div>
+          <div className="form-grid-v4">
+            <div className="field-v4"><label>Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+            <div className="field-v4"><label>Employee ID</label><input value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })} /></div>
+            <div className="field-v4"><label>Role</label><input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} /></div>
+            <div className="field-v4"><label>Project</label><select value={form.projectId} onChange={(e) => setForm({ ...form, projectId: e.target.value })}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+            <div className="field-v4"><label>Nationality</label><input value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} /></div>
+            <div className="field-v4"><label>Status</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option>Active</option><option>On Leave</option><option>Pending Review</option></select></div>
+            <div className="field-v4"><label>Annual Leave</label><input type="number" value={form.annualBalance} onChange={(e) => setForm({ ...form, annualBalance: Number(e.target.value) })} /></div>
+            <div className="field-v4"><label>Used Leave</label><input type="number" value={form.usedLeave} onChange={(e) => setForm({ ...form, usedLeave: Number(e.target.value) })} /></div>
           </div>
-          <button className="btn-v3 primary full" onClick={addEmployee}><UserPlus size={18} /> Save Employee</button>
+          <button className="btn-v4 primary full" onClick={addEmployee}><UserPlus size={16} /> Save Employee</button>
         </GlassCard>
       </div>
     </div>
@@ -437,45 +384,33 @@ function LeaveBalancesPage({ employees, setEmployees, projects }) {
   const [annualBalance, setAnnualBalance] = useState(employees[0]?.annualBalance || 30);
   const [usedLeave, setUsedLeave] = useState(employees[0]?.usedLeave || 0);
   const selectedEmployee = employees.find((e) => String(e.id) === selectedId);
-
   React.useEffect(() => {
     if (selectedEmployee) {
       setAnnualBalance(selectedEmployee.annualBalance);
       setUsedLeave(selectedEmployee.usedLeave);
     }
   }, [selectedId]);
-
   const saveBalance = () => setEmployees((prev) => prev.map((emp) => String(emp.id) === selectedId ? { ...emp, annualBalance: Number(annualBalance), usedLeave: Number(usedLeave) } : emp));
 
   return (
-    <div className="page-v3-stack">
-      <GlassCard className="page-hero-v3 balance-hero">
-        <div>
-          <div className="hero-v3-kicker">Leave governance</div>
-          <h2>Annual leave balance control.</h2>
-          <p>Directly allocate annual leave, update usage and maintain accurate balances for every employee record.</p>
-        </div>
-        <div className="hero-v3-mini-grid compact">
-          <div><span>Remaining leave</span><strong>{employees.reduce((s, e) => s + Math.max(e.annualBalance - e.usedLeave, 0), 0)}</strong></div>
-          <div><span>Employees on leave</span><strong>{employees.filter((e) => e.status === "On Leave").length}</strong></div>
-          <div><span>Managed projects</span><strong>{projects.length}</strong></div>
-        </div>
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4">
+        <div><div className="eyebrow-v4 dark">Leave governance</div><h2>Annual Leave Balance Control</h2><p>Allocate annual leave, adjust used leave and maintain accurate balances for every employee.</p></div>
       </GlassCard>
-
-      <div className="two-col-v3">
+      <div className="two-col-v4">
         <GlassCard>
           <SectionTitle title="Annual Leave Balances" description="Manually control annual leave allocation and usage for every employee." />
-          <div className="table-wrap-v3 premium-table-v3"><table><thead><tr><th>Employee</th><th>Project</th><th>Annual Balance</th><th>Used Leave</th><th>Remaining</th></tr></thead><tbody>{employees.map((emp) => <tr key={emp.id}><td>{emp.name}</td><td>{projectName(projects, emp.projectId)}</td><td>{emp.annualBalance}</td><td>{emp.usedLeave}</td><td>{Math.max(emp.annualBalance - emp.usedLeave, 0)}</td></tr>)}</tbody></table></div>
+          <div className="table-wrap-v4"><table><thead><tr><th>Employee</th><th>Project</th><th>Annual Balance</th><th>Used Leave</th><th>Remaining</th></tr></thead><tbody>{employees.map((emp) => <tr key={emp.id}><td>{emp.name}</td><td>{projectName(projects, emp.projectId)}</td><td>{emp.annualBalance}</td><td>{emp.usedLeave}</td><td>{Math.max(emp.annualBalance - emp.usedLeave, 0)}</td></tr>)}</tbody></table></div>
         </GlassCard>
-        <GlassCard className="form-panel-v3">
+        <GlassCard>
           <SectionTitle title="Update Balance" description="Select any employee and update leave values directly." />
-          <div className="field-v3"><label>Employee</label><select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>{employees.map((emp) => <option key={emp.id} value={String(emp.id)}>{emp.name} - {projectName(projects, emp.projectId)}</option>)}</select></div>
-          <div className="form-grid-v3">
-            <div className="field-v3"><label>Annual Leave Allocation</label><input type="number" value={annualBalance} onChange={(e) => setAnnualBalance(Number(e.target.value))} /></div>
-            <div className="field-v3"><label>Used Leave</label><input type="number" value={usedLeave} onChange={(e) => setUsedLeave(Number(e.target.value))} /></div>
+          <div className="field-v4"><label>Employee</label><select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>{employees.map((emp) => <option key={emp.id} value={String(emp.id)}>{emp.name} - {projectName(projects, emp.projectId)}</option>)}</select></div>
+          <div className="form-grid-v4">
+            <div className="field-v4"><label>Annual Leave Allocation</label><input type="number" value={annualBalance} onChange={(e) => setAnnualBalance(Number(e.target.value))} /></div>
+            <div className="field-v4"><label>Used Leave</label><input type="number" value={usedLeave} onChange={(e) => setUsedLeave(Number(e.target.value))} /></div>
           </div>
-          {selectedEmployee ? <div className="summary-v3"><div className="summary-title-v3">{selectedEmployee.name}</div><div>Project: {projectName(projects, selectedEmployee.projectId)}</div><div>Remaining after save: {Math.max(annualBalance - usedLeave, 0)} days</div></div> : null}
-          <button className="btn-v3 primary full" onClick={saveBalance}><Wallet size={18} /> Save Leave Balance</button>
+          {selectedEmployee ? <div className="summary-v4"><div className="summary-title-v4">{selectedEmployee.name}</div><div>Project: {projectName(projects, selectedEmployee.projectId)}</div><div>Remaining after save: {Math.max(annualBalance - usedLeave, 0)} days</div></div> : null}
+          <button className="btn-v4 primary full" onClick={saveBalance}><Wallet size={16} /> Save Leave Balance</button>
         </GlassCard>
       </div>
     </div>
@@ -491,38 +426,16 @@ function ApprovalsPage({ requests, setRequests, employees, setEmployees, project
       setEmployees((prev) => prev.map((emp) => emp.id === target.employeeId ? { ...emp, usedLeave: emp.usedLeave + Number(target.days), status: "On Leave" } : emp));
     }
   };
-
   const pending = requests.filter((r) => r.status === "Pending" || r.status === "In Review");
 
   return (
-    <div className="page-v3-stack">
-      <GlassCard className="page-hero-v3 approvals-hero">
-        <div>
-          <div className="hero-v3-kicker">Decision workspace</div>
-          <h2>Approvals radar.</h2>
-          <p>Review pending leave, permission and takleef requests in a premium approval experience built for HR control.</p>
-        </div>
-        <div className="hero-v3-mini-grid compact">
-          <div><span>Pending</span><strong>{pending.length}</strong></div>
-          <div><span>Approved</span><strong>{requests.filter((r) => r.status === "Approved").length}</strong></div>
-          <div><span>Rejected</span><strong>{requests.filter((r) => r.status === "Rejected").length}</strong></div>
-        </div>
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4">
+        <div><div className="eyebrow-v4 dark">Decision workspace</div><h2>Approvals</h2><p>Review annual leave, permissions and takleef requests in a cleaner approval workflow.</p></div>
       </GlassCard>
-
       <GlassCard>
         <SectionTitle title="Approval Workspace" description="Review and approve annual leave, permissions and takleef requests." />
-        <div className="approval-grid-v3">
-          {pending.length === 0 ? <div className="empty-v3">No pending approvals right now.</div> : pending.map((req) => {
-            const emp = employees.find((e) => e.id === req.employeeId);
-            return (
-              <div key={req.id} className="approval-card-v3 premium">
-                <div className="approval-top-v3"><div><h4>{req.employee}</h4><p>{req.type} • {projectName(projects, req.projectId)}</p></div><StatusBadge status={req.status} /></div>
-                <div className="approval-body-v3"><div><strong>Days:</strong> {req.days}</div><div><strong>Date:</strong> {req.date}</div><div><strong>Note:</strong> {req.note}</div>{emp ? <div><strong>Current balance:</strong> {Math.max(emp.annualBalance - emp.usedLeave, 0)} days</div> : null}</div>
-                <div className="approval-actions-v3"><button className="btn-v3 success" onClick={() => handleDecision(req.id, "Approved")}><CheckCircle2 size={18} /> Approve</button><button className="btn-v3 danger" onClick={() => handleDecision(req.id, "Rejected")}><XCircle size={18} /> Reject</button></div>
-              </div>
-            );
-          })}
-        </div>
+        <div className="approval-grid-v4">{pending.length === 0 ? <div className="empty-v4">No pending approvals right now.</div> : pending.map((req) => { const emp = employees.find((e) => e.id === req.employeeId); return <div key={req.id} className="approval-card-v4"><div className="approval-top-v4"><div><h4>{req.employee}</h4><p>{req.type} • {projectName(projects, req.projectId)}</p></div><StatusBadge status={req.status} /></div><div className="approval-body-v4"><div><strong>Days:</strong> {req.days}</div><div><strong>Date:</strong> {req.date}</div><div><strong>Note:</strong> {req.note}</div>{emp ? <div><strong>Current balance:</strong> {Math.max(emp.annualBalance - emp.usedLeave, 0)} days</div> : null}</div><div className="approval-actions-v4"><button className="btn-v4 success" onClick={() => handleDecision(req.id, "Approved")}><CheckCircle2 size={16} /> Approve</button><button className="btn-v4 danger" onClick={() => handleDecision(req.id, "Rejected")}><XCircle size={16} /> Reject</button></div></div>; })}</div>
       </GlassCard>
     </div>
   );
@@ -530,7 +443,6 @@ function ApprovalsPage({ requests, setRequests, employees, setEmployees, project
 
 function RequestsPage({ employees, requests, setRequests, projects }) {
   const [form, setForm] = useState({ employeeId: String(employees[0]?.id || ""), type: "Annual Leave", days: 1, note: "" });
-
   const createRequest = () => {
     const emp = employees.find((e) => String(e.id) === form.employeeId);
     if (!emp) return;
@@ -539,34 +451,24 @@ function RequestsPage({ employees, requests, setRequests, projects }) {
   };
 
   return (
-    <div className="page-v3-stack">
-      <GlassCard className="page-hero-v3 requests-hero">
-        <div>
-          <div className="hero-v3-kicker">HR request management</div>
-          <h2>Leaves, permissions & takleef.</h2>
-          <p>Create and track requests with a cleaner workflow built for enterprise HR teams and project operations.</p>
-        </div>
-        <div className="hero-v3-mini-grid compact">
-          <div><span>Total requests</span><strong>{requests.length}</strong></div>
-          <div><span>Pending</span><strong>{requests.filter((r) => r.status === "Pending").length}</strong></div>
-          <div><span>Projects</span><strong>{projects.length}</strong></div>
-        </div>
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4">
+        <div><div className="eyebrow-v4 dark">HR requests</div><h2>Leaves, Permissions & Takleef</h2><p>Create and track requests with a structured workflow for HR and project operations.</p></div>
       </GlassCard>
-
-      <div className="two-col-v3">
-        <GlassCard className="form-panel-v3">
-          <SectionTitle title="Submit Leave / Takleef Request" description="Create annual leave, permission or takleef requests for employees." />
-          <div className="form-grid-v3">
-            <div className="field-v3"><label>Employee</label><select value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })}>{employees.map((emp) => <option key={emp.id} value={String(emp.id)}>{emp.name} - {projectName(projects, emp.projectId)}</option>)}</select></div>
-            <div className="field-v3"><label>Type</label><select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}><option>Annual Leave</option><option>Permission</option><option>Takleef</option></select></div>
-            <div className="field-v3"><label>Days</label><input type="number" value={form.days} onChange={(e) => setForm({ ...form, days: Number(e.target.value) })} /></div>
-            <div className="field-v3 full-span"><label>Note</label><textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Request details" /></div>
+      <div className="two-col-v4">
+        <GlassCard>
+          <SectionTitle title="Submit Request" description="Create annual leave, permission or takleef requests for employees." />
+          <div className="form-grid-v4">
+            <div className="field-v4"><label>Employee</label><select value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })}>{employees.map((emp) => <option key={emp.id} value={String(emp.id)}>{emp.name} - {projectName(projects, emp.projectId)}</option>)}</select></div>
+            <div className="field-v4"><label>Type</label><select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}><option>Annual Leave</option><option>Permission</option><option>Takleef</option></select></div>
+            <div className="field-v4"><label>Days</label><input type="number" value={form.days} onChange={(e) => setForm({ ...form, days: Number(e.target.value) })} /></div>
+            <div className="field-v4 full-span"><label>Note</label><textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Request details" /></div>
           </div>
-          <button className="btn-v3 primary full" onClick={createRequest}><Plane size={18} /> Create Request</button>
+          <button className="btn-v4 primary full" onClick={createRequest}><Plane size={16} /> Create Request</button>
         </GlassCard>
         <GlassCard>
           <SectionTitle title="Request Tracker" description="All HR requests by project and current decision state." />
-          <div className="table-wrap-v3 premium-table-v3"><table><thead><tr><th>Employee</th><th>Type</th><th>Project</th><th>Days</th><th>Date</th><th>Status</th></tr></thead><tbody>{requests.map((req) => <tr key={req.id}><td>{req.employee}</td><td>{req.type}</td><td>{projectName(projects, req.projectId)}</td><td>{req.days}</td><td>{req.date}</td><td><StatusBadge status={req.status} /></td></tr>)}</tbody></table></div>
+          <div className="table-wrap-v4"><table><thead><tr><th>Employee</th><th>Type</th><th>Project</th><th>Days</th><th>Date</th><th>Status</th></tr></thead><tbody>{requests.map((req) => <tr key={req.id}><td>{req.employee}</td><td>{req.type}</td><td>{projectName(projects, req.projectId)}</td><td>{req.days}</td><td>{req.date}</td><td><StatusBadge status={req.status} /></td></tr>)}</tbody></table></div>
         </GlassCard>
       </div>
     </div>
@@ -580,52 +482,30 @@ function ProjectsPage({ projects, setProjects, employees }) {
   const [email, setEmail] = useState(projects[0]?.email || "");
   const project = projects.find((p) => p.id === activeProject);
   const projectEmployees = employees.filter((e) => e.projectId === activeProject);
-
-  React.useEffect(() => {
-    const p = projects.find((x) => x.id === activeProject);
-    if (p) {
-      setManager(p.manager);
-      setPhone(p.phone);
-      setEmail(p.email);
-    }
-  }, [activeProject, projects]);
-
+  React.useEffect(() => { const p = projects.find((x) => x.id === activeProject); if (p) { setManager(p.manager); setPhone(p.phone); setEmail(p.email); } }, [activeProject, projects]);
   const saveManagerInfo = () => setProjects((prev) => prev.map((p) => p.id === activeProject ? { ...p, manager, phone, email } : p));
 
   return (
-    <div className="page-v3-stack">
-      <GlassCard className="page-hero-v3 projects-hero">
-        <div>
-          <div className="hero-v3-kicker">Project ownership</div>
-          <h2>Project structure & workforce distribution.</h2>
-          <p>Control manager ownership, contact points and employee assignment for every project section.</p>
-        </div>
-        <div className="hero-v3-mini-grid compact">
-          <div><span>Total projects</span><strong>{projects.length}</strong></div>
-          <div><span>Employees in selected</span><strong>{projectEmployees.length}</strong></div>
-          <div><span>Manager</span><strong>{project?.manager?.split(" ")[0] || "-"}</strong></div>
-        </div>
-      </GlassCard>
-
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4"><div><div className="eyebrow-v4 dark">Project ownership</div><h2>Projects</h2><p>Control manager ownership, contact points and employee assignment for every project section.</p></div></GlassCard>
       <GlassCard>
         <SectionTitle title="Project Structure" description="Each project has its own employees, manager and contact information." />
-        <div className="project-tabs-v3">{projects.map((item) => <button key={item.id} className={`project-tab-v3 ${activeProject === item.id ? "active" : ""}`} onClick={() => setActiveProject(item.id)}><div className="strong-v3">{item.name}</div><div className="sub-v3">{item.code}</div></button>)}</div>
+        <div className="project-tabs-v4">{projects.map((item) => <button key={item.id} className={`project-tab-v4 ${activeProject === item.id ? "active" : ""}`} onClick={() => setActiveProject(item.id)}><div className="strong-v4">{item.name}</div><div className="sub-v4">{item.code}</div></button>)}</div>
       </GlassCard>
-
-      <div className="two-col-v3">
-        <GlassCard className="form-panel-v3">
+      <div className="two-col-v4">
+        <GlassCard>
           <SectionTitle title={`${project?.name || ""} Manager`} description="Primary manager and contact details for this project." />
-          <div className="form-grid-v3">
-            <div className="field-v3"><label>Manager Name</label><input value={manager} onChange={(e) => setManager(e.target.value)} /></div>
-            <div className="field-v3"><label>Phone Number</label><input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
-            <div className="field-v3 full-span"><label>Email</label><input value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          <div className="form-grid-v4">
+            <div className="field-v4"><label>Manager Name</label><input value={manager} onChange={(e) => setManager(e.target.value)} /></div>
+            <div className="field-v4"><label>Phone Number</label><input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+            <div className="field-v4 full-span"><label>Email</label><input value={email} onChange={(e) => setEmail(e.target.value)} /></div>
           </div>
-          <div className="contact-row-v3"><div className="contact-pill-v3"><UserCog size={16} /> {manager}</div><div className="contact-pill-v3"><Phone size={16} /> {phone}</div><div className="contact-pill-v3"><Mail size={16} /> {email}</div></div>
-          <button className="btn-v3 primary full" onClick={saveManagerInfo}>Save Project Contact</button>
+          <div className="contact-row-v4"><div className="contact-pill-v4"><UserCog size={15} /> {manager}</div><div className="contact-pill-v4"><Phone size={15} /> {phone}</div><div className="contact-pill-v4"><Mail size={15} /> {email}</div></div>
+          <button className="btn-v4 primary full" onClick={saveManagerInfo}>Save Project Contact</button>
         </GlassCard>
         <GlassCard>
           <SectionTitle title="Employees in Project" description="Only employees assigned to this project are shown below." />
-          <div className="table-wrap-v3 premium-table-v3"><table><thead><tr><th>Employee</th><th>Role</th><th>ID</th><th>Status</th></tr></thead><tbody>{projectEmployees.map((emp) => <tr key={emp.id}><td>{emp.name}</td><td>{emp.role}</td><td>{emp.employeeId}</td><td><StatusBadge status={emp.status} /></td></tr>)}</tbody></table></div>
+          <div className="table-wrap-v4"><table><thead><tr><th>Employee</th><th>Role</th><th>ID</th><th>Status</th></tr></thead><tbody>{projectEmployees.map((emp) => <tr key={emp.id}><td>{emp.name}</td><td>{emp.role}</td><td>{emp.employeeId}</td><td><StatusBadge status={emp.status} /></td></tr>)}</tbody></table></div>
         </GlassCard>
       </div>
     </div>
@@ -637,7 +517,6 @@ function ProjectFilesPage({ projects, filesByProject, setFilesByProject }) {
   const [form, setForm] = useState({ category: "Leave", title: "", note: "" });
   const project = projects.find((p) => p.id === activeProject);
   const items = filesByProject[activeProject] || [];
-
   const addFile = () => {
     if (!form.title) return;
     setFilesByProject((prev) => ({ ...prev, [activeProject]: [...(prev[activeProject] || []), { id: Date.now(), category: form.category, title: form.title, note: form.note, status: "Pending" }] }));
@@ -645,59 +524,92 @@ function ProjectFilesPage({ projects, filesByProject, setFilesByProject }) {
   };
 
   return (
-    <div className="page-v3-stack">
-      <GlassCard className="page-hero-v3 files-hero">
-        <div>
-          <div className="hero-v3-kicker">Project documentation</div>
-          <h2>Project files registry.</h2>
-          <p>Separate leave, takleef and supporting HR records by project section with cleaner file visibility.</p>
-        </div>
-        <div className="hero-v3-mini-grid compact">
-          <div><span>Selected project</span><strong>{project?.code || "-"}</strong></div>
-          <div><span>Files recorded</span><strong>{items.length}</strong></div>
-          <div><span>Manager</span><strong>{project?.manager?.split(" ")[0] || "-"}</strong></div>
-        </div>
-      </GlassCard>
-
-      <div className="two-col-v3">
-        <GlassCard className="form-panel-v3">
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4"><div><div className="eyebrow-v4 dark">Project documentation</div><h2>Project Files Registry</h2><p>Separate leave, takleef and supporting HR records by project section with cleaner file visibility.</p></div></GlassCard>
+      <div className="two-col-v4">
+        <GlassCard>
           <SectionTitle title="Project Files" description="Separate leave and task records for each project." />
-          <div className="field-v3"><label>Project</label><select value={activeProject} onChange={(e) => setActiveProject(e.target.value)}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
-          <div className="manager-lite-v3"><strong>{project?.manager}</strong><span>{project?.phone}</span></div>
-          <div className="form-grid-v3">
-            <div className="field-v3"><label>Category</label><select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}><option>Leave</option><option>Takleef</option><option>Permission</option><option>Other</option></select></div>
-            <div className="field-v3"><label>File Title</label><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="example.pdf" /></div>
-            <div className="field-v3 full-span"><label>Note</label><textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Document note" /></div>
+          <div className="field-v4"><label>Project</label><select value={activeProject} onChange={(e) => setActiveProject(e.target.value)}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+          <div className="manager-lite-v4"><strong>{project?.manager}</strong><span>{project?.phone}</span></div>
+          <div className="form-grid-v4">
+            <div className="field-v4"><label>Category</label><select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}><option>Leave</option><option>Takleef</option><option>Permission</option><option>Other</option></select></div>
+            <div className="field-v4"><label>File Title</label><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="example.pdf" /></div>
+            <div className="field-v4 full-span"><label>Note</label><textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Document note" /></div>
           </div>
-          <button className="btn-v3 primary full" onClick={addFile}><FolderOpen size={18} /> Add File Record</button>
+          <button className="btn-v4 primary full" onClick={addFile}><FolderOpen size={16} /> Add File Record</button>
         </GlassCard>
         <GlassCard>
           <SectionTitle title={`${project?.name || ""} Records`} description="Files attached to the selected project section." />
-          <div className="table-wrap-v3 premium-table-v3"><table><thead><tr><th>Category</th><th>Title</th><th>Note</th><th>Status</th></tr></thead><tbody>{items.map((file) => <tr key={file.id}><td>{file.category}</td><td>{file.title}</td><td>{file.note}</td><td><StatusBadge status={file.status} /></td></tr>)}</tbody></table></div>
+          <div className="table-wrap-v4"><table><thead><tr><th>Category</th><th>Title</th><th>Note</th><th>Status</th></tr></thead><tbody>{items.map((file) => <tr key={file.id}><td>{file.category}</td><td>{file.title}</td><td>{file.note}</td><td><StatusBadge status={file.status} /></td></tr>)}</tbody></table></div>
         </GlassCard>
       </div>
     </div>
   );
 }
 
-function PlaceholderPage({ title, description }) {
+function AttendancePage() {
   return (
-    <div className="page-v3-stack">
-      <GlassCard className="page-hero-v3 neutral-hero">
-        <div>
-          <div className="hero-v3-kicker">Enterprise modules</div>
-          <h2>{title}</h2>
-          <p>{description}</p>
-        </div>
-      </GlassCard>
-      <GlassCard>
-        <SectionTitle title={title} description={description} />
-        <div className="placeholder-grid-v3">
-          <div className="placeholder-box-v3"><Briefcase size={18} /><span>Enterprise-ready widgets</span></div>
-          <div className="placeholder-box-v3"><ClipboardCheck size={18} /><span>Approval workflows</span></div>
-          <div className="placeholder-box-v3"><Sparkles size={18} /><span>Premium printable modules</span></div>
-        </div>
-      </GlassCard>
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4"><div><div className="eyebrow-v4 dark">Attendance control</div><h2>Attendance</h2><p>Monitor daily attendance issues, late arrival, missing punches and attendance follow-up.</p></div></GlassCard>
+      <div className="dashboard-grid-v4-a">
+        <GlassCard><SectionTitle title="Attendance Summary" description="Essential attendance blocks needed by HR." /><div className="module-grid-v4"><div className="module-card-v4 static"><Fingerprint size={18} /><span>Missing punch review</span></div><div className="module-card-v4 static"><Clock3 size={18} /><span>Late arrival tracking</span></div><div className="module-card-v4 static"><CalendarCheck2 size={18} /><span>Shift attendance</span></div><div className="module-card-v4 static"><AlertTriangle size={18} /><span>Absence exceptions</span></div></div></GlassCard>
+        <GlassCard><SectionTitle title="Recommended HR Use" description="Useful controls for attendance administration." /><div className="metric-list-v4"><div className="metric-row-v4"><span>Late arrivals today</span><strong>4</strong></div><div className="metric-row-v4"><span>Missing punches</span><strong>2</strong></div><div className="metric-row-v4"><span>Open attendance cases</span><strong>3</strong></div></div></GlassCard>
+      </div>
+    </div>
+  );
+}
+
+function PayrollPage() {
+  return (
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4"><div><div className="eyebrow-v4 dark">Payroll preparation</div><h2>Payroll</h2><p>Track payroll preparation items, leave impact, attendance deductions and salary cycle notes.</p></div></GlassCard>
+      <div className="dashboard-grid-v4-a">
+        <GlassCard><SectionTitle title="Payroll Blocks" description="Core payroll-related sections HR usually needs." /><div className="module-grid-v4"><div className="module-card-v4 static"><ReceiptText size={18} /><span>Monthly payroll review</span></div><div className="module-card-v4 static"><CircleDollarSign size={18} /><span>Deduction control</span></div><div className="module-card-v4 static"><CalendarRange size={18} /><span>Leave impact</span></div><div className="module-card-v4 static"><FileSpreadsheet size={18} /><span>Export summary</span></div></div></GlassCard>
+        <GlassCard><SectionTitle title="Cycle Summary" description="Fast visibility for payroll cycle management." /><div className="metric-list-v4"><div className="metric-row-v4"><span>Employees in payroll</span><strong>64</strong></div><div className="metric-row-v4"><span>Deductions to review</span><strong>5</strong></div><div className="metric-row-v4"><span>Pending salary notes</span><strong>2</strong></div></div></GlassCard>
+      </div>
+    </div>
+  );
+}
+
+function ReportsPage() {
+  return (
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4"><div><div className="eyebrow-v4 dark">HR reporting</div><h2>Reports Center</h2><p>Prepare attendance reports, leave summaries, payroll exports and project-based HR reports.</p></div></GlassCard>
+      <GlassCard><SectionTitle title="Reporting Modules" description="Useful report categories for HR teams." /><div className="module-grid-v4"><div className="module-card-v4 static"><FileSpreadsheet size={18} /><span>Attendance report</span></div><div className="module-card-v4 static"><CalendarCheck2 size={18} /><span>Leave report</span></div><div className="module-card-v4 static"><ReceiptText size={18} /><span>Payroll summary</span></div><div className="module-card-v4 static"><FolderKanban size={18} /><span>Project HR report</span></div><div className="module-card-v4 static"><ContactRound size={18} /><span>Employee documents log</span></div><div className="module-card-v4 static"><CalendarRange size={18} /><span>Contract expiry report</span></div></div></GlassCard>
+    </div>
+  );
+}
+
+function SettingsPage() {
+  return (
+    <div className="page-stack-v4">
+      <GlassCard className="section-hero-v4"><div><div className="eyebrow-v4 dark">System control</div><h2>Settings</h2><p>Essential settings for the HR platform, project structure and operational controls.</p></div></GlassCard>
+      <div className="dashboard-grid-v4-a">
+        <GlassCard>
+          <SectionTitle title="Core Settings" description="Necessary settings HR teams commonly need in the portal." />
+          <div className="settings-grid-v4">
+            <div className="settings-item-v4"><ContactRound size={18} /><div><strong>Company Profile</strong><span>Company name, HR title, contact details</span></div></div>
+            <div className="settings-item-v4"><Users size={18} /><div><strong>User Roles</strong><span>HR Manager, HR Admin, Assistant permissions</span></div></div>
+            <div className="settings-item-v4"><FolderKanban size={18} /><div><strong>Project Structure</strong><span>Project list, project manager and contact info</span></div></div>
+            <div className="settings-item-v4"><CalendarCheck2 size={18} /><div><strong>Leave Rules</strong><span>Annual leave defaults, entitlement and approval logic</span></div></div>
+            <div className="settings-item-v4"><Fingerprint size={18} /><div><strong>Attendance Rules</strong><span>Late arrival, absence and punch controls</span></div></div>
+            <div className="settings-item-v4"><ReceiptText size={18} /><div><strong>Payroll Settings</strong><span>Payroll cycle, deduction notes and export fields</span></div></div>
+          </div>
+        </GlassCard>
+        <GlassCard>
+          <SectionTitle title="Display & System" description="Portal configuration essentials." />
+          <div className="settings-grid-v4 compact">
+            <div className="settings-item-v4"><Sparkles size={18} /><div><strong>Dashboard Preferences</strong><span>Control dashboard cards and priority blocks</span></div></div>
+            <div className="settings-item-v4"><Bell size={18} /><div><strong>Alerts</strong><span>Approval, leave and attendance alerts</span></div></div>
+            <div className="settings-item-v4"><FileSpreadsheet size={18} /><div><strong>Export Formats</strong><span>Excel and PDF output preparation</span></div></div>
+            <div className="settings-item-v4"><ShieldCheck size={18} /><div><strong>Security</strong><span>Session access and permission protection</span></div></div>
+            <div className="settings-item-v4"><CalendarRange size={18} /><div><strong>Work Schedule</strong><span>Weekly workdays, shift defaults and calendar</span></div></div>
+            <div className="settings-item-v4"><CalendarCheck2 size={18} /><div><strong>Public Holidays</strong><span>Holiday list and company leave calendar</span></div></div>
+            <div className="settings-item-v4"><ReceiptText size={18} /><div><strong>Contracts & Renewals</strong><span>Renewal reminder and contract document options</span></div></div>
+            <div className="settings-item-v4"><ContactRound size={18} /><div><strong>Employee Documents</strong><span>ID, contracts, certificates and attachments</span></div></div>
+          </div>
+        </GlassCard>
+      </div>
     </div>
   );
 }
@@ -716,47 +628,49 @@ export default function HRPortalRedesign() {
   return (
     <>
       <style>{styles}</style>
-      <div className="app-v3-shell">
+      <div className="app-v4-shell">
         <AnimatePresence>
           {(mobileSidebar || window.innerWidth > 960) && (
-            <motion.aside initial={{ x: -18, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -18, opacity: 0 }} className={`sidebar-v3 ${mobileSidebar ? "show" : ""}`}>
-              <div className="sidebar-v3-head">
-                <div className="sidebar-brand-v3"><BrandMark /><div><div className="sidebar-brand-title-v3">GAS Portal</div><div className="sidebar-brand-sub-v3">Human Capital Workspace</div></div></div>
-                <div className="profile-v3-box"><div className="avatar-v3">WK</div><div><div className="strong-v3 light">{currentUser.name}</div><div className="sub-v3 light">{currentUser.role}</div></div></div>
+            <motion.aside initial={{ x: -18, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -18, opacity: 0 }} className={`sidebar-v4 ${mobileSidebar ? "show" : ""}`}>
+              <div className="sidebar-head-v4">
+                <div className="sidebar-brand-v4"><BrandMark /><div><div className="sidebar-brand-title-v4">GAS Portal</div><div className="sidebar-brand-sub-v4">Human Capital Workspace</div></div></div>
+                <div className="profile-v4-box"><div className="avatar-v4">WK</div><div><div className="strong-v4 light">{currentUser.name}</div><div className="sub-v4 light">{currentUser.role}</div></div></div>
               </div>
-              <nav className="nav-v3">{sidebarItems.map((item) => { const Icon = item.icon; return <button key={item.key} className={`nav-v3-btn ${activePage === item.key ? "active" : ""}`} onClick={() => { setActivePage(item.key); setMobileSidebar(false); }}><Icon size={18} /><span>{item.label}</span></button>; })}</nav>
-              <div className="sidebar-projects-v3"><div className="eyebrow-v3 light">Project Sections</div>{projects.map((p) => <div key={p.id} className="sidebar-chip-v3">{p.name}</div>)}</div>
-              <button className="btn-v3 ghost light full" onClick={() => setCurrentUser(null)}><LogOut size={18} /> Logout</button>
+              <nav className="nav-v4">{sidebarItems.map((item) => { const Icon = item.icon; return <button key={item.key} className={`nav-btn-v4 ${activePage === item.key ? "active" : ""}`} onClick={() => { setActivePage(item.key); setMobileSidebar(false); }}><Icon size={17} /><span>{item.label}</span></button>; })}</nav>
+              <div className="sidebar-projects-v4"><div className="eyebrow-v4 light">Project Sections</div>{projects.map((p) => <div key={p.id} className="sidebar-chip-v4">{p.name}</div>)}</div>
+              <button className="btn-v4 ghost light full" onClick={() => setCurrentUser(null)}><LogOut size={16} /> Logout</button>
             </motion.aside>
           )}
         </AnimatePresence>
 
-        <main className="main-v3">
-          <GlassCard className="topbar-v3">
+        <main className="main-v4">
+          <GlassCard className="topbar-v4">
             <div>
-              <button className="menu-v3-btn" onClick={() => setMobileSidebar(!mobileSidebar)}><Menu size={18} /></button>
-              <div className="eyebrow-v3 dark">Human Resources Operating System</div>
-              <h1 className="page-title-v3">
+              <button className="menu-btn-v4" onClick={() => setMobileSidebar(!mobileSidebar)}><Menu size={17} /></button>
+              <div className="eyebrow-v4 dark">Human Resources Platform</div>
+              <h1 className="page-title-v4">
                 {activePage === "dashboard" && "Executive HR Dashboard"}
                 {activePage === "employees" && "Employee Management"}
                 {activePage === "leaveBalances" && "Annual Leave Balance Control"}
-                {activePage === "approvals" && "Approvals Workspace"}
+                {activePage === "approvals" && "Approvals"}
                 {activePage === "requests" && "Leaves, Permissions & Takleef"}
-                {activePage === "projects" && "Project Structure & Ownership"}
+                {activePage === "projects" && "Projects"}
                 {activePage === "files" && "Project Files Registry"}
+                {activePage === "attendance" && "Attendance"}
+                {activePage === "payroll" && "Payroll"}
                 {activePage === "reports" && "Reports Center"}
-                {activePage === "settings" && "System Settings"}
+                {activePage === "settings" && "Settings"}
               </h1>
-              <p className="page-sub-v3">Signed in as {currentUser.name} ({currentUser.role})</p>
+              <p className="page-sub-v4">Signed in as {currentUser.name} ({currentUser.role})</p>
             </div>
-            <div className="topbar-actions-v3">
-              <div className="search-v3"><Search size={16} /><input placeholder="Search employees, projects, approvals..." /></div>
-              <button className="btn-v3 secondary"><Bell size={16} /> Alerts</button>
-              <button className="btn-v3 primary" onClick={() => setActivePage("requests")}><Plus size={16} /> New Request</button>
+            <div className="topbar-actions-v4">
+              <div className="search-v4"><Search size={15} /><input placeholder="Search employees, projects, approvals..." /></div>
+              <button className="btn-v4 secondary"><Bell size={15} /> Alerts</button>
+              <button className="btn-v4 primary" onClick={() => setActivePage("requests")}><Plus size={15} /> New Request</button>
             </div>
           </GlassCard>
 
-          <div className="content-v3-stack">
+          <div className="content-v4-stack">
             {activePage === "dashboard" && <DashboardPage employees={employees} projects={projects} requests={requests} setActivePage={setActivePage} />}
             {activePage === "employees" && <EmployeesPage employees={employees} setEmployees={setEmployees} projects={projects} />}
             {activePage === "leaveBalances" && <LeaveBalancesPage employees={employees} setEmployees={setEmployees} projects={projects} />}
@@ -764,8 +678,10 @@ export default function HRPortalRedesign() {
             {activePage === "requests" && <RequestsPage employees={employees} requests={requests} setRequests={setRequests} projects={projects} />}
             {activePage === "projects" && <ProjectsPage projects={projects} setProjects={setProjects} employees={employees} />}
             {activePage === "files" && <ProjectFilesPage projects={projects} filesByProject={filesByProject} setFilesByProject={setFilesByProject} />}
-            {activePage === "reports" && <PlaceholderPage title="Reports Center" description="Printable monthly HR reports, leave reports and project summaries." />}
-            {activePage === "settings" && <PlaceholderPage title="System Settings" description="Adjust HR options, interface controls and configurable data blocks." />}
+            {activePage === "attendance" && <AttendancePage />}
+            {activePage === "payroll" && <PayrollPage />}
+            {activePage === "reports" && <ReportsPage />}
+            {activePage === "settings" && <SettingsPage />}
           </div>
         </main>
       </div>
@@ -774,32 +690,23 @@ export default function HRPortalRedesign() {
 }
 
 const styles = `
-:root{--bg:#edf2f7;--bg2:#f7f9fc;--panel:#ffffff;--panel2:rgba(255,255,255,.78);--line:#e5ecf4;--text:#091224;--muted:#64748b;--nav1:#030b1c;--nav2:#0a1e43;--blue:#1d4ed8;--blue2:#2563eb;--dark:#0f172a;--success:#059669;--warning:#d97706;--danger:#dc2626;--info:#2563eb;font-family:Inter,Arial,sans-serif}
-*{box-sizing:border-box}html,body,#root{margin:0;min-height:100%;background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%)}body{margin:0;color:var(--text)}button,input,select,textarea{font:inherit}
-.btn-v3{height:50px;border:none;border-radius:16px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;cursor:pointer;transition:.18s ease}.btn-v3:hover{transform:translateY(-1px)}.btn-v3.primary{background:linear-gradient(135deg,#0b1731,#184c90);color:#fff;box-shadow:0 18px 40px rgba(24,76,144,.24)}.btn-v3.secondary{background:rgba(255,255,255,.9);color:#0f172a;border:1px solid #dce4ef}.btn-v3.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.14)}.btn-v3.ghost.light{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.16)}.btn-v3.success{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}.btn-v3.danger{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}.full{width:100%}
-.brand-v3{height:66px;width:66px;border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,.16);background:#020617;box-shadow:0 20px 44px rgba(2,6,23,.28)}.brand-v3.small{height:48px;width:48px;border-radius:18px}.brand-v3-inner{width:100%;height:100%;display:grid;place-items:center;background:radial-gradient(circle at top left,rgba(59,130,246,.7),transparent 45%),linear-gradient(135deg,#020617,#0f172a,#101d37)}.brand-v3-main{font-size:27px;font-weight:900;line-height:1;color:#fff}.brand-v3.small .brand-v3-main{font-size:18px}.brand-v3-sub{font-size:8px;letter-spacing:.25em;color:#dbeafe;text-align:center}
-.eyebrow-v3{font-size:12px;letter-spacing:.28em;text-transform:uppercase}.eyebrow-v3.light{color:#b9c8e8}.eyebrow-v3.dark{color:#718096}.strong-v3{font-weight:800}.strong-v3.light{color:#fff}.sub-v3{color:#64748b;font-size:13px;margin-top:4px}.sub-v3.light{color:#c9d4ea}
-.login-v3-page{min-height:100vh;padding:24px;background:radial-gradient(circle at top left,rgba(59,130,246,.18),transparent 20%),radial-gradient(circle at bottom right,rgba(15,23,42,.12),transparent 32%),linear-gradient(135deg,#e8eef6,#f8fbff,#dde8fb)}.login-v3-shell{max-width:1500px;min-height:calc(100vh - 48px);margin:0 auto;display:grid;grid-template-columns:1.08fr .92fr;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.56);border-radius:38px;overflow:hidden;backdrop-filter:blur(18px);box-shadow:0 36px 100px rgba(15,23,42,.18)}
-.login-v3-left{position:relative;padding:44px;background:linear-gradient(145deg,#020617 0%,#0d1731 35%,#0c2f67 100%);color:#fff;display:flex;flex-direction:column;overflow:hidden}.aurora{position:absolute;border-radius:999px;filter:blur(24px);opacity:.52}.aurora.a1{width:260px;height:260px;background:#2563eb;top:-80px;left:-40px}.aurora.a2{width:280px;height:280px;background:#1d4ed8;right:-80px;top:40px}.aurora.a3{width:240px;height:240px;background:#0ea5e9;bottom:-120px;left:24%}.login-v3-brand-row{display:flex;align-items:center;gap:16px;position:relative;z-index:2}.login-v3-brand-title{font-size:30px;font-weight:800;margin-top:8px}.login-v3-copy{max-width:760px;margin-top:86px;position:relative;z-index:2}.login-v3-copy h1{margin:0 0 20px;font-size:60px;line-height:1.02;letter-spacing:-.05em;font-weight:900}.login-v3-copy p{margin:0;max-width:700px;font-size:20px;line-height:1.8;color:#cfdbef}.login-v3-grid{margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;position:relative;z-index:2}.login-v3-tile{padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.08);backdrop-filter:blur(14px)}.login-v3-tile span{display:block;color:#d4deef;font-size:14px}.login-v3-tile strong{display:block;margin-top:12px;font-size:34px}
-.login-v3-right{display:flex;align-items:center;justify-content:center;padding:34px}.login-v3-panel{width:100%;max-width:560px;background:#fff;border:1px solid #e2e8f0;border-radius:32px;padding:38px;box-shadow:0 30px 90px -35px rgba(15,23,42,.35)}.login-v3-head{display:flex;align-items:center;gap:16px;margin-bottom:30px}.login-v3-head h2{margin:0;font-size:42px;letter-spacing:-.03em;font-weight:900}.login-v3-head p{margin:8px 0 0;color:#64748b}.field-v3{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}.field-v3 label{font-size:14px;font-weight:700;color:#334155}.field-v3 input,.field-v3 select,.field-v3 textarea,.search-v3 input{width:100%;border:1px solid #d7e0ea;border-radius:16px;background:#fff;color:#0f172a;outline:none;transition:.18s ease}.field-v3 input,.field-v3 select,.search-v3 input{height:50px;padding:0 16px}.field-v3 textarea{min-height:120px;padding:14px 16px;resize:vertical}.field-v3 input:focus,.field-v3 select:focus,.field-v3 textarea:focus,.search-v3 input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(147,197,253,.2)}.demo-v3{margin-top:22px;border-radius:24px;border:1px solid #e5ebf3;background:#f8fbff;padding:20px;color:#475569}.demo-v3-title{font-weight:800;margin-bottom:12px}.error-v3{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:12px 14px;border-radius:16px;margin-bottom:16px}
-.glass-card-v3{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.84));border:1px solid rgba(229,236,244,.92);border-radius:30px;box-shadow:0 22px 54px rgba(15,23,42,.06);padding:28px;backdrop-filter:blur(16px)}
-.app-v3-shell{min-height:100vh;display:grid;grid-template-columns:320px 1fr;background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%)}.sidebar-v3{padding:24px;background:radial-gradient(circle at top left,rgba(96,165,250,.16),transparent 25%),radial-gradient(circle at bottom right,rgba(37,99,235,.18),transparent 22%),linear-gradient(180deg,#030b1c 0%,#07142d 38%,#0b2958 100%);color:#fff;display:flex;flex-direction:column;gap:22px}.sidebar-brand-v3{display:flex;align-items:center;gap:14px}.sidebar-brand-title-v3{font-size:34px;font-weight:900;line-height:1;letter-spacing:-.04em}.sidebar-brand-sub-v3{font-size:13px;color:#cdd8ea;margin-top:6px}.profile-v3-box{display:flex;gap:14px;align-items:center;padding:16px;border-radius:24px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.04))}.avatar-v3{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.15);font-weight:800}.nav-v3{display:flex;flex-direction:column;gap:10px}.nav-v3-btn{height:52px;border:none;border-radius:18px;background:transparent;color:#e7eefc;display:flex;align-items:center;gap:12px;padding:0 16px;font-weight:700;cursor:pointer;text-align:left}.nav-v3-btn:hover{background:rgba(255,255,255,.08)}.nav-v3-btn.active{background:#fff;color:#0f172a;box-shadow:0 16px 35px rgba(2,6,23,.18)}.sidebar-projects-v3{margin-top:8px}.sidebar-chip-v3{padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e5eefc;margin-top:10px;font-size:14px}
-.main-v3{padding:22px}.topbar-v3{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}.page-title-v3{margin:6px 0 0;font-size:48px;line-height:1.02;letter-spacing:-.05em;max-width:760px}.page-sub-v3{margin:10px 0 0;color:#64748b;font-size:18px}.topbar-actions-v3{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.search-v3{min-width:340px;height:50px;border-radius:16px;border:1px solid #d7e0ea;background:#fff;padding:0 14px;display:flex;align-items:center;gap:10px}.search-v3 input{border:none;box-shadow:none;background:transparent;padding:0}.content-v3-stack,.page-v3-stack{display:flex;flex-direction:column;gap:22px}.menu-v3-btn{display:none;width:42px;height:42px;border-radius:14px;border:1px solid #dce4ee;background:#fff;margin-bottom:10px;align-items:center;justify-content:center;cursor:pointer}
-.page-hero-v3{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:end;background:linear-gradient(135deg,#0d1731 0%,#12305f 42%,#1858a5 100%);color:#fff;position:relative;overflow:hidden}.page-hero-v3:before{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:999px;background:radial-gradient(circle,rgba(255,255,255,.16),transparent 60%)}.page-hero-v3:after{content:"";position:absolute;left:-60px;bottom:-80px;width:220px;height:220px;border-radius:999px;background:radial-gradient(circle,rgba(14,165,233,.22),transparent 60%)}.page-hero-v3 h2{margin:14px 0 10px;font-size:52px;line-height:1.02;letter-spacing:-.05em;position:relative;z-index:2}.page-hero-v3 p{margin:0;max-width:700px;font-size:17px;line-height:1.8;color:#d7e7fb;position:relative;z-index:2}.hero-v3-mini-grid.compact{position:relative;z-index:2}.hero-v3-mini-grid.compact div{padding:16px;border-radius:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}.hero-v3-mini-grid.compact span{display:block;font-size:13px;color:#d6e3fa}.hero-v3-mini-grid.compact strong{display:block;margin-top:8px;font-size:30px}
-.dashboard-v3{display:flex;flex-direction:column;gap:22px}.hero-v3-grid{display:grid;grid-template-columns:1.18fr .82fr;gap:22px}.hero-v3-main{position:relative;overflow:hidden;background:linear-gradient(135deg,#091326 0%,#0d1f40 35%,#154c91 100%);color:#fff;min-height:330px}.hero-v3-glow{position:absolute;border-radius:999px;filter:blur(26px);opacity:.48}.hero-v3-glow.g1{width:220px;height:220px;background:#2563eb;top:-70px;right:-30px}.hero-v3-glow.g2{width:180px;height:180px;background:#0ea5e9;bottom:-60px;left:10%}.hero-v3-kicker{position:relative;z-index:2;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:#cfe0fb}.hero-v3-main h2{position:relative;z-index:2;margin:18px 0 16px;font-size:58px;line-height:1.02;letter-spacing:-.055em;max-width:640px}.hero-v3-main p{position:relative;z-index:2;margin:0;max-width:690px;font-size:18px;line-height:1.8;color:#d6e3fa}.hero-v3-actions{position:relative;z-index:2;display:flex;gap:12px;margin-top:28px}.hero-v3-mini-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}.hero-v3-mini-grid div{padding:16px;border-radius:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}.hero-v3-mini-grid span{display:block;font-size:13px;color:#d6e3fa}.hero-v3-mini-grid strong{display:block;margin-top:8px;font-size:30px}
-.hero-v3-side{min-height:330px}.hero-side-top{display:flex;justify-content:space-between;align-items:center}.hero-side-top span{font-size:13px;color:#64748b;letter-spacing:.08em;text-transform:uppercase}.hero-side-value{font-size:76px;font-weight:900;line-height:1;letter-spacing:-.055em;margin-top:20px}.hero-side-title{font-size:24px;font-weight:900;margin-top:12px}.hero-v3-side p{color:#64748b;line-height:1.8}.hero-side-bars{display:grid;gap:14px;margin-top:22px}.bar-item{display:grid;grid-template-columns:110px 1fr auto;align-items:center;gap:12px}.bar-item span{font-size:13px;color:#64748b}.bar-track{height:10px;border-radius:999px;background:#edf2f7;overflow:hidden}.bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#0ea5e9)}.bar-fill.alt{background:linear-gradient(90deg,#0f172a,#2563eb)}
-.kpi-grid-v3{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.kpi-card-v3{padding:22px}.kpi-card-top{display:flex;justify-content:space-between;align-items:center}.kpi-icon{width:44px;height:44px;border-radius:16px;display:grid;place-items:center;background:#0f172a;color:#fff;box-shadow:0 14px 28px rgba(15,23,42,.16)}.kpi-trend{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;background:#f8fbff;border:1px solid #e7eef7;color:#1d4ed8;font-size:12px;font-weight:800}.kpi-label{margin-top:18px;color:#64748b;font-size:14px}.kpi-value{margin-top:8px;font-size:40px;font-weight:900;letter-spacing:-.04em}
-.section-title-v3{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:22px}.section-title-v3 h3{margin:0;font-size:30px;line-height:1.05;letter-spacing:-.03em}.section-title-v3 p{margin:8px 0 0;color:#64748b;line-height:1.7}.dashboard-v3-grid-a{display:grid;grid-template-columns:1fr 1fr;gap:22px}.dashboard-v3-grid-b{display:grid;grid-template-columns:1.18fr .82fr;gap:22px}.panel-dark-v3{background:linear-gradient(180deg,#0c1730,#12264b);color:#fff;border-color:rgba(255,255,255,.08)}.panel-dark-v3 .section-title-v3 h3{color:#fff}.panel-dark-v3 .section-title-v3 p{color:#bfd0ef}
-.radar-list-v3{display:flex;flex-direction:column;gap:12px}.radar-item-v3{width:100%;padding:16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.06);display:grid;grid-template-columns:56px 1fr auto;gap:16px;align-items:center;color:#fff;cursor:pointer;text-align:left}.radar-index{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.08);display:grid;place-items:center;font-weight:900;color:#d6e3fa}.radar-name{font-weight:800}.radar-sub{color:#bfd0ef;font-size:13px;margin-top:5px}.radar-side{display:flex;align-items:center;gap:10px;color:#d7e7ff;font-size:13px}
-.project-cards-v3{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.project-card-v3{padding:18px;border-radius:22px;background:#f8fbff;border:1px solid #e6edf7}.project-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.project-code-v3{font-size:12px;color:#64748b;letter-spacing:.16em;text-transform:uppercase}.project-card-v3 h4{margin:8px 0 0;font-size:21px}.project-owner-v3{margin-top:12px;font-weight:800}.project-contact-v3{margin-top:6px;color:#64748b}.project-foot-v3{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid #e3eaf3}.project-foot-v3 span{color:#64748b}.project-foot-v3 strong{font-size:28px}
-.stack-v3{display:flex;flex-direction:column;gap:22px}.metric-list-v3{display:flex;flex-direction:column;gap:14px}.metric-row-v3{display:flex;justify-content:space-between;align-items:center;padding:16px;border-radius:18px;background:#f8fbff;border:1px solid #e6edf7}.metric-row-v3 span{display:inline-flex;align-items:center;gap:8px;color:#64748b}.metric-row-v3 strong{font-size:26px}.launch-grid-v3{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.launch-tile-v3{padding:18px;border-radius:20px;border:1px solid #dce4ee;background:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:800;color:#0f172a}
-.table-wrap-v3{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:16px 14px;border-bottom:1px solid #edf2f7;font-size:14px;vertical-align:middle}th{color:#64748b;font-weight:800;white-space:nowrap}td{color:#0f172a}.strong-v3{font-weight:800}.sub-v3{color:#64748b;font-size:13px;margin-top:4px}.premium-table-v3 tbody tr:hover{background:#f8fbff}
-.two-col-v3{display:grid;grid-template-columns:1.15fr .85fr;gap:22px}.form-grid-v3{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.full-span{grid-column:1/-1}.form-panel-v3{background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(247,250,255,.94))}.summary-v3{padding:18px;border-radius:22px;background:#f8fbff;border:1px solid #e6edf7;color:#475569;line-height:1.8;margin-bottom:18px}.summary-title-v3{font-weight:900;color:#0f172a;margin-bottom:6px}
-.project-v3-layout{display:flex;flex-direction:column;gap:22px}.project-tabs-v3{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.project-tab-v3{padding:16px;border-radius:20px;border:1px solid #e6edf7;background:#fff;cursor:pointer;text-align:left}.project-tab-v3.active{background:linear-gradient(135deg,#0f172a,#173d72);color:#fff;border-color:#173d72}.project-tab-v3.active .sub-v3,.project-tab-v3.active .strong-v3{color:#fff}.contact-row-v3{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px}.contact-pill-v3{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#f8fbff;border:1px solid #e6edf7;color:#334155}.manager-lite-v3{padding:16px;border-radius:22px;background:#f8fbff;border:1px solid #e6edf7;display:flex;flex-direction:column;gap:6px;color:#475569;margin-bottom:18px}
-.approval-grid-v3{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.approval-card-v3{padding:18px;border-radius:24px;border:1px solid #e6edf7;background:#fff}.approval-card-v3.premium{background:linear-gradient(180deg,#ffffff,#f8fbff)}.approval-top-v3{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.approval-top-v3 h4{margin:0;font-size:20px}.approval-top-v3 p{margin:8px 0 0;color:#64748b}.approval-body-v3{margin-top:14px;display:grid;gap:10px;color:#334155}.approval-actions-v3{display:flex;gap:10px;margin-top:18px}.empty-v3{padding:30px;border-radius:22px;background:#f8fbff;border:1px dashed #cbd5e1;color:#64748b;text-align:center}
-.placeholder-grid-v3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.placeholder-box-v3{display:flex;align-items:center;gap:10px;padding:18px;border-radius:22px;border:1px solid #e6edf7;background:#f8fbff;font-weight:700;color:#334155}
-.status-v3{display:inline-flex;align-items:center;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid transparent}.status-v3.success{background:#ecfdf5;color:#047857;border-color:#a7f3d0}.status-v3.warning{background:#fffbeb;color:#b45309;border-color:#fde68a}.status-v3.danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca}.status-v3.info{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.status-v3.neutral{background:#f8fafc;color:#475569;border-color:#e2e8f0}
-@media (max-width:1280px){.login-v3-grid,.project-tabs-v3,.approval-grid-v3,.placeholder-grid-v3,.project-cards-v3,.launch-grid-v3,.kpi-grid-v3{grid-template-columns:repeat(2,1fr)}.dashboard-v3-grid-a,.dashboard-v3-grid-b,.two-col-v3,.login-v3-shell,.hero-v3-grid,.page-hero-v3{grid-template-columns:1fr}}
-@media (max-width:960px){.app-v3-shell{grid-template-columns:1fr}.sidebar-v3{position:fixed;left:0;top:0;bottom:0;width:300px;z-index:100;transform:translateX(-100%);transition:.22s ease}.sidebar-v3.show{transform:translateX(0)}.menu-v3-btn{display:inline-flex}.topbar-v3{flex-direction:column}.topbar-actions-v3{width:100%}.search-v3{min-width:100%}.form-grid-v3,.hero-v3-mini-grid,.project-cards-v3,.hero-v3-grid,.page-hero-v3{grid-template-columns:1fr}.page-title-v3{font-size:36px}.login-v3-copy h1,.hero-v3-main h2,.page-hero-v3 h2{font-size:40px}}
-@media (max-width:640px){.login-v3-page,.main-v3{padding:14px}.glass-card-v3,.login-v3-panel,.login-v3-left{padding:18px}.kpi-grid-v3,.login-v3-grid,.approval-grid-v3,.placeholder-grid-v3,.launch-grid-v3,.project-cards-v3{grid-template-columns:1fr}.page-title-v3{font-size:30px}.login-v3-copy{margin-top:42px}.login-v3-copy h1,.hero-v3-main h2,.page-hero-v3 h2{font-size:30px}.login-v3-head h2{font-size:34px}}
+:root{--bg:#edf2f7;--bg2:#f7f9fc;--line:#e6ecf3;--text:#0c1526;--muted:#66758b;--nav1:#041024;--nav2:#0a234d;--primary:#123a74;--primary2:#1c5aa7;--success:#059669;--warning:#d97706;--danger:#dc2626;--info:#2563eb;font-family:Inter,Arial,sans-serif}
+*{box-sizing:border-box}html,body,#root{margin:0;min-height:100%;background:linear-gradient(180deg,var(--bg),var(--bg2))}body{margin:0;color:var(--text)}button,input,select,textarea{font:inherit}
+.btn-v4{height:40px;border:none;border-radius:12px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:700;cursor:pointer;transition:.18s ease;font-size:13px}.btn-v4:hover{transform:translateY(-1px)}.btn-v4.primary{background:linear-gradient(135deg,#102a56,#18498a);color:#fff;box-shadow:0 14px 28px rgba(24,73,138,.18)}.btn-v4.secondary{background:#fff;color:#0f172a;border:1px solid #d9e2ec}.btn-v4.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.16)}.btn-v4.ghost.light{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.16)}.btn-v4.success{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}.btn-v4.danger{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}.full{width:100%}
+.brand-v4{height:54px;width:54px;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.16);background:#020617;box-shadow:0 16px 34px rgba(2,6,23,.22)}.brand-v4.small{height:40px;width:40px;border-radius:14px}.brand-v4-inner{width:100%;height:100%;display:grid;place-items:center;background:radial-gradient(circle at top left,rgba(59,130,246,.7),transparent 45%),linear-gradient(135deg,#020617,#0e1c35,#12325f)}.brand-v4-main{font-size:21px;font-weight:900;line-height:1;color:#fff}.brand-v4.small .brand-v4-main{font-size:14px}.brand-v4-sub{font-size:6px;letter-spacing:.22em;color:#dbeafe;text-align:center}
+.eyebrow-v4{font-size:11px;letter-spacing:.28em;text-transform:uppercase}.eyebrow-v4.light{color:#b9c8e8}.eyebrow-v4.dark{color:#73839a}.strong-v4{font-weight:800}.strong-v4.light{color:#fff}.sub-v4{color:#6a7a90;font-size:12px;margin-top:4px}.sub-v4.light{color:#cbd7eb}
+.glass-card-v4{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.88));border:1px solid rgba(229,236,244,.95);border-radius:24px;box-shadow:0 16px 36px rgba(15,23,42,.05);padding:22px;backdrop-filter:blur(14px)}
+.login-page-v4{min-height:100vh;padding:24px;background:radial-gradient(circle at top left,rgba(30,64,175,.18),transparent 18%),radial-gradient(circle at bottom right,rgba(15,23,42,.12),transparent 32%),linear-gradient(135deg,#eaf0f7,#f7faff,#dce8fb)}.login-shell-v4{max-width:1460px;min-height:calc(100vh - 48px);margin:0 auto;display:grid;grid-template-columns:1.02fr .98fr;background:rgba(255,255,255,.74);border:1px solid rgba(255,255,255,.56);border-radius:34px;overflow:hidden;backdrop-filter:blur(18px);box-shadow:0 30px 90px rgba(15,23,42,.16)}.login-left-v4{position:relative;padding:40px;background:linear-gradient(145deg,#071120 0%,#0a1c37 38%,#123d74 100%);color:#fff;display:flex;flex-direction:column;overflow:hidden}.hr-aurora{position:absolute;border-radius:999px;filter:blur(24px);opacity:.48}.hr-aurora.one{width:240px;height:240px;background:#2563eb;top:-80px;left:-40px}.hr-aurora.two{width:260px;height:260px;background:#1d4ed8;right:-70px;top:30px}.hr-aurora.three{width:220px;height:220px;background:#38bdf8;bottom:-100px;left:24%}.login-brand-row-v4{display:flex;align-items:center;gap:14px;position:relative;z-index:2}.login-brand-title-v4{font-size:26px;font-weight:800;margin-top:8px}.login-copy-v4{max-width:700px;margin-top:68px;position:relative;z-index:2}.login-copy-v4 h1{margin:0 0 16px;font-size:40px;line-height:1.08;letter-spacing:-.04em;font-weight:900}.login-copy-v4 p{margin:0;max-width:640px;font-size:15px;line-height:1.85;color:#d5e3f8}.login-badges-v4{margin-top:auto;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;position:relative;z-index:2}.login-badge-v4{display:flex;align-items:center;gap:10px;padding:14px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:13px}.login-right-v4{display:flex;align-items:center;justify-content:center;padding:30px;background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,.12))}.login-panel-v4{width:100%;max-width:500px;background:rgba(255,255,255,.96);border:1px solid #e2e8f0;border-radius:28px;padding:30px;box-shadow:0 24px 70px -34px rgba(15,23,42,.32)}.login-head-v4{display:flex;align-items:center;gap:14px;margin-bottom:22px}.login-head-v4 h2{margin:0;font-size:30px;letter-spacing:-.03em;font-weight:900}.login-head-v4 p{margin:6px 0 0;color:#64748b;font-size:13px}.field-v4{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}.field-v4 label{font-size:12px;font-weight:700;color:#334155}.field-v4 input,.field-v4 select,.field-v4 textarea,.search-v4 input{width:100%;border:1px solid #d7e0ea;border-radius:14px;background:#fff;color:#0f172a;outline:none;transition:.18s ease}.field-v4 input,.field-v4 select,.search-v4 input{height:42px;padding:0 13px}.field-v4 textarea{min-height:106px;padding:13px;resize:vertical}.field-v4 input:focus,.field-v4 select:focus,.field-v4 textarea:focus,.search-v4 input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(147,197,253,.18)}.demo-v4{margin-top:18px;border-radius:18px;border:1px solid #e5ebf3;background:#f8fbff;padding:16px;color:#475569;font-size:13px}.demo-v4-title{font-weight:800;margin-bottom:10px}.error-v4{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:11px 13px;border-radius:14px;margin-bottom:14px;font-size:13px}
+.app-v4-shell{min-height:100vh;display:grid;grid-template-columns:278px 1fr;background:linear-gradient(180deg,var(--bg),var(--bg2))}.sidebar-v4{padding:18px;background:radial-gradient(circle at top left,rgba(96,165,250,.15),transparent 25%),radial-gradient(circle at bottom right,rgba(37,99,235,.16),transparent 22%),linear-gradient(180deg,#041024 0%,#081938 40%,#0b2a58 100%);color:#fff;display:flex;flex-direction:column;gap:16px}.sidebar-brand-v4{display:flex;align-items:center;gap:12px}.sidebar-brand-title-v4{font-size:27px;font-weight:900;line-height:1;letter-spacing:-.04em}.sidebar-brand-sub-v4{font-size:11px;color:#cdd8ea;margin-top:5px}.profile-v4-box{display:flex;gap:12px;align-items:center;padding:12px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.04))}.avatar-v4{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.15);font-weight:800}.nav-v4{display:flex;flex-direction:column;gap:7px}.nav-btn-v4{height:42px;border:none;border-radius:14px;background:transparent;color:#e7eefc;display:flex;align-items:center;gap:10px;padding:0 13px;font-weight:700;cursor:pointer;text-align:left;font-size:13px}.nav-btn-v4:hover{background:rgba(255,255,255,.08)}.nav-btn-v4.active{background:#fff;color:#0f172a;box-shadow:0 14px 28px rgba(2,6,23,.16)}.sidebar-projects-v4{margin-top:6px}.sidebar-chip-v4{padding:9px 11px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e5eefc;margin-top:7px;font-size:12px}.main-v4{padding:16px}.topbar-v4{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}.page-title-v4{margin:5px 0 0;font-size:31px;line-height:1.08;letter-spacing:-.04em;max-width:620px}.page-sub-v4{margin:7px 0 0;color:#64748b;font-size:14px}.topbar-actions-v4{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.search-v4{min-width:280px;height:40px;border-radius:12px;border:1px solid #d7e0ea;background:#fff;padding:0 12px;display:flex;align-items:center;gap:8px}.search-v4 input{border:none;box-shadow:none;background:transparent;padding:0}.content-v4-stack,.page-stack-v4,.stack-v4{display:flex;flex-direction:column;gap:16px}.menu-btn-v4{display:none;width:40px;height:40px;border-radius:12px;border:1px solid #dce4ee;background:#fff;margin-bottom:8px;align-items:center;justify-content:center;cursor:pointer}
+.dashboard-hero-v4,.section-hero-v4{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:end;background:linear-gradient(135deg,#f9fbff,#f6f9fe);border:1px solid #e6edf5}.dashboard-hero-v4 h2,.section-hero-v4 h2{margin:8px 0 6px;font-size:28px;line-height:1.08;letter-spacing:-.04em}.dashboard-hero-v4 p,.section-hero-v4 p{margin:0;max-width:760px;font-size:14px;line-height:1.8;color:#6a7a90}.hero-actions-v4{display:flex;gap:8px;margin-top:14px}.hero-mini-grid-v4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.mini-stat-v4{display:flex;gap:10px;align-items:center;padding:12px;border-radius:16px;background:#fff;border:1px solid #e6edf5}.mini-stat-icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:#0f172a;color:#fff}.mini-stat-label{font-size:11px;color:#66758b}.mini-stat-value{font-size:18px;font-weight:900}
+.kpi-grid-v4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi-card-v4{padding:16px}.kpi-v4-top{display:flex;justify-content:space-between;align-items:center}.kpi-v4-icon{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:#0f172a;color:#fff}.kpi-v4-trend{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#f8fbff;border:1px solid #e7eef7;color:#1d4ed8;font-size:10px;font-weight:800}.kpi-v4-label{margin-top:12px;color:#64748b;font-size:12px}.kpi-v4-value{margin-top:5px;font-size:24px;font-weight:900;letter-spacing:-.04em}
+.section-title-v4{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:16px}.section-title-v4 h3{margin:0;font-size:20px;line-height:1.1;letter-spacing:-.03em}.section-title-v4 p{margin:5px 0 0;color:#64748b;line-height:1.7;font-size:13px}.dashboard-grid-v4-a{display:grid;grid-template-columns:1fr 1fr;gap:16px}.dashboard-grid-v4-b{display:grid;grid-template-columns:1.18fr .82fr;gap:16px}.table-wrap-v4{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:14px 12px;border-bottom:1px solid #edf2f7;font-size:13px;vertical-align:middle}th{color:#64748b;font-weight:800;white-space:nowrap}td{color:#0f172a}.compact-table th,.compact-table td{padding:12px 10px}
+.module-grid-v4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.module-card-v4{display:flex;align-items:center;gap:9px;padding:13px;border-radius:16px;border:1px solid #e6edf5;background:#fff;cursor:pointer;font-weight:700;text-align:left;font-size:13px}.module-card-v4.static{cursor:default}.metric-list-v4{display:flex;flex-direction:column;gap:9px}.metric-row-v4{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:14px;background:#f8fbff;border:1px solid #e6edf5;font-size:13px}.metric-row-v4 span{display:inline-flex;align-items:center;gap:8px;color:#64748b}.metric-row-v4 strong{font-size:19px}.quick-grid-v4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.quick-card-v4{padding:12px;border-radius:14px;border:1px solid #dce4ee;background:#fff;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;color:#0f172a;font-size:13px}
+.two-col-v4{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}.form-grid-v4{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full-span{grid-column:1/-1}.summary-v4{padding:14px;border-radius:16px;background:#f8fbff;border:1px solid #e6edf5;color:#475569;line-height:1.7;margin-bottom:14px;font-size:13px}.summary-title-v4{font-weight:900;color:#0f172a;margin-bottom:6px}.project-tabs-v4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.project-tab-v4{padding:12px;border-radius:16px;border:1px solid #e6edf5;background:#fff;cursor:pointer;text-align:left}.project-tab-v4.active{background:linear-gradient(135deg,#0f172a,#173d72);color:#fff;border-color:#173d72}.project-tab-v4.active .sub-v4,.project-tab-v4.active .strong-v4{color:#fff}.contact-row-v4{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 14px}.contact-pill-v4{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;background:#f8fbff;border:1px solid #e6edf5;color:#334155;font-size:12px}.manager-lite-v4{padding:12px;border-radius:16px;background:#f8fbff;border:1px solid #e6edf5;display:flex;flex-direction:column;gap:5px;color:#475569;margin-bottom:14px;font-size:13px}
+.approval-grid-v4{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.approval-card-v4{padding:14px;border-radius:18px;border:1px solid #e6edf5;background:#fff}.approval-top-v4{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.approval-top-v4 h4{margin:0;font-size:16px}.approval-top-v4 p{margin:5px 0 0;color:#64748b;font-size:12px}.approval-body-v4{margin-top:12px;display:grid;gap:8px;color:#334155;font-size:13px}.approval-actions-v4{display:flex;gap:8px;margin-top:12px}.empty-v4{padding:22px;border-radius:16px;background:#f8fbff;border:1px dashed #cbd5e1;color:#64748b;text-align:center;font-size:13px}
+.settings-grid-v4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.settings-grid-v4.compact{grid-template-columns:1fr}.settings-item-v4{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:16px;border:1px solid #e6edf5;background:#f8fbff}.settings-item-v4 strong{display:block;font-size:13px}.settings-item-v4 span{display:block;color:#64748b;font-size:12px;margin-top:4px}
+.status-v4{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid transparent}.status-v4.success{background:#ecfdf5;color:#047857;border-color:#a7f3d0}.status-v4.warning{background:#fffbeb;color:#b45309;border-color:#fde68a}.status-v4.danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca}.status-v4.info{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.status-v4.neutral{background:#f8fafc;color:#475569;border-color:#e2e8f0}
+@media (max-width:1280px){.kpi-grid-v4,.project-tabs-v4,.approval-grid-v4,.module-grid-v4,.quick-grid-v4,.settings-grid-v4,.login-badges-v4{grid-template-columns:repeat(2,1fr)}.dashboard-grid-v4-a,.dashboard-grid-v4-b,.two-col-v4,.dashboard-hero-v4,.section-hero-v4,.login-shell-v4{grid-template-columns:1fr}}
+@media (max-width:960px){.app-v4-shell{grid-template-columns:1fr}.sidebar-v4{position:fixed;left:0;top:0;bottom:0;width:290px;z-index:100;transform:translateX(-100%);transition:.22s ease}.sidebar-v4.show{transform:translateX(0)}.menu-btn-v4{display:inline-flex}.topbar-v4{flex-direction:column}.topbar-actions-v4{width:100%}.search-v4{min-width:100%}.form-grid-v4,.hero-mini-grid-v4,.module-grid-v4,.quick-grid-v4,.settings-grid-v4,.dashboard-hero-v4,.section-hero-v4{grid-template-columns:1fr}.page-title-v4{font-size:26px}.login-copy-v4 h1{font-size:34px}}
+@media (max-width:640px){.login-page-v4,.main-v4{padding:12px}.glass-card-v4,.login-panel-v4,.login-left-v4{padding:16px}.kpi-grid-v4,.login-badges-v4,.approval-grid-v4,.module-grid-v4,.quick-grid-v4,.project-tabs-v4,.settings-grid-v4{grid-template-columns:1fr}.page-title-v4{font-size:23px}.dashboard-hero-v4 h2,.section-hero-v4 h2{font-size:24px}.login-copy-v4{margin-top:38px}.login-copy-v4 h1{font-size:26px}.login-head-v4 h2{font-size:27px}}
 `;
