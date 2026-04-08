@@ -17,11 +17,9 @@ import {
   AlertTriangle,
   Wallet,
   FolderOpen,
-  KeyRound,
   Plus,
   Menu,
   UserPlus,
-  Briefcase,
   CheckCircle2,
   XCircle,
   Phone,
@@ -36,14 +34,14 @@ import {
   Clock3,
   TrendingUp,
   Layers3,
-  CalendarRange,
   Fingerprint,
-  ReceiptText,
+  CircleDollarSign,
+  Settings2,
   CalendarCheck2,
   FileSpreadsheet,
+  CalendarRange,
   ContactRound,
-  Settings2,
-  CircleDollarSign,
+  ReceiptText
 } from "lucide-react";
 
 const users = {
