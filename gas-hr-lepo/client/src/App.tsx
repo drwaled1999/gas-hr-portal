@@ -1,452 +1,689 @@
+import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  LayoutDashboard,
+  Users,
+  FolderKanban,
+  Plane,
+  ShieldCheck,
+  FileText,
+  Search,
+  LogOut,
+  Building2,
+  ClipboardCheck,
+  ChevronRight,
+  AlertTriangle,
+  Clock3,
+  Wallet,
+  FolderOpen,
+  KeyRound,
+  Filter,
+  Plus,
+} from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
-import { useEffect, useMemo, useState } from "react";
-import "./styles.css";
-
-type Role = "HR Manager" | "HR" | "HR Admin" | "Admin" | "Admin Assistant";
-type Page = "dashboard" | "employees" | "leaves" | "projects" | "add" | "permissions" | "files" | "reports" | "settings";
-type PermissionKey = "view_dashboard" | "view_employees" | "add_employee" | "manage_leaves" | "manage_projects" | "manage_permissions" | "view_reports" | "manage_files" | "manage_settings";
-
-type Project = { id:number; name:string; packageName:string; location:string; managerName:string; managerPhone:string; colorTag:string; };
-type LeaveEntry = { id:number; type:"Annual"|"Sick"|"Emergency"|"Takleef"; days:number; startDate:string; endDate:string; note:string; };
-type Employee = {
-  id:number; employeeCode:string; fullName:string; department:string; jobTitle:string; nationality:string;
-  projectName:string; packageName:string; role:Role; mobile:string; status:"Active"|"Inactive";
-  leave:{ total:number; used:number; remaining:number; sick:number; emergency:number; };
-  leaveEntries:LeaveEntry[]; notes:string[];
+const users = {
+  hrmanager: { password: "123456", name: "Walid Khalaf Alshammari", role: "HR Manager", project: "All Projects" },
+  walid: { password: "123456", name: "Walid Khalaf", role: "HR Admin", project: "Qatif" },
+  sara: { password: "123456", name: "Sara Ali", role: "Admin Assistant", project: "Qassim" },
 };
-type UserAccess = { id:number; fullName:string; username:string; role:Role; permissions:PermissionKey[]; };
-type ProjectFile = { id:number; projectName:string; category:"Leave"|"Takleef"; title:string; note:string; uploadedBy:string; uploadedAt:string; };
 
-const logoPath = "/LOGO-GAS.jpg";
-
-const projectsSeed: Project[] = [
-  { id:1, name:"Qatif", packageName:"Package 08", location:"Qatif", managerName:"Mohammed Al Qahtani", managerPhone:"+966 55 222 3344", colorTag:"Sky" },
-  { id:2, name:"Qassim", packageName:"Package 12", location:"Al Qassim", managerName:"Fahad Zaidan Alshammari", managerPhone:"+966 50 123 4567", colorTag:"Indigo" },
-  { id:3, name:"Shadqam", packageName:"Package 16", location:"Shadqam", managerName:"Nasser Al Harbi", managerPhone:"+966 54 777 8899", colorTag:"Emerald" },
+const initialEmployees = [
+  { id: 1, name: "Ahmed Salem", employeeId: "GAS-2038", role: "Store Worker", project: "Qatif", nationality: "Saudi", annualBalance: 30, usedLeave: 9, permissionsUsed: 3, status: "Active" },
+  { id: 2, name: "Muteb Al Bishi", employeeId: "GAS-2036", role: "Store Worker", project: "Qatif", nationality: "Saudi", annualBalance: 30, usedLeave: 4, permissionsUsed: 1, status: "Active" },
+  { id: 3, name: "Faisal Al Harbi", employeeId: "GAS-2194", role: "Site Administrator", project: "Zuluf", nationality: "Saudi", annualBalance: 35, usedLeave: 12, permissionsUsed: 6, status: "On Leave" },
+  { id: 4, name: "Rashid Al Qahtani", employeeId: "GAS-2210", role: "Coordinator", project: "Qassim", nationality: "Saudi", annualBalance: 30, usedLeave: 7, permissionsUsed: 2, status: "Active" },
+  { id: 5, name: "Mahmoud Adel", employeeId: "GAS-2288", role: "Timekeeper", project: "Jubail", nationality: "Egyptian", annualBalance: 30, usedLeave: 17, permissionsUsed: 5, status: "Pending Review" },
 ];
 
-const employeeSeed: Employee[] = [
-  { id:1, employeeCode:"GAS-1182", fullName:"Walid Khalaf", department:"HR", jobTitle:"HR Admin", nationality:"Saudi", projectName:"Qatif", packageName:"Package 08", role:"HR Admin", mobile:"+966 55 111 1111", status:"Active", leave:{ total:30, used:7, remaining:23, sick:2, emergency:1 }, leaveEntries:[{ id:11, type:"Annual", days:5, startDate:"2026-03-01", endDate:"2026-03-05", note:"Annual leave" },{ id:12, type:"Emergency", days:1, startDate:"2026-03-12", endDate:"2026-03-12", note:"Urgent matter" },{ id:13, type:"Sick", days:1, startDate:"2026-03-27", endDate:"2026-03-27", note:"Medical rest" }], notes:["Supports time sheet updates.","Coordinates project leave follow-up."] },
-  { id:2, employeeCode:"GAS-1450", fullName:"Sara Khan", department:"Admin", jobTitle:"Admin Assistant", nationality:"Non-Saudi", projectName:"Qatif", packageName:"Package 08", role:"Admin Assistant", mobile:"+966 55 888 4444", status:"Active", leave:{ total:30, used:16, remaining:14, sick:1, emergency:0 }, leaveEntries:[{ id:21, type:"Annual", days:15, startDate:"2026-02-01", endDate:"2026-02-15", note:"Annual leave" },{ id:22, type:"Sick", days:1, startDate:"2026-03-10", endDate:"2026-03-10", note:"Medical leave" }], notes:["Assigned to leave coordination support."] },
-  { id:3, employeeCode:"GAS-2036", fullName:"Ahmed Al Qahtani", department:"Operations", jobTitle:"Store Worker", nationality:"Saudi", projectName:"Qassim", packageName:"Package 12", role:"Admin", mobile:"+966 55 222 1111", status:"Active", leave:{ total:30, used:12, remaining:18, sick:0, emergency:1 }, leaveEntries:[{ id:31, type:"Annual", days:11, startDate:"2026-01-05", endDate:"2026-01-15", note:"Annual leave" },{ id:32, type:"Emergency", days:1, startDate:"2026-03-22", endDate:"2026-03-22", note:"Urgent matter" }], notes:["Attendance is consistent."] },
-  { id:4, employeeCode:"GAS-2201", fullName:"Eid Al Khaldi", department:"Operations", jobTitle:"Store Worker", nationality:"Saudi", projectName:"Shadqam", packageName:"Package 16", role:"Admin Assistant", mobile:"+966 55 333 2222", status:"Active", leave:{ total:30, used:4, remaining:26, sick:0, emergency:0 }, leaveEntries:[{ id:41, type:"Annual", days:4, startDate:"2026-03-04", endDate:"2026-03-07", note:"Annual leave" }], notes:["Needs monthly leave check."] },
+const initialProjects = [
+  { id: "qatif", name: "Qatif", manager: "Mohammed Al Qahtani", phone: "+966 55 222 3344", employees: 18, files: [
+    { id: 1, category: "Leave", title: "Annual Leave - Ahmed Salem.pdf", note: "Submitted for April review", status: "Pending" },
+    { id: 2, category: "Takleef", title: "Night Shift Assignment - Week 2.pdf", note: "Approved by project manager", status: "Approved" },
+  ]},
+  { id: "qassim", name: "Qassim", manager: "Saeed Al Mutairi", phone: "+966 54 777 1200", employees: 12, files: [
+    { id: 3, category: "Leave", title: "Emergency Leave - Rashid.pdf", note: "Family emergency", status: "Approved" },
+  ]},
+  { id: "zuluf", name: "Zuluf", manager: "Nasser Al Otaibi", phone: "+966 50 841 7701", employees: 9, files: [] },
+  { id: "jubail", name: "Jubail", manager: "Adel Ibrahim", phone: "+966 53 990 8431", employees: 15, files: [] },
 ];
 
-const usersSeed: UserAccess[] = [
-  { id:1, fullName:"Walid Khalaf Alshammari", username:"hrmanager", role:"HR Manager", permissions:["view_dashboard","view_employees","add_employee","manage_leaves","manage_projects","manage_permissions","view_reports","manage_files","manage_settings"] },
-  { id:2, fullName:"Walid Khalaf", username:"walid", role:"HR Admin", permissions:["view_dashboard","view_employees","add_employee","manage_leaves","manage_projects","view_reports","manage_files"] },
-  { id:3, fullName:"Sara Khan", username:"sara", role:"Admin Assistant", permissions:["view_dashboard","view_employees"] },
+const initialRequests = [
+  { id: 1, employee: "Faisal Al Harbi", type: "Leave", project: "Zuluf", days: 5, status: "Pending", date: "2026-04-09" },
+  { id: 2, employee: "Rashid Al Qahtani", type: "Permission", project: "Qassim", days: 1, status: "Approved", date: "2026-04-08" },
+  { id: 3, employee: "Ahmed Salem", type: "Takleef", project: "Qatif", days: 2, status: "In Review", date: "2026-04-11" },
 ];
 
-const passwords: Record<string,string> = { hrmanager:"123456", walid:"123456", sara:"123456" };
-
-const filesSeed: ProjectFile[] = [
-  { id:1, projectName:"Qatif", category:"Leave", title:"qatif_leave_march.pdf", note:"March leave record", uploadedBy:"Walid Khalaf", uploadedAt:"2026-04-07 09:30" },
-  { id:2, projectName:"Qatif", category:"Takleef", title:"qatif_takleef_week2.pdf", note:"Site takleef record", uploadedBy:"Walid Khalaf", uploadedAt:"2026-04-07 11:15" },
-  { id:3, projectName:"Qassim", category:"Leave", title:"qassim_approved_leave.pdf", note:"Approved leave files", uploadedBy:"HR Manager", uploadedAt:"2026-04-06 08:45" },
+const sidebarItems = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "employees", label: "Employees", icon: Users },
+  { key: "leaves", label: "Leaves & Takleef", icon: Plane },
+  { key: "projects", label: "Projects", icon: FolderKanban },
+  { key: "permissions", label: "Permissions", icon: ShieldCheck },
+  { key: "files", label: "Project Files", icon: FolderOpen },
+  { key: "reports", label: "Reports", icon: FileText },
+  { key: "settings", label: "Settings", icon: KeyRound },
 ];
 
-export default function App() {
-  const [booting, setBooting] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
-  const [page, setPage] = useState<Page>("dashboard");
-  const [search, setSearch] = useState("");
-  const [projectFilter, setProjectFilter] = useState(projectsSeed[0].name);
-  const [currentUser, setCurrentUser] = useState<UserAccess | null>(null);
-  const [users, setUsers] = useState<UserAccess[]>(usersSeed);
-  const [employees, setEmployees] = useState<Employee[]>(employeeSeed);
-  const [projects, setProjects] = useState<Project[]>(projectsSeed);
-  const [projectFiles, setProjectFiles] = useState<ProjectFile[]>(filesSeed);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState(employeeSeed[0].id);
-  const [selectedUserId, setSelectedUserId] = useState(usersSeed[1].id);
-  const [loginError, setLoginError] = useState("");
-  const [noteText, setNoteText] = useState("");
-  const [loginForm, setLoginForm] = useState({ username:"", password:"" });
-  const [leaveBalanceForm, setLeaveBalanceForm] = useState({ total:30, used:0, sick:0, emergency:0 });
-  const [manualLeaveForm, setManualLeaveForm] = useState({ type:"Annual" as LeaveEntry["type"], days:1, startDate:"", endDate:"", note:"" });
-  const [employeeForm, setEmployeeForm] = useState({ employeeCode:"", fullName:"", department:"", jobTitle:"", nationality:"Saudi", projectName:projectsSeed[0].name, packageName:projectsSeed[0].packageName, role:"Admin Assistant" as Role, mobile:"", totalLeave:30, note:"" });
-  const [projectForm, setProjectForm] = useState({ name:"", packageName:"", location:"", managerName:"", managerPhone:"", colorTag:"" });
-  const [projectFileForm, setProjectFileForm] = useState({ category:"Leave" as ProjectFile["category"], title:"", note:"" });
+function StatusBadge({ status }) {
+  const styles = {
+    Active: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    "On Leave": "bg-amber-50 text-amber-700 border-amber-200",
+    "Pending Review": "bg-rose-50 text-rose-700 border-rose-200",
+    Pending: "bg-amber-50 text-amber-700 border-amber-200",
+    Approved: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    "In Review": "bg-blue-50 text-blue-700 border-blue-200",
+  };
+  return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${styles[status] || "bg-slate-50 text-slate-700 border-slate-200"}`}>{status}</span>;
+}
 
-  useEffect(() => {
-    const t = setTimeout(() => setBooting(false), 1800);
-    return () => clearTimeout(t);
-  }, []);
-
-  const selectedEmployee = employees.find((emp) => emp.id === selectedEmployeeId) ?? employees[0];
-  const selectedUser = users.find((u) => u.id === selectedUserId) ?? users[0];
-
-  useEffect(() => {
-    if (selectedEmployee) {
-      setLeaveBalanceForm({
-        total: selectedEmployee.leave.total,
-        used: selectedEmployee.leave.used,
-        sick: selectedEmployee.leave.sick,
-        emergency: selectedEmployee.leave.emergency,
-      });
-      setProjectFilter(selectedEmployee.projectName);
-    }
-  }, [selectedEmployeeId]);
-
-  const filteredEmployees = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return employees.filter((emp) => {
-      const matchesSearch = !q || emp.fullName.toLowerCase().includes(q) || emp.employeeCode.toLowerCase().includes(q) || emp.projectName.toLowerCase().includes(q) || emp.packageName.toLowerCase().includes(q) || emp.department.toLowerCase().includes(q);
-      const matchesProject = !projectFilter || emp.projectName === projectFilter;
-      return matchesSearch && matchesProject;
-    });
-  }, [employees, search, projectFilter]);
-
-  const projectSummaries = useMemo(() => {
-    return projects.map((project) => {
-      const list = employees.filter((e) => e.projectName === project.name);
-      return { ...project, employeesCount:list.length, saudiCount:list.filter((e) => e.nationality === "Saudi").length, remainingLeave:list.reduce((acc, emp) => acc + emp.leave.remaining, 0) };
-    });
-  }, [projects, employees]);
-
-  const dashboard = useMemo(() => {
-    const saudi = employees.filter((e) => e.nationality === "Saudi").length;
-    const low = employees.filter((e) => e.leave.remaining <= 5).length;
-    const remaining = employees.reduce((acc, emp) => acc + emp.leave.remaining, 0);
-    return { totalEmployees:employees.length, saudiEmployees:saudi, totalProjects:projects.length, lowLeaveEmployees:low, totalRemainingLeave:remaining };
-  }, [employees, projects]);
-
-  const currentProjectSummary = projectSummaries.find((project) => project.name === projectFilter) ?? projectSummaries[0];
-  const visibleFiles = useMemo(() => projectFiles.filter((item) => item.projectName === projectFilter), [projectFiles, projectFilter]);
-
-  function hasPermission(permission: PermissionKey) {
-    if (!currentUser) return false;
-    return currentUser.permissions.includes(permission);
-  }
-
-  function login() {
-    const user = users.find((u) => u.username === loginForm.username.trim());
-    if (!user || passwords[user.username] !== loginForm.password.trim()) {
-      setLoginError("Invalid username or password.");
-      return;
-    }
-    setCurrentUser(user);
-    setAuthenticated(true);
-    setLoginError("");
-    if (user.role !== "HR Manager") {
-      const ownProject = employees.find((e) => e.fullName === user.fullName)?.projectName;
-      if (ownProject) setProjectFilter(ownProject);
-    }
-  }
-
-  function logout() {
-    setAuthenticated(false);
-    setCurrentUser(null);
-    setPage("dashboard");
-    setLoginForm({ username:"", password:"" });
-  }
-
-  function syncEmployeeProject(projectName: string) {
-    const project = projects.find((p) => p.name === projectName);
-    setEmployeeForm((prev) => ({ ...prev, projectName, packageName: project?.packageName ?? prev.packageName }));
-  }
-
-  function addEmployee() {
-    if (!employeeForm.employeeCode || !employeeForm.fullName || !employeeForm.projectName) {
-      alert("Please complete employee code, full name and project.");
-      return;
-    }
-    const total = Math.max(Number(employeeForm.totalLeave) || 0, 0);
-    const employee: Employee = {
-      id: Date.now(),
-      employeeCode: employeeForm.employeeCode,
-      fullName: employeeForm.fullName,
-      department: employeeForm.department,
-      jobTitle: employeeForm.jobTitle,
-      nationality: employeeForm.nationality,
-      projectName: employeeForm.projectName,
-      packageName: employeeForm.packageName,
-      role: employeeForm.role,
-      mobile: employeeForm.mobile,
-      status: "Active",
-      leave: { total, used:0, remaining:total, sick:0, emergency:0 },
-      leaveEntries: [],
-      notes: employeeForm.note ? [employeeForm.note] : [],
-    };
-    setEmployees((prev) => [employee, ...prev]);
-    setSelectedEmployeeId(employee.id);
-    setPage("employees");
-    setEmployeeForm({ employeeCode:"", fullName:"", department:"", jobTitle:"", nationality:"Saudi", projectName:projects[0].name, packageName:projects[0].packageName, role:"Admin Assistant", mobile:"", totalLeave:30, note:"" });
-  }
-
-  function addProject() {
-    if (!projectForm.name || !projectForm.packageName || !projectForm.managerName) {
-      alert("Please complete project name, package and manager.");
-      return;
-    }
-    const project: Project = { id: Date.now(), name: projectForm.name, packageName: projectForm.packageName, location: projectForm.location, managerName: projectForm.managerName, managerPhone: projectForm.managerPhone, colorTag: projectForm.colorTag || "Custom" };
-    setProjects((prev) => [...prev, project]);
-    setProjectFilter(project.name);
-    setProjectForm({ name:"", packageName:"", location:"", managerName:"", managerPhone:"", colorTag:"" });
-  }
-
-  function addLeaveNote() {
-    if (!selectedEmployee || !noteText.trim()) return;
-    setEmployees((prev) => prev.map((emp) => emp.id === selectedEmployee.id ? { ...emp, notes:[noteText, ...emp.notes] } : emp));
-    setNoteText("");
-  }
-
-  function saveLeaveBalance() {
-    if (!selectedEmployee) return;
-    const total = Math.max(Number(leaveBalanceForm.total) || 0, 0);
-    const used = Math.max(Number(leaveBalanceForm.used) || 0, 0);
-    const sick = Math.max(Number(leaveBalanceForm.sick) || 0, 0);
-    const emergency = Math.max(Number(leaveBalanceForm.emergency) || 0, 0);
-    const remaining = Math.max(total - used, 0);
-    setEmployees((prev) => prev.map((emp) => emp.id === selectedEmployee.id ? { ...emp, leave:{ total, used, remaining, sick, emergency } } : emp));
-  }
-
-  function addLeaveEntry() {
-    if (!selectedEmployee) return;
-    const days = Math.max(Number(manualLeaveForm.days) || 0, 0);
-    if (!days) return;
-    setEmployees((prev) => prev.map((emp) => {
-      if (emp.id !== selectedEmployee.id) return emp;
-      const newUsed = emp.leave.used + days;
-      const newSick = manualLeaveForm.type === "Sick" ? emp.leave.sick + days : emp.leave.sick;
-      const newEmergency = manualLeaveForm.type === "Emergency" ? emp.leave.emergency + days : emp.leave.emergency;
-      const entry: LeaveEntry = { id: Date.now(), type: manualLeaveForm.type, days, startDate: manualLeaveForm.startDate, endDate: manualLeaveForm.endDate, note: manualLeaveForm.note };
-      return { ...emp, leave:{ total:emp.leave.total, used:newUsed, remaining:Math.max(emp.leave.total - newUsed, 0), sick:newSick, emergency:newEmergency }, leaveEntries:[entry, ...emp.leaveEntries] };
-    }));
-    setManualLeaveForm({ type:"Annual", days:1, startDate:"", endDate:"", note:"" });
-  }
-
-  function addProjectFile() {
-    if (!projectFileForm.title.trim()) return;
-    const item: ProjectFile = { id: Date.now(), projectName: projectFilter, category: projectFileForm.category, title: projectFileForm.title, note: projectFileForm.note, uploadedBy: currentUser?.fullName || "User", uploadedAt: new Date().toLocaleString() };
-    setProjectFiles((prev) => [item, ...prev]);
-    setProjectFileForm({ category:"Leave", title:"", note:"" });
-  }
-
-  function togglePermission(userId: number, permission: PermissionKey) {
-    if (!currentUser || currentUser.role !== "HR Manager") return;
-    let updatedSelf: UserAccess | null = null;
-    setUsers((prev) => prev.map((user) => {
-      if (user.id !== userId) return user;
-      const exists = user.permissions.includes(permission);
-      const updated = { ...user, permissions: exists ? user.permissions.filter((p) => p !== permission) : [...user.permissions, permission] };
-      if (currentUser.id === userId) updatedSelf = updated;
-      return updated;
-    }));
-    if (updatedSelf) setCurrentUser(updatedSelf);
-  }
-
-  const sideNav = [
-    { key:"dashboard" as Page, label:"Dashboard", visible:hasPermission("view_dashboard") },
-    { key:"employees" as Page, label:"Employees", visible:hasPermission("view_employees") },
-    { key:"leaves" as Page, label:"Leaves & Takleef", visible:hasPermission("manage_leaves") },
-    { key:"projects" as Page, label:"Projects", visible:hasPermission("manage_projects") || currentUser?.role === "HR Manager" },
-    { key:"add" as Page, label:"Add Employee", visible:hasPermission("add_employee") },
-    { key:"permissions" as Page, label:"Permissions", visible:hasPermission("manage_permissions") },
-    { key:"files" as Page, label:"Project Files", visible:hasPermission("manage_files") },
-    { key:"reports" as Page, label:"Reports", visible:hasPermission("view_reports") },
-    { key:"settings" as Page, label:"Settings", visible:hasPermission("manage_settings") },
-  ];
-
-  if (booting) {
-    return <div className="splash-screen"><div className="splash-orbit" /><div className="splash-card"><div className="logo-fade-wrap"><img src={logoPath} alt="GAS Logo" className="splash-logo" /></div><h1>GAS HR Leave Portal</h1><p>Loading secure enterprise workspace...</p><div className="loader"><span /></div></div></div>;
-  }
-
-  if (!authenticated) {
-    return (
-      <div className="login-page">
-        <div className="login-layout">
-          <section className="login-hero">
-            <div className="hero-top"><img src={logoPath} alt="GAS Logo" className="login-logo" /><div className="hero-badge">Enterprise HR Workspace</div></div>
-            <div className="hero-copy"><h1>GAS HR Leave Portal</h1><p>Redesigned HR platform for employee records, leave balances, manual leave entries, takleef requests, project sections, permission control and project file review.</p></div>
-            <div className="hero-stats">
-              <div className="hero-stat"><span>Total Employees</span><strong>{dashboard.totalEmployees}</strong></div>
-              <div className="hero-stat"><span>Saudi Employees</span><strong>{dashboard.saudiEmployees}</strong></div>
-              <div className="hero-stat"><span>Projects</span><strong>{dashboard.totalProjects}</strong></div>
-              <div className="hero-stat"><span>Remaining Leave</span><strong>{dashboard.totalRemainingLeave}</strong></div>
-            </div>
-            <div className="hero-credit"><div>Team Fahad Zaidan Alshammari</div><div>Prepared by Walid Khalaf Alshammari</div></div>
-          </section>
-
-          <section className="login-panel-wrap">
-            <div className="login-panel">
-              <div className="login-panel-head"><img src={logoPath} alt="GAS Logo" className="login-panel-logo" /><div><h2>Sign In</h2><p className="muted">Professional internal HR access</p></div></div>
-              <div className="form-group"><label>Username</label><input value={loginForm.username} onChange={(e) => setLoginForm((prev) => ({ ...prev, username:e.target.value }))} placeholder="Enter your username" /></div>
-              <div className="form-group"><label>Password</label><input type="password" value={loginForm.password} onChange={(e) => setLoginForm((prev) => ({ ...prev, password:e.target.value }))} placeholder="Enter your password" /></div>
-              {loginError && <div className="error-box">{loginError}</div>}
-              <button className="primary-btn" onClick={login}>Sign In</button>
-              <div className="demo-box"><strong>Demo Accounts</strong><p>HR Manager: hrmanager / 123456</p><p>HR Admin: walid / 123456</p><p>Admin Assistant: sara / 123456</p></div>
-            </div>
-          </section>
+function BrandMark({ small = false }) {
+  return (
+    <div className={`relative overflow-hidden ${small ? "h-12 w-12 rounded-2xl" : "h-16 w-16 rounded-3xl"} border border-white/10 bg-slate-950 text-white shadow-2xl`}>
+      <div className="grid h-full w-full place-items-center bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.55),_transparent_45%),linear-gradient(135deg,#020617,#0f172a,#111827)]">
+        <div className="text-center leading-none">
+          <div className={`${small ? "text-lg" : "text-2xl"} font-black tracking-tight`}>GAS</div>
+          <div className="text-[8px] uppercase tracking-[0.25em] text-slate-300">HR</div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+function StatCard({ title, value, helper, icon: Icon }) {
+  return (
+    <Card className="rounded-3xl border-0 shadow-sm">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm text-slate-500">{title}</p>
+            <h3 className="mt-3 text-3xl font-bold text-slate-950">{value}</h3>
+            <p className="mt-2 text-sm text-slate-500">{helper}</p>
+          </div>
+          <div className="rounded-2xl bg-slate-950 p-3 text-white shadow-lg">
+            <Icon className="h-5 w-5" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LoginScreen({ onLogin }) {
+  const [username, setUsername] = useState("hrmanager");
+  const [password, setPassword] = useState("123456");
+  const [error, setError] = useState("");
+
+  const submit = () => {
+    const found = users[username];
+    if (!found || found.password !== password) {
+      setError("Invalid username or password");
+      return;
+    }
+    setError("");
+    onLogin(found);
+  };
 
   return (
-    <div className="portal-shell">
-      <aside className="sidebar">
-        <div className="sidebar-brand"><img src={logoPath} alt="GAS Logo" className="sidebar-logo" /><div><h2>GAS Portal</h2><p>{currentUser?.role}</p></div></div>
-        <div className="sidebar-nav">
-          {sideNav.filter((item) => item.visible).map((item) => <button key={item.key} className={page === item.key ? "nav-btn active" : "nav-btn"} onClick={() => setPage(item.key)}>{item.label}</button>)}
-          <div className="project-menu"><div className="project-menu-title">Project Sections</div>{projects.map((project) => <button key={project.id} className={projectFilter === project.name ? "project-link active" : "project-link"} onClick={() => { setProjectFilter(project.name); setPage("projects"); }}>{project.name}</button>)}</div>
-        </div>
-      </aside>
-
-      <main className="content">
-        <div className="topbar"><div><h1>{sideNav.find((item) => item.key === page)?.label ?? "Portal"}</h1><p className="muted">Signed in as {currentUser?.fullName} ({currentUser?.role})</p></div><button className="secondary-btn" onClick={logout}>Logout</button></div>
-
-        {page === "dashboard" && <>
-          <div className="stats-grid">
-            <div className="stat-card featured"><h3>{dashboard.totalEmployees}</h3><p>Total Employees</p></div>
-            <div className="stat-card"><h3>{dashboard.saudiEmployees}</h3><p>Saudi Employees</p></div>
-            <div className="stat-card"><h3>{dashboard.totalProjects}</h3><p>Projects</p></div>
-            <div className="stat-card"><h3>{dashboard.lowLeaveEmployees}</h3><p>Low Leave Balance</p></div>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.22),_transparent_25%),radial-gradient(circle_at_bottom_right,_rgba(15,23,42,0.28),_transparent_30%),linear-gradient(135deg,#e2e8f0_0%,#f8fafc_30%,#dbeafe_100%)] p-6 md:p-10">
+      <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-[36px] border border-white/40 bg-white/70 shadow-2xl backdrop-blur-xl lg:grid-cols-[1.08fr_0.92fr]">
+        <div className="relative hidden overflow-hidden bg-[linear-gradient(145deg,#020617_0%,#0f172a_42%,#0b1f46_100%)] p-10 text-white lg:flex lg:flex-col">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(96,165,250,.28),transparent_25%),radial-gradient(circle_at_85%_10%,rgba(148,163,184,.15),transparent_18%),radial-gradient(circle_at_40%_80%,rgba(37,99,235,.22),transparent_22%)]" />
+          <div className="relative z-10 flex items-center gap-4">
+            <BrandMark />
+            <div>
+              <div className="text-xs uppercase tracking-[0.3em] text-blue-200">Enterprise Human Resources</div>
+              <div className="mt-2 text-2xl font-semibold">GAS Workforce Portal</div>
+            </div>
           </div>
-          <div className="main-grid">
-            <section className="panel">
-              <h3>Project Summary</h3>
-              <table><thead><tr><th>Project</th><th>Manager</th><th>Phone</th><th>Employees</th><th>Remain.</th></tr></thead><tbody>{projectSummaries.map((project) => <tr key={project.id}><td>{project.name}</td><td>{project.managerName}</td><td>{project.managerPhone}</td><td>{project.employeesCount}</td><td>{project.remainingLeave}</td></tr>)}</tbody></table>
-            </section>
-            <section className="panel">
-              <h3>Quick Highlights</h3>
-              <div className="info-box"><strong>Manual Leave Setup</strong><p>Every leave balance is editable manually, including total leave days.</p></div>
-              <div className="info-box"><strong>Project Files</strong><p>Each project has its own leave and takleef file section for review.</p></div>
-              <div className="info-box"><strong>HR Manager Control</strong><p>Permissions for every user can be assigned directly from the portal.</p></div>
-            </section>
+
+          <div className="relative z-10 mt-20 max-w-2xl">
+            <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-5xl font-black leading-tight tracking-tight">
+              Built for modern HR operations, project teams and employee life cycle management.
+            </motion.h1>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
+              Professional portal for employee records, manual leave balances, permissions, takleef requests,
+              project file sections, approvals, and HR reporting across all active company projects.
+            </p>
           </div>
-        </>}
 
-        {page === "employees" && <div className="split-grid">
-          <section className="panel">
-            <div className="panel-header"><h3>Employee Directory</h3><div className="filters-row"><input className="search-input" placeholder="Search by name, code, project or package" value={search} onChange={(e) => setSearch(e.target.value)} /><select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)} className="compact-select">{projects.map((project) => <option key={project.id}>{project.name}</option>)}</select></div></div>
-            <table><thead><tr><th>Code</th><th>Name</th><th>Project</th><th>Used</th><th>Remaining</th></tr></thead><tbody>{filteredEmployees.map((emp) => <tr key={emp.id} onClick={() => setSelectedEmployeeId(emp.id)}><td>{emp.employeeCode}</td><td>{emp.fullName}</td><td>{emp.projectName}</td><td>{emp.leave.used}</td><td><span className={emp.leave.remaining <= 5 ? "leave-badge low" : "leave-badge good"}>{emp.leave.remaining}</span></td></tr>)}</tbody></table>
-          </section>
-
-          <section className="panel">
-            <div className="employee-header"><div><h3>{selectedEmployee.fullName}</h3><p className="muted">{selectedEmployee.jobTitle} • {selectedEmployee.department}</p></div><span className="status-pill">{selectedEmployee.status}</span></div>
-            <div className="info-grid">
-              <div className="mini-card"><label>Employee Code</label><strong>{selectedEmployee.employeeCode}</strong></div>
-              <div className="mini-card"><label>Mobile</label><strong>{selectedEmployee.mobile}</strong></div>
-              <div className="mini-card"><label>Project</label><strong>{selectedEmployee.projectName}</strong></div>
-              <div className="mini-card"><label>Package</label><strong>{selectedEmployee.packageName}</strong></div>
-              <div className="mini-card"><label>Nationality</label><strong>{selectedEmployee.nationality}</strong></div>
-              <div className="mini-card"><label>System Role</label><strong>{selectedEmployee.role}</strong></div>
-            </div>
-            <div className="leave-summary">
-              <div className="leave-card"><span>Total Leave</span><strong>{selectedEmployee.leave.total}</strong></div>
-              <div className="leave-card"><span>Used Leave</span><strong>{selectedEmployee.leave.used}</strong></div>
-              <div className="leave-card"><span>Remaining</span><strong>{selectedEmployee.leave.remaining}</strong></div>
-              <div className="leave-card"><span>Sick / Emergency</span><strong>{selectedEmployee.leave.sick} / {selectedEmployee.leave.emergency}</strong></div>
-            </div>
-            <div className="section-gap">
-              <h4>Notes</h4>
-              <div className="notes-list">{selectedEmployee.notes.map((note, i) => <div key={i} className="note-box">{note}</div>)}</div>
-              <div className="form-group"><label>Add Note</label><textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="Write a new note here" /></div>
-              <button className="primary-btn" onClick={addLeaveNote}>Add Note</button>
-            </div>
-          </section>
-        </div>}
-
-        {page === "leaves" && <div className="split-grid">
-          <section className="panel">
-            <div className="panel-header"><h3>Manual Leave Control</h3><div className="leave-chip">Remaining: {selectedEmployee.leave.remaining}</div></div>
-            <div className="info-grid"><div className="mini-card"><label>Employee</label><strong>{selectedEmployee.fullName}</strong></div><div className="mini-card"><label>Project</label><strong>{selectedEmployee.projectName}</strong></div></div>
-            <div className="form-grid">
-              <div className="form-group"><label>Total Leave</label><input type="number" value={leaveBalanceForm.total} onChange={(e) => setLeaveBalanceForm((prev) => ({ ...prev, total:Number(e.target.value) }))} /></div>
-              <div className="form-group"><label>Used Leave</label><input type="number" value={leaveBalanceForm.used} onChange={(e) => setLeaveBalanceForm((prev) => ({ ...prev, used:Number(e.target.value) }))} /></div>
-              <div className="form-group"><label>Sick Leave</label><input type="number" value={leaveBalanceForm.sick} onChange={(e) => setLeaveBalanceForm((prev) => ({ ...prev, sick:Number(e.target.value) }))} /></div>
-              <div className="form-group"><label>Emergency Leave</label><input type="number" value={leaveBalanceForm.emergency} onChange={(e) => setLeaveBalanceForm((prev) => ({ ...prev, emergency:Number(e.target.value) }))} /></div>
-            </div>
-            <button className="primary-btn" onClick={saveLeaveBalance}>Save Leave Balance</button>
-            <div className="subsection">
-              <h4>Add Leave / Takleef Entry</h4>
-              <div className="form-grid">
-                <div className="form-group"><label>Type</label><select value={manualLeaveForm.type} onChange={(e) => setManualLeaveForm((prev) => ({ ...prev, type:e.target.value as LeaveEntry["type"] }))}><option>Annual</option><option>Sick</option><option>Emergency</option><option>Takleef</option></select></div>
-                <div className="form-group"><label>Days</label><input type="number" value={manualLeaveForm.days} onChange={(e) => setManualLeaveForm((prev) => ({ ...prev, days:Number(e.target.value) }))} /></div>
-                <div className="form-group"><label>Start Date</label><input type="date" value={manualLeaveForm.startDate} onChange={(e) => setManualLeaveForm((prev) => ({ ...prev, startDate:e.target.value }))} /></div>
-                <div className="form-group"><label>End Date</label><input type="date" value={manualLeaveForm.endDate} onChange={(e) => setManualLeaveForm((prev) => ({ ...prev, endDate:e.target.value }))} /></div>
+          <div className="relative z-10 mt-auto grid grid-cols-2 gap-4 xl:grid-cols-4">
+            {[["Employees", "54"], ["Projects", "4"], ["Open Requests", "13"], ["Leave Balance", "126"]].map(([title, value]) => (
+              <div key={title} className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-md">
+                <div className="text-sm text-slate-300">{title}</div>
+                <div className="mt-3 text-3xl font-bold">{value}</div>
               </div>
-              <div className="form-group"><label>Note</label><textarea value={manualLeaveForm.note} onChange={(e) => setManualLeaveForm((prev) => ({ ...prev, note:e.target.value }))} /></div>
-              <button className="primary-btn" onClick={addLeaveEntry}>Add Entry</button>
-            </div>
-          </section>
-          <section className="panel">
-            <h3>Leave History</h3>
-            <table><thead><tr><th>Type</th><th>Days</th><th>Start</th><th>End</th><th>Note</th></tr></thead><tbody>{selectedEmployee.leaveEntries.map((entry) => <tr key={entry.id}><td>{entry.type}</td><td>{entry.days}</td><td>{entry.startDate}</td><td>{entry.endDate}</td><td>{entry.note}</td></tr>)}</tbody></table>
-          </section>
-        </div>}
-
-        {page === "projects" && <div className="stack-layout">
-          <div className="project-grid">{projectSummaries.map((project) => <div key={project.id} className={projectFilter === project.name ? "panel project-card active" : "panel project-card"} onClick={() => setProjectFilter(project.name)}><div className="project-card-head"><h3>{project.name}</h3><span className="project-badge">{project.packageName}</span></div><p className="muted">{project.location}</p><div className="project-manager"><strong>{project.managerName}</strong><span>{project.managerPhone}</span></div><div className="project-stats"><div><label>Employees</label><strong>{project.employeesCount}</strong></div><div><label>Remain.</label><strong>{project.remainingLeave}</strong></div></div></div>)}</div>
-          <section className="panel">
-            <h3>Add New Project</h3>
-            <div className="form-grid">
-              <div className="form-group"><label>Project Name</label><input value={projectForm.name} onChange={(e) => setProjectForm((prev) => ({ ...prev, name:e.target.value }))} /></div>
-              <div className="form-group"><label>Package</label><input value={projectForm.packageName} onChange={(e) => setProjectForm((prev) => ({ ...prev, packageName:e.target.value }))} /></div>
-              <div className="form-group"><label>Location</label><input value={projectForm.location} onChange={(e) => setProjectForm((prev) => ({ ...prev, location:e.target.value }))} /></div>
-              <div className="form-group"><label>Manager Name</label><input value={projectForm.managerName} onChange={(e) => setProjectForm((prev) => ({ ...prev, managerName:e.target.value }))} /></div>
-              <div className="form-group"><label>Manager Mobile</label><input value={projectForm.managerPhone} onChange={(e) => setProjectForm((prev) => ({ ...prev, managerPhone:e.target.value }))} /></div>
-              <div className="form-group"><label>Color Tag</label><input value={projectForm.colorTag} onChange={(e) => setProjectForm((prev) => ({ ...prev, colorTag:e.target.value }))} /></div>
-            </div>
-            <button className="primary-btn" onClick={addProject}>Add Project</button>
-          </section>
-        </div>}
-
-        {page === "files" && <section className="panel">
-          <div className="panel-header"><div><h3>{currentProjectSummary.name} Files</h3><p className="muted">Leave and takleef records for this project.</p></div><div className="project-contact-chip"><strong>{currentProjectSummary.managerName}</strong><span>{currentProjectSummary.managerPhone}</span></div></div>
-          <div className="upload-box">
-            <div className="form-grid">
-              <div className="form-group"><label>Category</label><select value={projectFileForm.category} onChange={(e) => setProjectFileForm((prev) => ({ ...prev, category:e.target.value as ProjectFile["category"] }))}><option>Leave</option><option>Takleef</option></select></div>
-              <div className="form-group"><label>File Title</label><input value={projectFileForm.title} onChange={(e) => setProjectFileForm((prev) => ({ ...prev, title:e.target.value }))} placeholder="example.pdf" /></div>
-            </div>
-            <div className="form-group"><label>Note</label><textarea value={projectFileForm.note} onChange={(e) => setProjectFileForm((prev) => ({ ...prev, note:e.target.value }))} /></div>
-            <button className="primary-btn" onClick={addProjectFile}>Add File Record</button>
+            ))}
           </div>
-          <table><thead><tr><th>Category</th><th>Title</th><th>Uploaded By</th><th>Note</th><th>Time</th></tr></thead><tbody>{visibleFiles.map((item) => <tr key={item.id}><td>{item.category}</td><td>{item.title}</td><td>{item.uploadedBy}</td><td>{item.note}</td><td>{item.uploadedAt}</td></tr>)}</tbody></table>
-        </section>}
+        </div>
 
-        {page === "add" && <section className="panel">
-          <h3>Add Employee</h3>
-          <div className="form-grid">
-            <div className="form-group"><label>Employee Code</label><input value={employeeForm.employeeCode} onChange={(e) => setEmployeeForm((prev) => ({ ...prev, employeeCode:e.target.value }))} /></div>
-            <div className="form-group"><label>Full Name</label><input value={employeeForm.fullName} onChange={(e) => setEmployeeForm((prev) => ({ ...prev, fullName:e.target.value }))} /></div>
-            <div className="form-group"><label>Department</label><input value={employeeForm.department} onChange={(e) => setEmployeeForm((prev) => ({ ...prev, department:e.target.value }))} /></div>
-            <div className="form-group"><label>Job Title</label><input value={employeeForm.jobTitle} onChange={(e) => setEmployeeForm((prev) => ({ ...prev, jobTitle:e.target.value }))} /></div>
-            <div className="form-group"><label>Nationality</label><select value={employeeForm.nationality} onChange={(e) => setEmployeeForm((prev) => ({ ...prev, nationality:e.target.value }))}><option>Saudi</option><option>Non-Saudi</option></select></div>
-            <div className="form-group"><label>System Role</label><select value={employeeForm.role} onChange={(e) => setEmployeeForm((prev) => ({ ...prev, role:e.target.value as Role }))}><option>HR</option><option>HR Admin</option><option>Admin</option><option>Admin Assistant</option></select></div>
-            <div className="form-group"><label>Project</label><select value={employeeForm.projectName} onChange={(e) => syncEmployeeProject(e.target.value)}>{projects.map((project) => <option key={project.id}>{project.name}</option>)}</select></div>
-            <div className="form-group"><label>Package</label><input value={employeeForm.packageName} readOnly /></div>
-            <div className="form-group"><label>Mobile</label><input value={employeeForm.mobile} onChange={(e) => setEmployeeForm((prev) => ({ ...prev, mobile:e.target.value }))} /></div>
-            <div className="form-group"><label>Base Leave Balance</label><input type="number" value={employeeForm.totalLeave} onChange={(e) => setEmployeeForm((prev) => ({ ...prev, totalLeave:Number(e.target.value) }))} /></div>
+        <div className="flex items-center justify-center bg-white/60 p-6 md:p-12">
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-xl rounded-[32px] border border-slate-200 bg-white p-8 shadow-[0_25px_80px_-30px_rgba(15,23,42,0.35)] md:p-10">
+            <div className="mb-8 flex items-center gap-4">
+              <BrandMark small />
+              <div>
+                <h2 className="text-4xl font-black tracking-tight text-slate-950">Welcome back</h2>
+                <p className="mt-1 text-base text-slate-500">Secure sign in to the HR control center</p>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <Label className="mb-2 inline-block text-sm font-medium text-slate-700">Username</Label>
+                <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Enter your username" className="h-14 rounded-2xl border-slate-200 text-base" />
+              </div>
+              <div>
+                <Label className="mb-2 inline-block text-sm font-medium text-slate-700">Password</Label>
+                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="h-14 rounded-2xl border-slate-200 text-base" />
+              </div>
+              {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
+              <Button onClick={submit} className="h-14 w-full rounded-2xl bg-slate-950 text-base font-semibold shadow-lg hover:bg-slate-900">Sign In to Dashboard</Button>
+            </div>
+
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div className="text-sm font-semibold text-slate-900">Demo access</div>
+              <div className="mt-3 space-y-2 text-sm text-slate-600">
+                <div><span className="font-medium text-slate-900">HR Manager:</span> hrmanager / 123456</div>
+                <div><span className="font-medium text-slate-900">HR Admin:</span> walid / 123456</div>
+                <div><span className="font-medium text-slate-900">Admin Assistant:</span> sara / 123456</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DashboardHome({ employees, projects, requests }) {
+  const remainingLeave = useMemo(() => employees.reduce((sum, emp) => sum + Math.max(emp.annualBalance - emp.usedLeave, 0), 0), [employees]);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard title="Total Employees" value={employees.length} helper="Across all project sections" icon={Users} />
+        <StatCard title="Project Sites" value={projects.length} helper="Live site-based HR workspaces" icon={Building2} />
+        <StatCard title="Open Requests" value={requests.length} helper="Leaves, permissions and takleef" icon={ClipboardCheck} />
+        <StatCard title="Remaining Leave" value={remainingLeave} helper="Calculated from manual balances" icon={Wallet} />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+        <Card className="rounded-3xl border-0 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl">HR Operations Overview</CardTitle>
+              <CardDescription>Daily control view for employees, project requests and balances</CardDescription>
+            </div>
+            <Button variant="outline" className="rounded-2xl">View full analytics</Button>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              {[
+                { title: "Active Employees", value: employees.filter((e) => e.status === "Active").length, progress: 82 },
+                { title: "Employees on Leave", value: employees.filter((e) => e.status === "On Leave").length, progress: 26 },
+                { title: "Pending HR Review", value: employees.filter((e) => e.status === "Pending Review").length, progress: 18 },
+              ].map((item) => (
+                <div key={item.title} className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="text-sm text-slate-500">{item.title}</div>
+                  <div className="mt-2 text-3xl font-bold text-slate-950">{item.value}</div>
+                  <Progress value={item.progress} className="mt-4 h-2" />
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 rounded-3xl border border-slate-200">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Leave Balance</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {employees.slice(0, 5).map((emp) => (
+                    <TableRow key={emp.id}>
+                      <TableCell className="font-medium text-slate-900">{emp.name}</TableCell>
+                      <TableCell>{emp.project}</TableCell>
+                      <TableCell>{emp.role}</TableCell>
+                      <TableCell>{emp.annualBalance - emp.usedLeave} days</TableCell>
+                      <TableCell><StatusBadge status={emp.status} /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+          <Card className="rounded-3xl border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl">Today’s Alerts</CardTitle>
+              <CardDescription>Items that need direct HR attention</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[
+                { icon: AlertTriangle, title: "2 leave requests pending approval", desc: "Review before end of day" },
+                { icon: Clock3, title: "1 manual balance needs update", desc: "Employee record mismatch found" },
+                { icon: FolderOpen, title: "Project file awaiting upload", desc: "Qassim leave attachment missing" },
+              ].map((item) => (
+                <div key={item.title} className="flex gap-3 rounded-2xl border border-slate-200 p-4">
+                  <div className="rounded-2xl bg-slate-950 p-2 text-white"><item.icon className="h-4 w-4" /></div>
+                  <div>
+                    <div className="font-semibold text-slate-900">{item.title}</div>
+                    <div className="text-sm text-slate-500">{item.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-3xl border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-xl">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              {["Add employee record", "Register leave manually", "Upload project document", "Generate monthly report"].map((action) => (
+                <Button key={action} variant="outline" className="justify-between rounded-2xl px-4 py-6">
+                  {action}
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmployeesPage({ employees, setEmployees }) {
+  const [form, setForm] = useState({ name: "", employeeId: "", role: "", project: "Qatif", nationality: "Saudi", annualBalance: 30, usedLeave: 0, permissionsUsed: 0 });
+
+  const addEmployee = () => {
+    if (!form.name || !form.employeeId || !form.role) return;
+    setEmployees((prev) => [...prev, { id: Date.now(), ...form, annualBalance: Number(form.annualBalance), usedLeave: Number(form.usedLeave), permissionsUsed: Number(form.permissionsUsed), status: "Active" }]);
+    setForm({ name: "", employeeId: "", role: "", project: "Qatif", nationality: "Saudi", annualBalance: 30, usedLeave: 0, permissionsUsed: 0 });
+  };
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <Card className="rounded-3xl border-0 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Employee Directory</CardTitle>
+          <CardDescription>Track employee records, roles, projects and manual leave balances</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>ID</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Leave Used</TableHead>
+                <TableHead>Remaining</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {employees.map((emp) => (
+                <TableRow key={emp.id}>
+                  <TableCell><div className="font-medium text-slate-900">{emp.name}</div><div className="text-xs text-slate-500">{emp.role}</div></TableCell>
+                  <TableCell>{emp.employeeId}</TableCell>
+                  <TableCell>{emp.project}</TableCell>
+                  <TableCell>{emp.usedLeave} days</TableCell>
+                  <TableCell>{emp.annualBalance - emp.usedLeave} days</TableCell>
+                  <TableCell><StatusBadge status={emp.status} /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-3xl border-0 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Add Employee</CardTitle>
+          <CardDescription>Everything is editable manually as requested</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div><Label>Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-2 h-12 rounded-2xl" /></div>
+          <div><Label>Employee ID</Label><Input value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })} className="mt-2 h-12 rounded-2xl" /></div>
+          <div><Label>Role / Category</Label><Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="mt-2 h-12 rounded-2xl" /></div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Project</Label>
+              <Select value={form.project} onValueChange={(v) => setForm({ ...form, project: v })}>
+                <SelectTrigger className="mt-2 h-12 rounded-2xl"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Qatif">Qatif</SelectItem>
+                  <SelectItem value="Qassim">Qassim</SelectItem>
+                  <SelectItem value="Zuluf">Zuluf</SelectItem>
+                  <SelectItem value="Jubail">Jubail</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Nationality</Label><Input value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} className="mt-2 h-12 rounded-2xl" /></div>
           </div>
-          <div className="form-group"><label>Initial Note</label><textarea value={employeeForm.note} onChange={(e) => setEmployeeForm((prev) => ({ ...prev, note:e.target.value }))} /></div>
-          <button className="primary-btn" onClick={addEmployee}>Create Employee</button>
-        </section>}
+          <div className="grid grid-cols-3 gap-4">
+            <div><Label>Annual Leave</Label><Input type="number" value={form.annualBalance} onChange={(e) => setForm({ ...form, annualBalance: e.target.value })} className="mt-2 h-12 rounded-2xl" /></div>
+            <div><Label>Used Days</Label><Input type="number" value={form.usedLeave} onChange={(e) => setForm({ ...form, usedLeave: e.target.value })} className="mt-2 h-12 rounded-2xl" /></div>
+            <div><Label>Permissions</Label><Input type="number" value={form.permissionsUsed} onChange={(e) => setForm({ ...form, permissionsUsed: e.target.value })} className="mt-2 h-12 rounded-2xl" /></div>
+          </div>
+          <Button onClick={addEmployee} className="h-12 w-full rounded-2xl bg-slate-950">Save Employee Record</Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
-        {page === "permissions" && <div className="split-grid">
-          <section className="panel">
-            <h3>System Users</h3>
-            <table><thead><tr><th>Name</th><th>Username</th><th>Role</th></tr></thead><tbody>{users.map((user) => <tr key={user.id} onClick={() => setSelectedUserId(user.id)}><td>{user.fullName}</td><td>{user.username}</td><td>{user.role}</td></tr>)}</tbody></table>
-          </section>
-          <section className="panel">
-            <h3>Manage Permissions</h3>
-            <div className="user-chip"><strong>{selectedUser.fullName}</strong><span>{selectedUser.role}</span></div>
-            <div className="permission-list">{(["view_dashboard","view_employees","manage_leaves","manage_projects","manage_permissions","view_reports","manage_files","manage_settings"] as PermissionKey[]).map((permission) => <label key={permission} className="permission-item"><input type="checkbox" checked={selectedUser.permissions.includes(permission)} onChange={() => togglePermission(selectedUser.id, permission)} /><span>{permission}</span></label>)}</div>
-          </section>
-        </div>}
+function LeavesPage({ employees, setEmployees, requests, setRequests }) {
+  const [selectedId, setSelectedId] = useState(String(employees[0]?.id || ""));
+  const [manualDays, setManualDays] = useState(1);
+  const [requestType, setRequestType] = useState("Leave");
+  const [note, setNote] = useState("");
+  const selectedEmployee = employees.find((e) => String(e.id) === selectedId);
 
-        {page === "reports" && <section className="panel">
-          <h3>Reports</h3>
-          <table><thead><tr><th>Name</th><th>Project</th><th>Total</th><th>Used</th><th>Remaining</th></tr></thead><tbody>{employees.map((emp) => <tr key={emp.id}><td>{emp.fullName}</td><td>{emp.projectName}</td><td>{emp.leave.total}</td><td>{emp.leave.used}</td><td>{emp.leave.remaining}</td></tr>)}</tbody></table>
-        </section>}
+  const applyManualLeave = () => {
+    if (!selectedEmployee) return;
+    setEmployees((prev) => prev.map((emp) => emp.id === selectedEmployee.id ? { ...emp, usedLeave: emp.usedLeave + Number(manualDays), status: "On Leave" } : emp));
+    setRequests((prev) => [{ id: Date.now(), employee: selectedEmployee.name, type: requestType, project: selectedEmployee.project, days: Number(manualDays), status: "Pending", date: new Date().toISOString().slice(0, 10), note }, ...prev]);
+    setManualDays(1);
+    setNote("");
+  };
 
-        {page === "settings" && <section className="panel">
-          <h3>Settings</h3>
-          <div className="info-box"><strong>Manual Control Ready</strong><p>All major data fields in this redesigned UI are editable manually.</p></div>
-          <div className="info-box"><strong>Next Step</strong><p>Connect this UI to the backend to save projects, employees, leaves and permissions permanently.</p></div>
-        </section>}
-      </main>
+  return (
+    <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <Card className="rounded-3xl border-0 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Manual Leave & Takleef Entry</CardTitle>
+          <CardDescription>Add leave days manually and deduct them automatically from employee balance</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Employee</Label>
+            <Select value={selectedId} onValueChange={setSelectedId}>
+              <SelectTrigger className="mt-2 h-12 rounded-2xl"><SelectValue placeholder="Select employee" /></SelectTrigger>
+              <SelectContent>{employees.map((emp) => <SelectItem key={emp.id} value={String(emp.id)}>{emp.name} - {emp.project}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Type</Label>
+              <Select value={requestType} onValueChange={setRequestType}>
+                <SelectTrigger className="mt-2 h-12 rounded-2xl"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Leave">Leave</SelectItem>
+                  <SelectItem value="Takleef">Takleef</SelectItem>
+                  <SelectItem value="Permission">Permission</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Days</Label><Input type="number" value={manualDays} onChange={(e) => setManualDays(e.target.value)} className="mt-2 h-12 rounded-2xl" /></div>
+          </div>
+          <div><Label>Note</Label><Textarea value={note} onChange={(e) => setNote(e.target.value)} className="mt-2 min-h-[120px] rounded-2xl" placeholder="Leave details, approval note or takleef information" /></div>
+          {selectedEmployee ? <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600"><div className="font-semibold text-slate-900">Current balance for {selectedEmployee.name}</div><div className="mt-2">Annual balance: {selectedEmployee.annualBalance} days</div><div>Used leave: {selectedEmployee.usedLeave} days</div><div>Remaining after entry: {Math.max(selectedEmployee.annualBalance - (selectedEmployee.usedLeave + Number(manualDays || 0)), 0)} days</div></div> : null}
+          <Button onClick={applyManualLeave} className="h-12 w-full rounded-2xl bg-slate-950">Submit Manual Entry</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-3xl border-0 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Request Tracker</CardTitle>
+          <CardDescription>Leaves, permissions and takleef submissions by project</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Employee</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Days</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {requests.map((req) => (
+                <TableRow key={req.id}>
+                  <TableCell className="font-medium text-slate-900">{req.employee}</TableCell>
+                  <TableCell>{req.type}</TableCell>
+                  <TableCell>{req.project}</TableCell>
+                  <TableCell>{req.days}</TableCell>
+                  <TableCell>{req.date}</TableCell>
+                  <TableCell><StatusBadge status={req.status} /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function ProjectsPage({ projects, setProjects }) {
+  const [activeProject, setActiveProject] = useState(projects[0]?.id || "");
+  const [fileForm, setFileForm] = useState({ category: "Leave", title: "", note: "" });
+  const project = projects.find((p) => p.id === activeProject);
+
+  const addFileRecord = () => {
+    if (!project || !fileForm.title) return;
+    setProjects((prev) => prev.map((p) => p.id === activeProject ? { ...p, files: [...p.files, { id: Date.now(), category: fileForm.category, title: fileForm.title, note: fileForm.note, status: "Pending" }] } : p));
+    setFileForm({ category: "Leave", title: "", note: "" });
+  };
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
+      <Card className="rounded-3xl border-0 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-xl">Project Sections</CardTitle>
+          <CardDescription>Each project has its own leave and takleef space</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {projects.map((projectItem) => (
+            <button key={projectItem.id} onClick={() => setActiveProject(projectItem.id)} className={`w-full rounded-2xl border px-4 py-4 text-left transition ${activeProject === projectItem.id ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50"}`}>
+              <div className="font-semibold">{projectItem.name}</div>
+              <div className={`mt-1 text-sm ${activeProject === projectItem.id ? "text-slate-300" : "text-slate-500"}`}>{projectItem.employees} employees</div>
+            </button>
+          ))}
+        </CardContent>
+      </Card>
+
+      <div className="space-y-6">
+        <Card className="rounded-3xl border-0 shadow-sm">
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div>
+              <CardTitle className="text-2xl">{project?.name} Files</CardTitle>
+              <CardDescription>Project-specific records, leave documents and takleef files</CardDescription>
+            </div>
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">
+              <div className="font-semibold text-slate-900">{project?.manager}</div>
+              <div>{project?.phone}</div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label>Category</Label>
+                <Select value={fileForm.category} onValueChange={(v) => setFileForm({ ...fileForm, category: v })}>
+                  <SelectTrigger className="mt-2 h-12 rounded-2xl"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Leave">Leave</SelectItem>
+                    <SelectItem value="Takleef">Takleef</SelectItem>
+                    <SelectItem value="Permission">Permission</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>File title</Label><Input value={fileForm.title} onChange={(e) => setFileForm({ ...fileForm, title: e.target.value })} className="mt-2 h-12 rounded-2xl" placeholder="example.pdf" /></div>
+            </div>
+            <div><Label>Note</Label><Textarea value={fileForm.note} onChange={(e) => setFileForm({ ...fileForm, note: e.target.value })} className="mt-2 min-h-[110px] rounded-2xl" placeholder="Add review note or document summary" /></div>
+            <Button onClick={addFileRecord} className="h-12 w-full rounded-2xl bg-slate-950">Add File Record</Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-3xl border-0 shadow-sm">
+          <CardHeader><CardTitle className="text-xl">Recorded Files</CardTitle></CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Note</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(project?.files || []).map((file) => (
+                  <TableRow key={file.id}>
+                    <TableCell>{file.category}</TableCell>
+                    <TableCell className="font-medium text-slate-900">{file.title}</TableCell>
+                    <TableCell>{file.note}</TableCell>
+                    <TableCell><StatusBadge status={file.status} /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function PlaceholderPage({ title, description }) {
+  return (
+    <Card className="rounded-3xl border-0 shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4 md:grid-cols-3">
+          {["Custom form blocks", "Approval workflows", "Printable report layouts"].map((item) => (
+            <div key={item} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-slate-600">{item}</div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function HRPortalRedesign() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [activePage, setActivePage] = useState("dashboard");
+  const [employees, setEmployees] = useState(initialEmployees);
+  const [projects, setProjects] = useState(initialProjects);
+  const [requests, setRequests] = useState(initialRequests);
+
+  if (!currentUser) return <LoginScreen onLogin={setCurrentUser} />;
+
+  return (
+    <div className="min-h-screen bg-slate-100">
+      <div className="grid min-h-screen xl:grid-cols-[300px_1fr]">
+        <aside className="relative overflow-hidden bg-[linear-gradient(180deg,#020617_0%,#0f172a_40%,#0b1f46_100%)] text-white">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,.18),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(37,99,235,.18),transparent_22%)]" />
+          <div className="relative z-10 flex h-full flex-col p-6">
+            <div className="flex items-center gap-4">
+              <BrandMark />
+              <div>
+                <div className="text-4xl font-black tracking-tight">GAS Portal</div>
+                <div className="mt-1 text-sm text-slate-300">Enterprise HR Workspace</div>
+              </div>
+            </div>
+
+            <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12 border border-white/10 bg-white/10"><AvatarFallback className="bg-transparent text-white">WK</AvatarFallback></Avatar>
+                <div>
+                  <div className="font-semibold">{currentUser.name}</div>
+                  <div className="text-sm text-slate-300">{currentUser.role}</div>
+                </div>
+              </div>
+            </div>
+
+            <nav className="mt-8 space-y-2">
+              {sidebarItems.map((item) => {
+                const Icon = item.icon;
+                const active = activePage === item.key;
+                return (
+                  <button key={item.key} onClick={() => setActivePage(item.key)} className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition ${active ? "bg-white text-slate-950 shadow-xl" : "text-slate-200 hover:bg-white/10"}`}>
+                    <Icon className="h-5 w-5" />
+                    <span className="font-medium">{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="mt-8 border-t border-white/10 pt-6">
+              <div className="mb-3 text-xs uppercase tracking-[0.28em] text-slate-400">Project Sections</div>
+              <div className="space-y-2">
+                {projects.map((p) => <div key={p.id} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">{p.name}</div>)}
+              </div>
+            </div>
+
+            <div className="mt-auto pt-6">
+              <Button onClick={() => setCurrentUser(null)} className="h-12 w-full rounded-2xl bg-white text-slate-950 hover:bg-slate-100"><LogOut className="mr-2 h-4 w-4" /> Logout</Button>
+            </div>
+          </div>
+        </aside>
+
+        <main className="p-5 md:p-8 xl:p-10">
+          <div className="rounded-[32px] border border-white bg-white p-5 shadow-sm md:p-7">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="text-sm font-medium uppercase tracking-[0.26em] text-slate-400">Human Resources Dashboard</div>
+                <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">
+                  {activePage === "dashboard" && "Executive HR Dashboard"}
+                  {activePage === "employees" && "Employee Management"}
+                  {activePage === "leaves" && "Leaves, Permissions & Takleef"}
+                  {activePage === "projects" && "Project-Based HR Sections"}
+                  {activePage === "permissions" && "Permissions Center"}
+                  {activePage === "files" && "Project Files"}
+                  {activePage === "reports" && "Reports Center"}
+                  {activePage === "settings" && "System Settings"}
+                </h1>
+                <p className="mt-2 text-lg text-slate-500">Signed in as {currentUser.name} ({currentUser.role})</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative min-w-[260px] flex-1 lg:flex-none">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input placeholder="Search employees, requests, files..." className="h-12 rounded-2xl border-slate-200 pl-11" />
+                </div>
+                <Button variant="outline" className="h-12 rounded-2xl"><Filter className="mr-2 h-4 w-4" /> Filter</Button>
+                <Button className="h-12 rounded-2xl bg-slate-950"><Plus className="mr-2 h-4 w-4" /> New Record</Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            {activePage === "dashboard" && <DashboardHome employees={employees} projects={projects} requests={requests} />}
+            {activePage === "employees" && <EmployeesPage employees={employees} setEmployees={setEmployees} />}
+            {activePage === "leaves" && <LeavesPage employees={employees} setEmployees={setEmployees} requests={requests} setRequests={setRequests} />}
+            {activePage === "projects" && <ProjectsPage projects={projects} setProjects={setProjects} />}
+            {activePage === "permissions" && <PlaceholderPage title="Permissions Center" description="Track short permissions, approvals and employee permission consumption manually." />}
+            {activePage === "files" && <ProjectsPage projects={projects} setProjects={setProjects} />}
+            {activePage === "reports" && <PlaceholderPage title="Reports Center" description="Prepare monthly attendance, leave summary, project file logs and printable HR reports." />}
+            {activePage === "settings" && <PlaceholderPage title="System Settings" description="Control portal settings, labels, project structure and editable HR options." />}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
