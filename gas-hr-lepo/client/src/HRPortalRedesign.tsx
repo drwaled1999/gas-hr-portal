@@ -41,7 +41,6 @@ import {
   FileBadge,
   Landmark,
   UserCircle2,
-  Briefcase,
 } from "lucide-react";
 
 const ADMIN_TITLES = ["HR Manager", "HR Admin", "HR Assistant", "Admin Assistant", "Site Administrator"];
@@ -143,54 +142,10 @@ const initialFiles = {
 };
 
 const initialAccounts = [
-  {
-    id: 1,
-    username: "hrmanager",
-    password: "123456",
-    name: "Walid Khalaf Alshammari",
-    title: "HR Manager",
-    role: "HR Manager",
-    employeeId: 6,
-    projectId: "qassim",
-    permissions: roleTemplates["HR Manager"],
-    isAdminView: true,
-  },
-  {
-    id: 2,
-    username: "walid",
-    password: "123456",
-    name: "Walid Khalaf",
-    title: "HR Admin",
-    role: "HR Admin",
-    employeeId: 6,
-    projectId: "qassim",
-    permissions: roleTemplates["HR Admin"],
-    isAdminView: true,
-  },
-  {
-    id: 3,
-    username: "sara",
-    password: "123456",
-    name: "Sara Ali",
-    title: "HR Assistant",
-    role: "HR Assistant",
-    employeeId: null,
-    projectId: "qatif",
-    permissions: roleTemplates["HR Assistant"],
-    isAdminView: true,
-  },
-  {
-    id: 4,
-    username: "ahmed.salem",
-    password: "123456",
-    name: "Ahmed Salem",
-    title: "Store Worker",
-    role: "Employee",
-    employeeId: 1,
-    projectId: "qatif",
-    permissions: roleTemplates.Employee,
-    isAdminView: false,
-  },
+  { id: 1, username: "hrmanager", password: "123456", name: "Walid Khalaf Alshammari", title: "HR Manager", role: "HR Manager", employeeId: 6, projectId: "qassim", permissions: roleTemplates["HR Manager"], isAdminView: true },
+  { id: 2, username: "walid", password: "123456", name: "Walid Khalaf", title: "HR Admin", role: "HR Admin", employeeId: 6, projectId: "qassim", permissions: roleTemplates["HR Admin"], isAdminView: true },
+  { id: 3, username: "sara", password: "123456", name: "Sara Ali", title: "HR Assistant", role: "HR Assistant", employeeId: null, projectId: "qatif", permissions: roleTemplates["HR Assistant"], isAdminView: true },
+  { id: 4, username: "ahmed.salem", password: "123456", name: "Ahmed Salem", title: "Store Worker", role: "Employee", employeeId: 1, projectId: "qatif", permissions: roleTemplates.Employee, isAdminView: false },
 ];
 
 const sidebarCatalog = [
@@ -289,6 +244,7 @@ function LoginScreen({ accounts, onLogin }) {
   const [username, setUsername] = useState("hrmanager");
   const [password, setPassword] = useState("123456");
   const [error, setError] = useState("");
+
   const submit = () => {
     const found = accounts.find((acc) => acc.username === username);
     if (!found || found.password !== password) {
@@ -298,6 +254,7 @@ function LoginScreen({ accounts, onLogin }) {
     setError("");
     onLogin(found);
   };
+
   return (
     <div className="login-page">
       <div className="login-shell">
@@ -343,7 +300,7 @@ function LoginScreen({ accounts, onLogin }) {
   );
 }
 
-function DashboardPage({ currentAccount, employees, projects, requests, setActivePage }) {
+function DashboardPage({ currentAccount, employees, projects, requests, accounts, setActivePage }) {
   const totalRemaining = useMemo(() => employees.reduce((sum, emp) => sum + Math.max(emp.annualBalance - emp.usedLeave, 0), 0), [employees]);
   const pendingApprovals = requests.filter((r) => r.status === "Pending" || r.status === "In Review").length;
   const employeeSelf = employeeByAccount(currentAccount, employees);
@@ -356,10 +313,29 @@ function DashboardPage({ currentAccount, employees, projects, requests, setActiv
       ["Remaining Leave", employeeSelf ? Math.max(employeeSelf.annualBalance - employeeSelf.usedLeave, 0) : "-"],
       ["Salary", employeeSelf ? employeeSelf.salary : "-"],
     ];
+
     return (
       <div className="page-stack">
-        <GlassCard className="hero-card"><div><div className="eyebrow dark">Employee self service</div><h2>My Workspace</h2><p>Access your leave balance, submit requests and track approvals.</p><div className="hero-actions"><button className="btn primary" onClick={() => setActivePage("requests")}><Plus size={14} /> New Request</button><button className="btn secondary" onClick={() => setActivePage("myLeave")}><CalendarCheck2 size={14} /> My Leave</button></div></div></GlassCard>
-        <GlassCard><SectionTitle title="My Summary" description="Employee self-service information." action={<ExportButtons rows={rows} fileName="my-profile.xlsx" sheetName="Profile" />} /><div className="simple-grid"><div className="summary-box"><div className="summary-title">{currentAccount.name}</div><div>Job Title: {currentAccount.title}</div><div>Remaining Leave: {employeeSelf ? Math.max(employeeSelf.annualBalance - employeeSelf.usedLeave, 0) : "-"} days</div></div></div></GlassCard>
+        <GlassCard className="hero-card">
+          <div>
+            <div className="eyebrow dark">Employee self service</div>
+            <h2>My Workspace</h2>
+            <p>Access your leave balance, submit requests and track approvals.</p>
+            <div className="hero-actions">
+              <button className="btn primary" onClick={() => setActivePage("requests")}><Plus size={14} /> New Request</button>
+              <button className="btn secondary" onClick={() => setActivePage("myLeave")}><CalendarCheck2 size={14} /> My Leave</button>
+            </div>
+          </div>
+        </GlassCard>
+        <GlassCard>
+          <SectionTitle title="My Summary" description="Employee self-service information." action={<ExportButtons rows={rows} fileName="my-profile.xlsx" sheetName="Profile" />} />
+          <div className="summary-box">
+            <div className="summary-title">{currentAccount.name}</div>
+            <div>Job Title: {currentAccount.title}</div>
+            <div>Remaining Leave: {employeeSelf ? Math.max(employeeSelf.annualBalance - employeeSelf.usedLeave, 0) : "-"} days</div>
+            <div>Project: {employeeSelf ? projectName(projects, employeeSelf.projectId) : "-"}</div>
+          </div>
+        </GlassCard>
       </div>
     );
   }
@@ -369,6 +345,7 @@ function DashboardPage({ currentAccount, employees, projects, requests, setActiv
     { label: "Projects", value: projects.length, icon: Building2 },
     { label: "Pending", value: pendingApprovals, icon: ClipboardCheck },
     { label: "Remaining Leave", value: totalRemaining, icon: Wallet },
+    { label: "Accounts", value: accounts.length, icon: KeyRound },
   ];
 
   return (
@@ -387,87 +364,146 @@ function DashboardPage({ currentAccount, employees, projects, requests, setActiv
           <div className="mini-stat"><div className="mini-stat-icon"><Activity size={14} /></div><div><div className="mini-stat-label">Active</div><div className="mini-stat-value">{employees.filter((e) => e.status === "Active").length}</div></div></div>
           <div className="mini-stat"><div className="mini-stat-icon"><Clock3 size={14} /></div><div><div className="mini-stat-label">On Leave</div><div className="mini-stat-value">{employees.filter((e) => e.status === "On Leave").length}</div></div></div>
           <div className="mini-stat"><div className="mini-stat-icon"><AlertTriangle size={14} /></div><div><div className="mini-stat-label">Pending</div><div className="mini-stat-value">{pendingApprovals}</div></div></div>
-          <div className="mini-stat"><div className="mini-stat-icon"><Users size={14} /></div><div><div className="mini-stat-label">Accounts</div><div className="mini-stat-value">{4}</div></div></div>
+          <div className="mini-stat"><div className="mini-stat-icon"><Users size={14} /></div><div><div className="mini-stat-label">Accounts</div><div className="mini-stat-value">{accounts.length}</div></div></div>
         </div>
       </GlassCard>
       <div className="kpi-grid">
         {kpis.map((item) => {
           const Icon = item.icon;
-          return <GlassCard key={item.label} className="kpi-card"><div className="kpi-top"><div className="kpi-icon"><Icon size={14} /></div></div><div className="kpi-label">{item.label}</div><div className="kpi-value">{item.value}</div></GlassCard>;
+          return (
+            <GlassCard key={item.label} className="kpi-card">
+              <div className="kpi-top"><div className="kpi-icon"><Icon size={14} /></div></div>
+              <div className="kpi-label">{item.label}</div>
+              <div className="kpi-value">{item.value}</div>
+            </GlassCard>
+          );
         })}
       </div>
     </div>
   );
 }
 
+function parseHours(value) {
+  if (!value || value === "-" || value === "0" || value === "0:00" || value === "0:00:00") return 0;
+  const parts = String(value).split(":").map(Number);
+  if (parts.length < 2 || Number.isNaN(parts[0])) return 0;
+  const h = parts[0] || 0;
+  const m = parts[1] || 0;
+  const s = parts[2] || 0;
+  return Math.round((h + m / 60 + s / 3600) * 100) / 100;
+}
+
+function normalizeDate(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (!Number.isNaN(d.getTime())) return d;
+  const str = String(value).trim();
+  const slashParts = str.split("/");
+  if (slashParts.length === 3) {
+    const mm = Number(slashParts[0]);
+    const dd = Number(slashParts[1]);
+    const yyyy = Number(slashParts[2]);
+    const parsed = new Date(yyyy, mm - 1, dd);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
+  const dashParts = str.split("-");
+  if (dashParts.length === 3) {
+    const yyyy = Number(dashParts[0]);
+    const mm = Number(dashParts[1]);
+    const dd = Number(dashParts[2]);
+    const parsed = new Date(yyyy, mm - 1, dd);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
+  return null;
+}
+
 function buildAttendanceState(records) {
-  if (!records || !records.length) return { days: [], rows: [] };
-  const parseHours = (value) => {
-    if (!value) return 0;
-    const parts = String(value).split(":").map(Number);
-    if (parts.length < 2 || Number.isNaN(parts[0])) return 0;
-    return Math.round((parts[0] + (parts[1] || 0) / 60) * 100) / 100;
-  };
-  const normalizeDate = (value) => {
-    if (!value) return null;
-    const d = new Date(value);
-    if (!Number.isNaN(d.getTime())) return d;
-    return null;
-  };
-  const grouped = {};
-  const uniqueDates = {};
+  if (!records || !records.length) return { days: [], rows: [], monthTitle: "Attendance" };
+
+  const employeesMap = {};
+  const datesMap = {};
+
   records.forEach((row) => {
-    const name = String(row.Name || row["Name"] || row.Employee || "Unknown Employee").trim();
-    const date = normalizeDate(row.Date || row["Date"]);
-    if (!date) return;
-    const key = date.toISOString().slice(0, 10);
-    uniqueDates[key] = date;
-    if (!grouped[name]) grouped[name] = { name, byDay: {}, totalHours: 0, absentCount: 0, singlePunchCount: 0 };
-    const exception = String(row.Exception || "").trim();
-    const totalHours = parseHours(row["Total Work Hours"] || row["Regular hours"] || row["Regular Hours"]);
-    const inTime = String(row.In || "").trim();
-    const outTime = String(row.Out || "").trim();
-    const leave = String(row.Leave || "").trim();
-    let cell = { value: "", type: "normal", rawHours: totalHours };
-    if (leave && leave !== "--") {
-      cell = { value: leave, type: "leave", rawHours: 0 };
-    } else if (/absence/i.test(exception)) {
-      cell = { value: "A", type: "absent", rawHours: 0 };
-      grouped[name].absentCount += 1;
-    } else if (/missing punch/i.test(exception) || (inTime && !outTime) || (!inTime && outTime)) {
-      cell = { value: totalHours > 0 ? String(Math.round(totalHours)) : "", type: "single", rawHours: totalHours };
-      grouped[name].singlePunchCount += 1;
-      grouped[name].totalHours += totalHours;
-    } else if (totalHours > 0) {
-      cell = { value: String(Math.round(totalHours)), type: "hours", rawHours: totalHours };
-      grouped[name].totalHours += totalHours;
+    const name = String(row["Name"] || row["Employee"] || "").trim();
+    const dateObj = normalizeDate(row["Date"]);
+    if (!name || !dateObj) return;
+
+    const dateKey = dateObj.toISOString().slice(0, 10);
+    datesMap[dateKey] = dateObj;
+
+    if (!employeesMap[name]) {
+      employeesMap[name] = {
+        name,
+        byDay: {},
+        totalHours: 0,
+        absentCount: 0,
+        singlePunchCount: 0,
+      };
     }
-    grouped[name].byDay[key] = cell;
+
+    const exception = String(row["Exception"] || "").trim();
+    const leave = String(row["Leave"] || "").trim();
+    const totalHours = parseHours(row["Total Work Hours"]);
+    const inTime = String(row["In"] || "").trim();
+    const outTime = String(row["Out"] || "").trim();
+
+    let cell = { value: "", type: "normal" };
+
+    if (leave && leave !== "-" && leave !== "--") {
+      cell = { value: leave, type: "leave" };
+    } else if (/absence/i.test(exception)) {
+      cell = { value: "A", type: "absent" };
+      employeesMap[name].absentCount += 1;
+    } else if (/missing punch/i.test(exception) || (inTime && inTime !== "-" && (!outTime || outTime === "-")) || (outTime && outTime !== "-" && (!inTime || inTime === "-"))) {
+      cell = { value: totalHours > 0 ? String(Math.round(totalHours)) : "", type: "single" };
+      employeesMap[name].singlePunchCount += 1;
+      employeesMap[name].totalHours += totalHours;
+    } else if (totalHours > 0) {
+      cell = { value: String(Math.round(totalHours)), type: "hours" };
+      employeesMap[name].totalHours += totalHours;
+    }
+
+    employeesMap[name].byDay[dateKey] = cell;
   });
-  const days = Object.keys(uniqueDates).sort().map((key) => {
-    const d = uniqueDates[key];
-    return { key, label: `${d.getDate()}-${d.toLocaleString("en-US", { month: "short" })}`, weekend: d.getDay() === 5 || d.getDay() === 6 };
-  });
-  const rows = Object.values(grouped).map((emp) => {
-    const cells = days.map((day) => {
-      if (emp.byDay[day.key]) return emp.byDay[day.key];
-      if (day.weekend) return { value: "", type: "weekend", rawHours: 0 };
-      emp.absentCount += 1;
-      return { value: "A", type: "absent", rawHours: 0 };
+
+  const days = Object.keys(datesMap)
+    .sort()
+    .map((dateKey) => {
+      const d = datesMap[dateKey];
+      return {
+        key: dateKey,
+        label: `${d.getDate()}-${d.toLocaleString("en-US", { month: "short" })}`,
+        weekend: d.getDay() === 5 || d.getDay() === 6,
+      };
     });
-    return { ...emp, cells };
+
+  const rows = Object.values(employeesMap).map((emp) => {
+    const cells = days.map((day) => {
+      const existing = emp.byDay[day.key];
+      if (existing) return existing;
+      if (day.weekend) return { value: "", type: "weekend" };
+      emp.absentCount += 1;
+      return { value: "A", type: "absent" };
+    });
+    return { ...emp, cells, totalHours: Math.round(emp.totalHours * 100) / 100 };
   });
-  return { days, rows };
+
+  const firstDay = days[0]?.key ? new Date(days[0].key) : null;
+  const monthTitle = firstDay ? `${firstDay.toLocaleString("en-US", { month: "long" })} Attendance` : "Attendance";
+
+  return { days, rows, monthTitle };
 }
 
 function AttendancePage({ currentAccount }) {
-  const [attendanceState, setAttendanceState] = useState({ days: [], rows: [] });
+  const [attendanceState, setAttendanceState] = useState({ days: [], rows: [], monthTitle: "Attendance" });
   const [fileName, setFileName] = useState("");
-  const [monthName, setMonthName] = useState("Attendance Sheet");
+  const [monthName, setMonthName] = useState("Attendance");
+
   const totalEmployees = attendanceState.rows.length;
   const totalHours = attendanceState.rows.reduce((sum, row) => sum + row.totalHours, 0);
   const absentCount = attendanceState.rows.reduce((sum, row) => sum + row.absentCount, 0);
   const singlePunchCount = attendanceState.rows.reduce((sum, row) => sum + row.singlePunchCount, 0);
+
   const onFileUpload = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -478,27 +514,63 @@ function AttendancePage({ currentAccount }) {
       complete: (result) => {
         const parsed = buildAttendanceState(result.data || []);
         setAttendanceState(parsed);
-        if (parsed.days.length > 0) {
-          const d = new Date(parsed.days[0].key);
-          setMonthName(`${d.toLocaleString("en-US", { month: "long" })} Attendance`);
-        }
+        setMonthName(parsed.monthTitle || "Attendance");
       },
     });
   };
+
   const exportRows = [
     ["Employee", ...attendanceState.days.map((day) => day.label), "Total Hours", "Absent", "Single Punch"],
     ...attendanceState.rows.map((row) => [row.name, ...row.cells.map((cell) => cell.value), Number(row.totalHours.toFixed(2)), row.absentCount, row.singlePunchCount]),
   ];
+
   return (
     <div className="page-stack">
-      <GlassCard className="section-hero"><div><div className="eyebrow dark">Attendance control</div><h2>Attendance</h2><p>Upload biometric CSV and generate a monthly Oracle-style attendance sheet with totals, absence and single punch highlighting.</p></div></GlassCard>
+      <GlassCard className="section-hero">
+        <div>
+          <div className="eyebrow dark">Attendance control</div>
+          <h2>Attendance</h2>
+          <p>Upload biometric CSV and generate a monthly Oracle-style attendance sheet with totals, absence and single punch highlighting.</p>
+        </div>
+        <div className="hero-mini-grid">
+          <div className="mini-stat"><div className="mini-stat-icon"><Users size={14} /></div><div><div className="mini-stat-label">Employees</div><div className="mini-stat-value">{totalEmployees}</div></div></div>
+          <div className="mini-stat"><div className="mini-stat-icon"><Clock3 size={14} /></div><div><div className="mini-stat-label">Total Hours</div><div className="mini-stat-value">{Math.round(totalHours)}</div></div></div>
+          <div className="mini-stat"><div className="mini-stat-icon"><AlertTriangle size={14} /></div><div><div className="mini-stat-label">Absent</div><div className="mini-stat-value">{absentCount}</div></div></div>
+          <div className="mini-stat"><div className="mini-stat-icon"><Fingerprint size={14} /></div><div><div className="mini-stat-label">Single Punch</div><div className="mini-stat-value">{singlePunchCount}</div></div></div>
+        </div>
+      </GlassCard>
       <GlassCard>
         <SectionTitle title="Biometric Import" description="Upload the raw CSV exported from your attendance device." action={<ExportButtons rows={exportRows} fileName="attendance-sheet.xlsx" sheetName="Attendance" />} />
         {!currentAccount.isAdminView ? <div className="empty-box">Attendance import is available to administrative HR roles only.</div> : <div className="upload-box"><label className="upload-btn"><Upload size={14} /> Upload CSV<input type="file" accept=".csv" hidden onChange={onFileUpload} /></label><div className="upload-note">{fileName || "No file uploaded yet"}</div></div>}
       </GlassCard>
       <GlassCard>
         <SectionTitle title={monthName} description="Generated monthly attendance sheet ready for HR review and Excel download." />
-        {attendanceState.rows.length === 0 ? <div className="empty-box">Upload the attendance CSV file to generate the monthly grid.</div> : <div className="attendance-table-wrap"><table className="attendance-table"><thead><tr><th className="sticky-col">Employee</th>{attendanceState.days.map((day) => <th key={day.key} className={day.weekend ? "weekend-head" : ""}>{day.label}</th>)}<th>Total Hours</th><th>Absent</th><th>Single Punch</th></tr></thead><tbody>{attendanceState.rows.map((row) => <tr key={row.name}><td className="sticky-col employee-col">{row.name}</td>{row.cells.map((cell, i) => <td key={i} className={`attendance-cell ${cell.type}`}>{cell.value}</td>)}<td>{Number(row.totalHours.toFixed(2))}</td><td>{row.absentCount}</td><td>{row.singlePunchCount}</td></tr>)}</tbody></table></div>}
+        {attendanceState.rows.length === 0 ? <div className="empty-box">Upload the attendance CSV file to generate the monthly grid.</div> : (
+          <div className="attendance-table-wrap">
+            <table className="attendance-table">
+              <thead>
+                <tr>
+                  <th className="sticky-col">Employee</th>
+                  {attendanceState.days.map((day) => <th key={day.key} className={day.weekend ? "weekend-head" : ""}>{day.label}</th>)}
+                  <th>Total Hours</th>
+                  <th>Absent</th>
+                  <th>Single Punch</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendanceState.rows.map((row) => (
+                  <tr key={row.name}>
+                    <td className="sticky-col employee-col">{row.name}</td>
+                    {row.cells.map((cell, i) => <td key={i} className={`attendance-cell ${cell.type}`}>{cell.value}</td>)}
+                    <td>{Number(row.totalHours.toFixed(2))}</td>
+                    <td>{row.absentCount}</td>
+                    <td>{row.singlePunchCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </GlassCard>
     </div>
   );
@@ -508,25 +580,21 @@ function RequestsPage({ currentAccount, employees, requests, setRequests, projec
   const employeeSelf = employeeByAccount(currentAccount, employees);
   const visibleRequests = currentAccount.isAdminView ? requests : requests.filter((r) => r.employeeId === currentAccount.employeeId);
   const rows = visibleRequests.map((req) => [req.employee, req.type, projectName(projects, req.projectId), req.days, req.date, req.status, req.attachmentName || "-"]);
-  const [form, setForm] = useState({
-    type: "Annual Leave",
-    days: 1,
-    note: "",
-    attachmentName: "",
-  });
+  const [form, setForm] = useState({ type: "Annual Leave", days: 1, note: "", attachmentName: "" });
+
   const submitRequest = () => {
     const targetEmployee = currentAccount.isAdminView ? employees[0] : employeeSelf;
     if (!targetEmployee) return;
-    const type = form.type;
-    setRequests((prev) => [{ id: Date.now(), employeeId: targetEmployee.id, employee: targetEmployee.name, type, projectId: targetEmployee.projectId, days: Number(type === "Annual Leave" || type === "Takleef" ? form.days : 0), status: "Pending", date: new Date().toISOString().slice(0, 10), note: form.note, attachmentName: form.attachmentName }, ...prev]);
+    setRequests((prev) => [{ id: Date.now(), employeeId: targetEmployee.id, employee: targetEmployee.name, type: form.type, projectId: targetEmployee.projectId, days: Number(form.type === "Annual Leave" || form.type === "Takleef" ? form.days : 0), status: "Pending", date: new Date().toISOString().slice(0, 10), note: form.note, attachmentName: form.attachmentName }, ...prev]);
     setForm({ type: "Annual Leave", days: 1, note: "", attachmentName: "" });
   };
+
   return (
     <div className="page-stack">
       <GlassCard className="section-hero"><div><div className="eyebrow dark">Request management</div><h2>Requests</h2><p>Create annual leave, salary certificate, salary transfer and takleef requests.</p></div></GlassCard>
       <div className="two-col">
         <GlassCard>
-          <SectionTitle title="Submit Request" description="Employees can raise requests and upload PDF attachment names for HR review." />
+          <SectionTitle title="Submit Request" description="Employees can raise requests and add PDF attachment names for HR review." />
           <div className="form-grid">
             <div className="field"><label>Request Type</label><select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}><option>Annual Leave</option><option>Salary Certificate</option><option>Salary Transfer</option><option>Takleef</option></select></div>
             <div className="field"><label>Days</label><input type="number" value={form.days} onChange={(e) => setForm({ ...form, days: Number(e.target.value) })} disabled={!(form.type === "Annual Leave" || form.type === "Takleef")} /></div>
@@ -547,6 +615,7 @@ function RequestsPage({ currentAccount, employees, requests, setRequests, projec
 function ApprovalsPage({ currentAccount, requests, setRequests, employees, setEmployees, projects }) {
   const pending = requests.filter((r) => r.status === "Pending" || r.status === "In Review");
   const rows = requests.map((req) => [req.employee, req.type, projectName(projects, req.projectId), req.days, req.date, req.status]);
+
   const handleDecision = (requestId, nextStatus) => {
     const target = requests.find((r) => r.id === requestId);
     if (!target) return;
@@ -555,9 +624,11 @@ function ApprovalsPage({ currentAccount, requests, setRequests, employees, setEm
       setEmployees((prev) => prev.map((emp) => emp.id === target.employeeId ? { ...emp, usedLeave: emp.usedLeave + Number(target.days), status: "On Leave" } : emp));
     }
   };
+
   if (!currentAccount.isAdminView) {
     return <div className="page-stack"><GlassCard><div className="empty-box">Approvals are available to HR administrative roles only.</div></GlassCard></div>;
   }
+
   return (
     <div className="page-stack">
       <GlassCard className="section-hero"><div><div className="eyebrow dark">Approval workflow</div><h2>Approvals</h2><p>Approve or reject leave, salary certificate, salary transfer and takleef requests.</p></div></GlassCard>
@@ -566,7 +637,22 @@ function ApprovalsPage({ currentAccount, requests, setRequests, employees, setEm
         <div className="approval-grid">
           {pending.length === 0 ? <div className="empty-box">No pending approvals right now.</div> : pending.map((req) => {
             const emp = employees.find((e) => e.id === req.employeeId);
-            return <div className="approval-card" key={req.id}><div className="approval-top"><div><h4>{req.employee}</h4><p>{req.type} • {projectName(projects, req.projectId)}</p></div><StatusBadge status={req.status} /></div><div className="approval-body"><div><strong>Days:</strong> {req.days || 0}</div><div><strong>Date:</strong> {req.date}</div><div><strong>Note:</strong> {req.note}</div><div><strong>Attachment:</strong> {req.attachmentName || "-"}</div>{emp ? <div><strong>Current leave balance:</strong> {Math.max(emp.annualBalance - emp.usedLeave, 0)} days</div> : null}</div><div className="approval-actions"><button className="btn success" onClick={() => handleDecision(req.id, "Approved")}><CheckCircle2 size={14} /> Approve</button><button className="btn danger" onClick={() => handleDecision(req.id, "Rejected")}><XCircle size={14} /> Reject</button></div></div>;
+            return (
+              <div className="approval-card" key={req.id}>
+                <div className="approval-top"><div><h4>{req.employee}</h4><p>{req.type} • {projectName(projects, req.projectId)}</p></div><StatusBadge status={req.status} /></div>
+                <div className="approval-body">
+                  <div><strong>Days:</strong> {req.days || 0}</div>
+                  <div><strong>Date:</strong> {req.date}</div>
+                  <div><strong>Note:</strong> {req.note}</div>
+                  <div><strong>Attachment:</strong> {req.attachmentName || "-"}</div>
+                  {emp ? <div><strong>Current leave balance:</strong> {Math.max(emp.annualBalance - emp.usedLeave, 0)} days</div> : null}
+                </div>
+                <div className="approval-actions">
+                  <button className="btn success" onClick={() => handleDecision(req.id, "Approved")}><CheckCircle2 size={14} /> Approve</button>
+                  <button className="btn danger" onClick={() => handleDecision(req.id, "Rejected")}><XCircle size={14} /> Reject</button>
+                </div>
+              </div>
+            );
           })}
         </div>
       </GlassCard>
@@ -575,55 +661,40 @@ function ApprovalsPage({ currentAccount, requests, setRequests, employees, setEm
 }
 
 function EmployeesPage({ currentAccount, employees, setEmployees, projects }) {
-  if (!currentAccount.isAdminView) {
-    return <div className="page-stack"><GlassCard><div className="empty-box">Employee directory is available to administrative HR roles only.</div></GlassCard></div>;
-  }
+  if (!currentAccount.isAdminView) return <div className="page-stack"><GlassCard><div className="empty-box">Employee directory is available to administrative HR roles only.</div></GlassCard></div>;
+
   const rows = employees.map((emp) => [emp.name, emp.employeeId, projectName(projects, emp.projectId), emp.manager, `${Math.max(emp.annualBalance - emp.usedLeave, 0)} days`, emp.status]);
   const [form, setForm] = useState({ name: "", employeeId: "", role: "", projectId: projects[0]?.id || "", nationality: "Saudi", annualBalance: 30, usedLeave: 0, status: "Active", salary: 5000 });
+
   const addEmployee = () => {
     if (!form.name || !form.employeeId || !form.role) return;
     const project = projects.find((p) => p.id === form.projectId);
     setEmployees((prev) => [...prev, { id: Date.now(), ...form, permissionsUsed: 0, manager: project?.manager || "", housing: 1200, transport: 500 }]);
     setForm({ name: "", employeeId: "", role: "", projectId: projects[0]?.id || "", nationality: "Saudi", annualBalance: 30, usedLeave: 0, status: "Active", salary: 5000 });
   };
+
   return (
     <div className="page-stack">
       <GlassCard className="section-hero"><div><div className="eyebrow dark">Employee administration</div><h2>Employees</h2><p>Create and manage employee records linked to projects and managers.</p></div></GlassCard>
       <div className="two-col">
-        <GlassCard><SectionTitle title="Employees Directory" description="Project-linked employee records with manager ownership and leave visibility." action={<ExportButtons rows={[["Name", "ID", "Project", "Manager", "Balance", "Status"], ...rows]} fileName="employees.xlsx" sheetName="Employees" />} /><div className="table-wrap premium-table"><table><thead><tr><th>Name</th><th>ID</th><th>Project</th><th>Manager</th><th>Balance</th><th>Status</th></tr></thead><tbody>{employees.map((emp) => <tr key={emp.id}><td><div className="strong">{emp.name}</div><div className="sub">{emp.role}</div></td><td>{emp.employeeId}</td><td>{projectName(projects, emp.projectId)}</td><td>{emp.manager}</td><td>{Math.max(emp.annualBalance - emp.usedLeave, 0)} days</td><td><StatusBadge status={emp.status} /></td></tr>)}</tbody></table></div></GlassCard>
+        <GlassCard>
+          <SectionTitle title="Employees Directory" description="Project-linked employee records with manager ownership and leave visibility." action={<ExportButtons rows={[["Name", "ID", "Project", "Manager", "Balance", "Status"], ...rows]} fileName="employees.xlsx" sheetName="Employees" />} />
+          <div className="table-wrap premium-table"><table><thead><tr><th>Name</th><th>ID</th><th>Project</th><th>Manager</th><th>Balance</th><th>Status</th></tr></thead><tbody>{employees.map((emp) => <tr key={emp.id}><td><div className="strong">{emp.name}</div><div className="sub">{emp.role}</div></td><td>{emp.employeeId}</td><td>{projectName(projects, emp.projectId)}</td><td>{emp.manager}</td><td>{Math.max(emp.annualBalance - emp.usedLeave, 0)} days</td><td><StatusBadge status={emp.status} /></td></tr>)}</tbody></table></div>
+        </GlassCard>
         <GlassCard>
           <SectionTitle title="Add Employee" description="Create a new employee and assign them to a specific project." />
-          <div className="form-grid"><div className="field"><label>Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div><div className="field"><label>Employee ID</label><input value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })} /></div><div className="field"><label>Role</label><input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} /></div><div className="field"><label>Project</label><select value={form.projectId} onChange={(e) => setForm({ ...form, projectId: e.target.value })}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div><div className="field"><label>Nationality</label><input value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} /></div><div className="field"><label>Status</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option>Active</option><option>On Leave</option><option>Pending Review</option></select></div><div className="field"><label>Annual Leave</label><input type="number" value={form.annualBalance} onChange={(e) => setForm({ ...form, annualBalance: Number(e.target.value) })} /></div><div className="field"><label>Salary</label><input type="number" value={form.salary} onChange={(e) => setForm({ ...form, salary: Number(e.target.value) })} /></div></div>
+          <div className="form-grid">
+            <div className="field"><label>Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+            <div className="field"><label>Employee ID</label><input value={form.employeeId} onChange={(e) => setForm({ ...form, employeeId: e.target.value })} /></div>
+            <div className="field"><label>Role</label><input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} /></div>
+            <div className="field"><label>Project</label><select value={form.projectId} onChange={(e) => setForm({ ...form, projectId: e.target.value })}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+            <div className="field"><label>Nationality</label><input value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} /></div>
+            <div className="field"><label>Status</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option>Active</option><option>On Leave</option><option>Pending Review</option></select></div>
+            <div className="field"><label>Annual Leave</label><input type="number" value={form.annualBalance} onChange={(e) => setForm({ ...form, annualBalance: Number(e.target.value) })} /></div>
+            <div className="field"><label>Salary</label><input type="number" value={form.salary} onChange={(e) => setForm({ ...form, salary: Number(e.target.value) })} /></div>
+          </div>
           <button className="btn primary full" onClick={addEmployee}><UserPlus size={14} /> Save Employee</button>
         </GlassCard>
-      </div>
-    </div>
-  );
-}
-
-function LeaveBalancesPage({ currentAccount, employees, setEmployees, projects }) {
-  const employeeSelf = employeeByAccount(currentAccount, employees);
-  if (!currentAccount.isAdminView) {
-    return <MyLeavePage currentAccount={currentAccount} employees={employees} projects={projects} />;
-  }
-  const rows = employees.map((emp) => [emp.name, projectName(projects, emp.projectId), emp.annualBalance, emp.usedLeave, Math.max(emp.annualBalance - emp.usedLeave, 0)]);
-  const [selectedId, setSelectedId] = useState(String(employees[0]?.id || ""));
-  const [annualBalance, setAnnualBalance] = useState(employees[0]?.annualBalance || 30);
-  const [usedLeave, setUsedLeave] = useState(employees[0]?.usedLeave || 0);
-  const selectedEmployee = employees.find((e) => String(e.id) === selectedId);
-  useEffect(() => {
-    if (selectedEmployee) {
-      setAnnualBalance(selectedEmployee.annualBalance);
-      setUsedLeave(selectedEmployee.usedLeave);
-    }
-  }, [selectedId]);
-  const saveBalance = () => setEmployees((prev) => prev.map((emp) => String(emp.id) === selectedId ? { ...emp, annualBalance: Number(annualBalance), usedLeave: Number(usedLeave) } : emp));
-  return (
-    <div className="page-stack">
-      <GlassCard className="section-hero"><div><div className="eyebrow dark">Leave governance</div><h2>Leave Balances</h2><p>Control annual leave allocation and used balances for every employee.</p></div></GlassCard>
-      <div className="two-col">
-        <GlassCard><SectionTitle title="Annual Leave Balances" description="Manually control annual leave allocation and usage for every employee." action={<ExportButtons rows={[["Employee", "Project", "Annual Balance", "Used Leave", "Remaining"], ...rows]} fileName="leave-balances.xlsx" sheetName="Leave Balances" />} /><div className="table-wrap premium-table"><table><thead><tr><th>Employee</th><th>Project</th><th>Annual Balance</th><th>Used Leave</th><th>Remaining</th></tr></thead><tbody>{employees.map((emp) => <tr key={emp.id}><td>{emp.name}</td><td>{projectName(projects, emp.projectId)}</td><td>{emp.annualBalance}</td><td>{emp.usedLeave}</td><td>{Math.max(emp.annualBalance - emp.usedLeave, 0)}</td></tr>)}</tbody></table></div></GlassCard>
-        <GlassCard><SectionTitle title="Update Balance" description="Select any employee and update leave values directly." /><div className="field"><label>Employee</label><select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>{employees.map((emp) => <option key={emp.id} value={String(emp.id)}>{emp.name} - {projectName(projects, emp.projectId)}</option>)}</select></div><div className="form-grid"><div className="field"><label>Annual Leave</label><input type="number" value={annualBalance} onChange={(e) => setAnnualBalance(Number(e.target.value))} /></div><div className="field"><label>Used Leave</label><input type="number" value={usedLeave} onChange={(e) => setUsedLeave(Number(e.target.value))} /></div></div>{selectedEmployee ? <div className="summary-box"><div className="summary-title">{selectedEmployee.name}</div><div>Remaining after save: {Math.max(annualBalance - usedLeave, 0)} days</div></div> : null}<button className="btn primary full" onClick={saveBalance}><Wallet size={14} /> Save Balance</button></GlassCard>
       </div>
     </div>
   );
@@ -632,7 +703,57 @@ function LeaveBalancesPage({ currentAccount, employees, setEmployees, projects }
 function MyLeavePage({ currentAccount, employees, projects }) {
   const emp = employeeByAccount(currentAccount, employees);
   const rows = [["Name", currentAccount.name], ["Project", emp ? projectName(projects, emp.projectId) : "-"], ["Annual Balance", emp?.annualBalance || 0], ["Used Leave", emp?.usedLeave || 0], ["Remaining", emp ? Math.max(emp.annualBalance - emp.usedLeave, 0) : 0]];
-  return <div className="page-stack"><GlassCard className="section-hero"><div><div className="eyebrow dark">Employee leave balance</div><h2>My Leave</h2><p>View your leave balance and submit new leave requests.</p></div></GlassCard><GlassCard><SectionTitle title="My Leave Balance" description="Visible to employee accounts." action={<ExportButtons rows={rows} fileName="my-leave.xlsx" sheetName="My Leave" />} /><div className="summary-box"><div className="summary-title">{currentAccount.name}</div><div>Remaining Leave: {emp ? Math.max(emp.annualBalance - emp.usedLeave, 0) : 0} days</div><div>Project: {emp ? projectName(projects, emp.projectId) : "-"}</div></div></GlassCard></div>;
+  return (
+    <div className="page-stack">
+      <GlassCard className="section-hero"><div><div className="eyebrow dark">Employee leave balance</div><h2>My Leave</h2><p>View your leave balance and submit new leave requests.</p></div></GlassCard>
+      <GlassCard>
+        <SectionTitle title="My Leave Balance" description="Visible to employee accounts." action={<ExportButtons rows={rows} fileName="my-leave.xlsx" sheetName="My Leave" />} />
+        <div className="summary-box">
+          <div className="summary-title">{currentAccount.name}</div>
+          <div>Remaining Leave: {emp ? Math.max(emp.annualBalance - emp.usedLeave, 0) : 0} days</div>
+          <div>Project: {emp ? projectName(projects, emp.projectId) : "-"}</div>
+        </div>
+      </GlassCard>
+    </div>
+  );
+}
+
+function LeaveBalancesPage({ currentAccount, employees, setEmployees, projects }) {
+  if (!currentAccount.isAdminView) return <MyLeavePage currentAccount={currentAccount} employees={employees} projects={projects} />;
+
+  const rows = employees.map((emp) => [emp.name, projectName(projects, emp.projectId), emp.annualBalance, emp.usedLeave, Math.max(emp.annualBalance - emp.usedLeave, 0)]);
+  const [selectedId, setSelectedId] = useState(String(employees[0]?.id || ""));
+  const [annualBalance, setAnnualBalance] = useState(employees[0]?.annualBalance || 30);
+  const [usedLeave, setUsedLeave] = useState(employees[0]?.usedLeave || 0);
+  const selectedEmployee = employees.find((e) => String(e.id) === selectedId);
+
+  useEffect(() => {
+    if (selectedEmployee) {
+      setAnnualBalance(selectedEmployee.annualBalance);
+      setUsedLeave(selectedEmployee.usedLeave);
+    }
+  }, [selectedId]);
+
+  const saveBalance = () => setEmployees((prev) => prev.map((emp) => String(emp.id) === selectedId ? { ...emp, annualBalance: Number(annualBalance), usedLeave: Number(usedLeave) } : emp));
+
+  return (
+    <div className="page-stack">
+      <GlassCard className="section-hero"><div><div className="eyebrow dark">Leave governance</div><h2>Leave Balances</h2><p>Control annual leave allocation and used balances for every employee.</p></div></GlassCard>
+      <div className="two-col">
+        <GlassCard>
+          <SectionTitle title="Annual Leave Balances" description="Manually control annual leave allocation and usage for every employee." action={<ExportButtons rows={[["Employee", "Project", "Annual Balance", "Used Leave", "Remaining"], ...rows]} fileName="leave-balances.xlsx" sheetName="Leave Balances" />} />
+          <div className="table-wrap premium-table"><table><thead><tr><th>Employee</th><th>Project</th><th>Annual Balance</th><th>Used Leave</th><th>Remaining</th></tr></thead><tbody>{employees.map((emp) => <tr key={emp.id}><td>{emp.name}</td><td>{projectName(projects, emp.projectId)}</td><td>{emp.annualBalance}</td><td>{emp.usedLeave}</td><td>{Math.max(emp.annualBalance - emp.usedLeave, 0)}</td></tr>)}</tbody></table></div>
+        </GlassCard>
+        <GlassCard>
+          <SectionTitle title="Update Balance" description="Select any employee and update leave values directly." />
+          <div className="field"><label>Employee</label><select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>{employees.map((emp) => <option key={emp.id} value={String(emp.id)}>{emp.name} - {projectName(projects, emp.projectId)}</option>)}</select></div>
+          <div className="form-grid"><div className="field"><label>Annual Leave</label><input type="number" value={annualBalance} onChange={(e) => setAnnualBalance(Number(e.target.value))} /></div><div className="field"><label>Used Leave</label><input type="number" value={usedLeave} onChange={(e) => setUsedLeave(Number(e.target.value))} /></div></div>
+          {selectedEmployee ? <div className="summary-box"><div className="summary-title">{selectedEmployee.name}</div><div>Remaining after save: {Math.max(annualBalance - usedLeave, 0)} days</div></div> : null}
+          <button className="btn primary full" onClick={saveBalance}><Wallet size={14} /> Save Balance</button>
+        </GlassCard>
+      </div>
+    </div>
+  );
 }
 
 function PayrollPage({ currentAccount, employees, projects }) {
@@ -641,19 +762,31 @@ function PayrollPage({ currentAccount, employees, projects }) {
     const rows = [["Name", currentAccount.name], ["Basic Salary", emp?.salary || 0], ["Housing", emp?.housing || 0], ["Transport", emp?.transport || 0]];
     return <div className="page-stack"><GlassCard><SectionTitle title="My Salary Data" description="Employee salary viewing is limited to personal information." action={<ExportButtons rows={rows} fileName="my-salary.xlsx" sheetName="My Salary" />} /><div className="summary-box"><div className="summary-title">{currentAccount.name}</div><div>Basic Salary: {emp?.salary || 0}</div><div>Housing: {emp?.housing || 0}</div><div>Transport: {emp?.transport || 0}</div></div></GlassCard></div>;
   }
+
   const salaryRows = employees.map((emp) => ({ ...emp, deductions: emp.usedLeave * 20, netSalary: emp.salary + emp.housing + emp.transport - emp.usedLeave * 20 }));
   const rows = salaryRows.map((row) => [row.name, projectName(projects, row.projectId), row.salary, row.housing, row.transport, row.deductions, row.netSalary]);
-  return <div className="page-stack"><GlassCard className="section-hero"><div><div className="eyebrow dark">Payroll preparation</div><h2>Payroll</h2><p>Track payroll preparation items, salary details and deduction impact.</p></div></GlassCard><GlassCard><SectionTitle title="Payroll Table" description="Salary details commonly needed by HR for payroll preparation." action={<ExportButtons rows={[["Employee", "Project", "Basic Salary", "Housing", "Transport", "Deductions", "Net Salary"], ...rows]} fileName="payroll.xlsx" sheetName="Payroll" />} /><div className="table-wrap premium-table"><table><thead><tr><th>Employee</th><th>Project</th><th>Basic Salary</th><th>Housing</th><th>Transport</th><th>Deductions</th><th>Net Salary</th></tr></thead><tbody>{salaryRows.map((row) => <tr key={row.id}><td>{row.name}</td><td>{projectName(projects, row.projectId)}</td><td>{row.salary}</td><td>{row.housing}</td><td>{row.transport}</td><td>{row.deductions}</td><td>{row.netSalary}</td></tr>)}</tbody></table></div></GlassCard></div>;
+
+  return (
+    <div className="page-stack">
+      <GlassCard className="section-hero"><div><div className="eyebrow dark">Payroll preparation</div><h2>Payroll</h2><p>Track payroll preparation items, salary details and deduction impact.</p></div></GlassCard>
+      <GlassCard>
+        <SectionTitle title="Payroll Table" description="Salary details commonly needed by HR for payroll preparation." action={<ExportButtons rows={[["Employee", "Project", "Basic Salary", "Housing", "Transport", "Deductions", "Net Salary"], ...rows]} fileName="payroll.xlsx" sheetName="Payroll" />} />
+        <div className="table-wrap premium-table"><table><thead><tr><th>Employee</th><th>Project</th><th>Basic Salary</th><th>Housing</th><th>Transport</th><th>Deductions</th><th>Net Salary</th></tr></thead><tbody>{salaryRows.map((row) => <tr key={row.id}><td>{row.name}</td><td>{projectName(projects, row.projectId)}</td><td>{row.salary}</td><td>{row.housing}</td><td>{row.transport}</td><td>{row.deductions}</td><td>{row.netSalary}</td></tr>)}</tbody></table></div>
+      </GlassCard>
+    </div>
+  );
 }
 
 function ProjectsPage({ currentAccount, projects, setProjects, employees }) {
   if (!currentAccount.isAdminView) return <div className="page-stack"><GlassCard><div className="empty-box">Projects section is available to administrative HR roles only.</div></GlassCard></div>;
+
   const [activeProject, setActiveProject] = useState(projects[0]?.id || "");
   const [manager, setManager] = useState(projects[0]?.manager || "");
   const [phone, setPhone] = useState(projects[0]?.phone || "");
   const [email, setEmail] = useState(projects[0]?.email || "");
   const project = projects.find((p) => p.id === activeProject);
   const projectEmployees = employees.filter((e) => e.projectId === activeProject);
+
   useEffect(() => {
     const found = projects.find((p) => p.id === activeProject);
     if (found) {
@@ -662,30 +795,63 @@ function ProjectsPage({ currentAccount, projects, setProjects, employees }) {
       setEmail(found.email);
     }
   }, [activeProject, projects]);
+
   const saveProjectInfo = () => setProjects((prev) => prev.map((p) => p.id === activeProject ? { ...p, manager, phone, email } : p));
   const rows = projectEmployees.map((emp) => [emp.name, emp.role, emp.employeeId, emp.status]);
+
   return (
     <div className="page-stack">
       <GlassCard className="section-hero"><div><div className="eyebrow dark">Project ownership</div><h2>Projects</h2><p>Manage project structure, manager contacts and workforce distribution.</p></div></GlassCard>
       <GlassCard><SectionTitle title="Project Structure" description="Each project has its own employees, manager and contact information." /><div className="project-tabs">{projects.map((item) => <button key={item.id} className={`project-tab ${activeProject === item.id ? "active" : ""}`} onClick={() => setActiveProject(item.id)}><div className="strong">{item.name}</div><div className="sub">{item.code}</div></button>)}</div></GlassCard>
-      <div className="two-col"><GlassCard><SectionTitle title={`${project?.name || ""} Manager`} description="Primary manager and contact details for this project." /><div className="form-grid"><div className="field"><label>Manager Name</label><input value={manager} onChange={(e) => setManager(e.target.value)} /></div><div className="field"><label>Phone Number</label><input value={phone} onChange={(e) => setPhone(e.target.value)} /></div><div className="field full-span"><label>Email</label><input value={email} onChange={(e) => setEmail(e.target.value)} /></div></div><div className="contact-row"><div className="contact-pill"><UserCog size={14} /> {manager}</div><div className="contact-pill"><Phone size={14} /> {phone}</div><div className="contact-pill"><Mail size={14} /> {email}</div></div><button className="btn primary full" onClick={saveProjectInfo}>Save Project Contact</button></GlassCard><GlassCard><SectionTitle title="Employees in Project" description="Only employees assigned to this project are shown below." action={<ExportButtons rows={[["Employee", "Role", "ID", "Status"], ...rows]} fileName={`${project?.code || "project"}-employees.xlsx`} sheetName="Project Employees" />} /><div className="table-wrap premium-table"><table><thead><tr><th>Employee</th><th>Role</th><th>ID</th><th>Status</th></tr></thead><tbody>{projectEmployees.map((emp) => <tr key={emp.id}><td>{emp.name}</td><td>{emp.role}</td><td>{emp.employeeId}</td><td><StatusBadge status={emp.status} /></td></tr>)}</tbody></table></div></GlassCard></div>
+      <div className="two-col">
+        <GlassCard>
+          <SectionTitle title={`${project?.name || ""} Manager`} description="Primary manager and contact details for this project." />
+          <div className="form-grid"><div className="field"><label>Manager Name</label><input value={manager} onChange={(e) => setManager(e.target.value)} /></div><div className="field"><label>Phone Number</label><input value={phone} onChange={(e) => setPhone(e.target.value)} /></div><div className="field full-span"><label>Email</label><input value={email} onChange={(e) => setEmail(e.target.value)} /></div></div>
+          <div className="contact-row"><div className="contact-pill"><UserCog size={14} /> {manager}</div><div className="contact-pill"><Phone size={14} /> {phone}</div><div className="contact-pill"><Mail size={14} /> {email}</div></div>
+          <button className="btn primary full" onClick={saveProjectInfo}>Save Project Contact</button>
+        </GlassCard>
+        <GlassCard>
+          <SectionTitle title="Employees in Project" description="Only employees assigned to this project are shown below." action={<ExportButtons rows={[["Employee", "Role", "ID", "Status"], ...rows]} fileName={`${project?.code || "project"}-employees.xlsx`} sheetName="Project Employees" />} />
+          <div className="table-wrap premium-table"><table><thead><tr><th>Employee</th><th>Role</th><th>ID</th><th>Status</th></tr></thead><tbody>{projectEmployees.map((emp) => <tr key={emp.id}><td>{emp.name}</td><td>{emp.role}</td><td>{emp.employeeId}</td><td><StatusBadge status={emp.status} /></td></tr>)}</tbody></table></div>
+        </GlassCard>
+      </div>
     </div>
   );
 }
 
 function ProjectFilesPage({ currentAccount, projects, filesByProject, setFilesByProject }) {
   if (!currentAccount.isAdminView) return <div className="page-stack"><GlassCard><div className="empty-box">Project files are available to administrative HR roles only.</div></GlassCard></div>;
+
   const [activeProject, setActiveProject] = useState(projects[0]?.id || "");
   const [form, setForm] = useState({ category: "Leave", title: "", note: "" });
   const project = projects.find((p) => p.id === activeProject);
   const items = filesByProject[activeProject] || [];
+
   const addFile = () => {
     if (!form.title) return;
     setFilesByProject((prev) => ({ ...prev, [activeProject]: [...(prev[activeProject] || []), { id: Date.now(), category: form.category, title: form.title, note: form.note, status: "Pending" }] }));
     setForm({ category: "Leave", title: "", note: "" });
   };
+
   const rows = items.map((file) => [file.category, file.title, file.note, file.status]);
-  return <div className="page-stack"><GlassCard className="section-hero"><div><div className="eyebrow dark">Project documentation</div><h2>Project Files</h2></div></GlassCard><div className="two-col"><GlassCard><SectionTitle title="Project Files" description="Separate leave and task records for each project." /><div className="field"><label>Project</label><select value={activeProject} onChange={(e) => setActiveProject(e.target.value)}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div><div className="form-grid"><div className="field"><label>Category</label><select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}><option>Leave</option><option>Takleef</option><option>Salary Transfer</option><option>Other</option></select></div><div className="field"><label>File Title</label><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div><div className="field full-span"><label>Note</label><textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div></div><button className="btn primary full" onClick={addFile}><FolderOpen size={14} /> Add File Record</button></GlassCard><GlassCard><SectionTitle title={`${project?.name || ""} Records`} description="Files attached to the selected project section." action={<ExportButtons rows={[["Category", "Title", "Note", "Status"], ...rows]} fileName={`${project?.code || "project"}-files.xlsx`} sheetName="Project Files" />} /><div className="table-wrap premium-table"><table><thead><tr><th>Category</th><th>Title</th><th>Note</th><th>Status</th></tr></thead><tbody>{items.map((file) => <tr key={file.id}><td>{file.category}</td><td>{file.title}</td><td>{file.note}</td><td><StatusBadge status={file.status} /></td></tr>)}</tbody></table></div></GlassCard></div></div>;
+
+  return (
+    <div className="page-stack">
+      <GlassCard className="section-hero"><div><div className="eyebrow dark">Project documentation</div><h2>Project Files</h2></div></GlassCard>
+      <div className="two-col">
+        <GlassCard>
+          <SectionTitle title="Project Files" description="Separate leave and task records for each project." />
+          <div className="field"><label>Project</label><select value={activeProject} onChange={(e) => setActiveProject(e.target.value)}>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+          <div className="form-grid"><div className="field"><label>Category</label><select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}><option>Leave</option><option>Takleef</option><option>Salary Transfer</option><option>Other</option></select></div><div className="field"><label>File Title</label><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div><div className="field full-span"><label>Note</label><textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div></div>
+          <button className="btn primary full" onClick={addFile}><FolderOpen size={14} /> Add File Record</button>
+        </GlassCard>
+        <GlassCard>
+          <SectionTitle title={`${project?.name || ""} Records`} description="Files attached to the selected project section." action={<ExportButtons rows={[["Category", "Title", "Note", "Status"], ...rows]} fileName={`${project?.code || "project"}-files.xlsx`} sheetName="Project Files" />} />
+          <div className="table-wrap premium-table"><table><thead><tr><th>Category</th><th>Title</th><th>Note</th><th>Status</th></tr></thead><tbody>{items.map((file) => <tr key={file.id}><td>{file.category}</td><td>{file.title}</td><td>{file.note}</td><td><StatusBadge status={file.status} /></td></tr>)}</tbody></table></div>
+        </GlassCard>
+      </div>
+    </div>
+  );
 }
 
 function SalaryTransfersPage({ currentAccount, requests, projects }) {
@@ -701,30 +867,17 @@ function TakleefPage({ currentAccount, requests, projects }) {
 }
 
 function AccountsPage({ currentAccount, accounts, setAccounts, employees, projects }) {
-  if (!hasPermission(currentAccount, PERMISSIONS.accounts)) {
-    return <div className="page-stack"><GlassCard><div className="empty-box">Account management is available to the HR Manager only.</div></GlassCard></div>;
-  }
+  if (!hasPermission(currentAccount, PERMISSIONS.accounts)) return <div className="page-stack"><GlassCard><div className="empty-box">Account management is available to the HR Manager only.</div></GlassCard></div>;
+
   const rows = accounts.map((acc) => [acc.name, acc.username, acc.title, acc.role, acc.permissions.length]);
-  const [form, setForm] = useState({
-    name: "",
-    username: "",
-    password: "123456",
-    title: "Employee",
-    role: "Employee",
-    employeeId: "",
-    projectId: projects[0]?.id || "",
-    permissions: roleTemplates.Employee,
-  });
+  const [form, setForm] = useState({ name: "", username: "", password: "123456", title: "Employee", role: "Employee", employeeId: "", projectId: projects[0]?.id || "", permissions: roleTemplates.Employee });
 
   useEffect(() => {
     setForm((prev) => ({ ...prev, permissions: roleTemplates[prev.role] || roleTemplates.Employee }));
   }, [form.role]);
 
   const togglePermission = (permission) => {
-    setForm((prev) => ({
-      ...prev,
-      permissions: prev.permissions.includes(permission) ? prev.permissions.filter((p) => p !== permission) : [...prev.permissions, permission],
-    }));
+    setForm((prev) => ({ ...prev, permissions: prev.permissions.includes(permission) ? prev.permissions.filter((p) => p !== permission) : [...prev.permissions, permission] }));
   };
 
   const createAccount = () => {
@@ -809,7 +962,7 @@ export default function HRPortalRedesign() {
     if (!visibleSidebar.find((item) => item.key === activePage)) {
       setActivePage(visibleSidebar[0]?.key || "dashboard");
     }
-  }, [currentAccount, activePage]);
+  }, [currentAccount]);
 
   if (!currentAccount) {
     return <><style>{styles}</style><LoginScreen accounts={accounts} onLogin={setCurrentAccount} /></>;
@@ -850,7 +1003,7 @@ export default function HRPortalRedesign() {
             </div>
           </GlassCard>
           <div className="content-stack">
-            {activePage === "dashboard" && <DashboardPage currentAccount={currentAccount} employees={employees} projects={projects} requests={requests} setActivePage={setActivePage} />}
+            {activePage === "dashboard" && <DashboardPage currentAccount={currentAccount} employees={employees} projects={projects} requests={requests} accounts={accounts} setActivePage={setActivePage} />}
             {activePage === "employees" && <EmployeesPage currentAccount={currentAccount} employees={employees} setEmployees={setEmployees} projects={projects} />}
             {activePage === "leaveBalances" && <LeaveBalancesPage currentAccount={currentAccount} employees={employees} setEmployees={setEmployees} projects={projects} />}
             {activePage === "approvals" && <ApprovalsPage currentAccount={currentAccount} requests={requests} setRequests={setRequests} employees={employees} setEmployees={setEmployees} projects={projects} />}
@@ -883,11 +1036,10 @@ const styles = `
 .login-page{min-height:100vh;padding:24px;background:linear-gradient(135deg,#eaf0f7,#f7faff,#dce8fb)}.login-shell{max-width:1460px;min-height:calc(100vh - 48px);margin:0 auto;display:grid;grid-template-columns:1.02fr .98fr;background:rgba(255,255,255,.74);border:1px solid rgba(255,255,255,.56);border-radius:34px;overflow:hidden}.login-left{position:relative;padding:40px;background:linear-gradient(145deg,#071120 0%,#0a1c37 38%,#123d74 100%);color:#fff;display:flex;flex-direction:column}.aurora{position:absolute;border-radius:999px;filter:blur(24px);opacity:.48}.aurora.one{width:240px;height:240px;background:#2563eb;top:-80px;left:-40px}.aurora.two{width:260px;height:260px;background:#1d4ed8;right:-70px;top:30px}.aurora.three{width:220px;height:220px;background:#38bdf8;bottom:-100px;left:24%}.login-brand-row{display:flex;align-items:center;gap:14px;position:relative;z-index:2}.login-brand-title{font-size:26px;font-weight:800;margin-top:8px}.login-copy{max-width:700px;margin-top:68px;position:relative;z-index:2}.login-copy h1{margin:0 0 16px;font-size:40px;line-height:1.08;font-weight:900}.login-copy p{margin:0;max-width:640px;font-size:15px;line-height:1.85;color:#d5e3f8}.login-right{display:flex;align-items:center;justify-content:center;padding:30px}.login-panel{width:100%;max-width:500px;background:rgba(255,255,255,.96);border:1px solid #e2e8f0;border-radius:28px;padding:30px}.login-head{display:flex;align-items:center;gap:14px;margin-bottom:22px}.login-head h2{margin:0;font-size:30px;font-weight:900}.login-head p{margin:6px 0 0;color:#64748b;font-size:13px}.field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}.field label{font-size:12px;font-weight:700;color:#334155}.field input,.field select,.field textarea,.search-box input{width:100%;border:1px solid #d7e0ea;border-radius:14px;background:#fff;color:#0f172a;outline:none}.field input,.field select,.search-box input{height:42px;padding:0 13px}.field textarea{min-height:106px;padding:13px;resize:vertical}.demo-box{margin-top:18px;border-radius:18px;border:1px solid #e5ebf3;background:#f8fbff;padding:16px;color:#475569;font-size:13px}.demo-title{font-weight:800;margin-bottom:10px}.error-box{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:11px 13px;border-radius:14px;margin-bottom:14px;font-size:13px}
 .app-shell{min-height:100vh;display:grid;grid-template-columns:278px 1fr;background:linear-gradient(180deg,var(--bg),var(--bg2))}.sidebar{padding:18px;background:linear-gradient(180deg,#041024 0%,#081938 40%,#0b2a58 100%);color:#fff;display:flex;flex-direction:column;gap:16px}.sidebar-userhead{padding:8px 6px 2px}.sidebar-user-name{font-size:18px;font-weight:900;color:#fff}.sidebar-user-role{font-size:12px;color:#cdd8ea;margin-top:6px}.nav-list{display:flex;flex-direction:column;gap:7px}.nav-btn{height:42px;border:none;border-radius:14px;background:transparent;color:#e7eefc;display:flex;align-items:center;gap:10px;padding:0 13px;font-weight:700;cursor:pointer;text-align:left;font-size:13px}.nav-btn.active{background:#fff;color:#0f172a}.sidebar-projects{margin-top:8px}.sidebar-chip{padding:9px 11px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e5eefc;margin-top:7px;font-size:12px}.main-shell{padding:16px}.topbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}.page-title{margin:5px 0 0;font-size:26px;line-height:1.1;max-width:520px}.page-sub{margin:7px 0 0;color:#64748b;font-size:14px}.topbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.search-box{min-width:280px;height:40px;border-radius:12px;border:1px solid #d7e0ea;background:#fff;padding:0 12px;display:flex;align-items:center;gap:8px}.search-box input{border:none;background:transparent;padding:0}.content-stack,.page-stack{display:flex;flex-direction:column;gap:16px}.menu-btn{display:none;width:40px;height:40px;border-radius:12px;border:1px solid #dce4ee;background:#fff;margin-bottom:8px;align-items:center;justify-content:center;cursor:pointer}
 .hero-card,.section-hero{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:end;background:linear-gradient(135deg,#f9fbff,#f6f9fe);border:1px solid #e6edf5}.hero-card h2,.section-hero h2{margin:8px 0 6px;font-size:28px;line-height:1.08}.hero-card p,.section-hero p{margin:0;max-width:760px;font-size:14px;line-height:1.8;color:#6a7a90}.hero-actions{display:flex;gap:8px;margin-top:14px}.hero-mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.mini-stat{display:flex;gap:10px;align-items:center;padding:12px;border-radius:16px;background:#fff;border:1px solid #e6edf5}.mini-stat-icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:#0f172a;color:#fff}.mini-stat-label{font-size:11px;color:#66758b}.mini-stat-value{font-size:18px;font-weight:900}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi-card{padding:16px}.kpi-top{display:flex}.kpi-icon{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:#0f172a;color:#fff}.kpi-label{margin-top:12px;color:#64748b;font-size:12px}.kpi-value{margin-top:5px;font-size:24px;font-weight:900}
-.section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}.section-title h3{margin:0;font-size:20px}.section-title p{margin:5px 0 0;color:#64748b;line-height:1.7;font-size:13px}.dashboard-grid-a{display:grid;grid-template-columns:1fr 1fr;gap:16px}.module-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.module-card{display:flex;align-items:center;gap:9px;padding:13px;border-radius:16px;border:1px solid #e6edf5;background:#fff;cursor:pointer;font-weight:700;text-align:left;font-size:13px}.metric-list{display:flex;flex-direction:column;gap:9px}.metric-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:14px;background:#f8fbff;border:1px solid #e6edf5;font-size:13px}.metric-row strong{font-size:19px}.simple-grid{display:grid;grid-template-columns:1fr;gap:12px}
-.table-wrap{overflow:auto}.attendance-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:14px 12px;border-bottom:1px solid #edf2f7;font-size:13px;vertical-align:middle}th{color:#64748b;font-weight:800;white-space:nowrap}td{color:#0f172a}.two-col{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full-span{grid-column:1/-1}.summary-box{padding:14px;border-radius:16px;background:#f8fbff;border:1px solid #e6edf5;color:#475569;line-height:1.7;margin-bottom:14px;font-size:13px}.summary-title{font-weight:900;color:#0f172a;margin-bottom:6px}.project-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.project-tab{padding:12px;border-radius:16px;border:1px solid #e6edf5;background:#fff;cursor:pointer;text-align:left}.project-tab.active{background:linear-gradient(135deg,#0f172a,#173d72);color:#fff;border-color:#173d72}.project-tab.active .sub,.project-tab.active .strong{color:#fff}.contact-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 14px}.contact-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;background:#f8fbff;border:1px solid #e6edf5;color:#334155;font-size:12px}.approval-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.approval-card{padding:14px;border-radius:18px;border:1px solid #e6edf5;background:#fff}.approval-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.approval-top h4{margin:0;font-size:16px}.approval-top p{margin:5px 0 0;color:#64748b;font-size:12px}.approval-body{margin-top:12px;display:grid;gap:8px;color:#334155;font-size:13px}.approval-actions{display:flex;gap:8px;margin-top:12px}.empty-box{padding:22px;border-radius:16px;background:#f8fbff;border:1px dashed #cbd5e1;color:#64748b;text-align:center;font-size:13px}.inline-actions{display:flex;gap:8px;flex-wrap:wrap}.upload-box{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.upload-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 14px;border-radius:12px;border:1px solid #dce4ef;background:#fff;cursor:pointer;font-size:13px;font-weight:700}.upload-note{font-size:13px;color:#64748b}.attendance-table th,.attendance-table td{min-width:70px;text-align:center;padding:10px 8px}.attendance-table .sticky-col{position:sticky;left:0;background:#fff;z-index:2;text-align:left;min-width:180px}.attendance-table .employee-col{font-weight:800}.attendance-table .weekend-head{background:#9fc5e8;color:#0f172a}.attendance-cell.weekend{background:#9fc5e8}.attendance-cell.single{background:#f6b26b}.attendance-cell.absent{color:#b91c1c;font-weight:800}.attendance-cell.leave{color:#1d4ed8;font-weight:800}.attendance-cell.hours{font-weight:700}.warning-box{padding:12px 14px;border-radius:14px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:13px;margin-bottom:14px}.permissions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}.permission-pill{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #e6edf5;border-radius:12px;background:#fff;font-size:12px}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.kpi-card{padding:16px}.kpi-top{display:flex}.kpi-icon{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:#0f172a;color:#fff}.kpi-label{margin-top:12px;color:#64748b;font-size:12px}.kpi-value{margin-top:5px;font-size:24px;font-weight:900}
+.section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}.section-title h3{margin:0;font-size:20px}.section-title p{margin:5px 0 0;color:#64748b;line-height:1.7;font-size:13px}.two-col{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full-span{grid-column:1/-1}.summary-box{padding:14px;border-radius:16px;background:#f8fbff;border:1px solid #e6edf5;color:#475569;line-height:1.7;margin-bottom:14px;font-size:13px}.summary-title{font-weight:900;color:#0f172a;margin-bottom:6px}.project-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.project-tab{padding:12px;border-radius:16px;border:1px solid #e6edf5;background:#fff;cursor:pointer;text-align:left}.project-tab.active{background:linear-gradient(135deg,#0f172a,#173d72);color:#fff;border-color:#173d72}.project-tab.active .sub,.project-tab.active .strong{color:#fff}.contact-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 14px}.contact-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;background:#f8fbff;border:1px solid #e6edf5;color:#334155;font-size:12px}.approval-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.approval-card{padding:14px;border-radius:18px;border:1px solid #e6edf5;background:#fff}.approval-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.approval-top h4{margin:0;font-size:16px}.approval-top p{margin:5px 0 0;color:#64748b;font-size:12px}.approval-body{margin-top:12px;display:grid;gap:8px;color:#334155;font-size:13px}.approval-actions{display:flex;gap:8px;margin-top:12px}.empty-box{padding:22px;border-radius:16px;background:#f8fbff;border:1px dashed #cbd5e1;color:#64748b;text-align:center;font-size:13px}.inline-actions{display:flex;gap:8px;flex-wrap:wrap}.upload-box{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.upload-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 14px;border-radius:12px;border:1px solid #dce4ef;background:#fff;cursor:pointer;font-size:13px;font-weight:700}.upload-note{font-size:13px;color:#64748b}.table-wrap{overflow:auto}.attendance-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:14px 12px;border-bottom:1px solid #edf2f7;font-size:13px;vertical-align:middle}th{color:#64748b;font-weight:800;white-space:nowrap}.attendance-table th,.attendance-table td{min-width:70px;text-align:center;padding:10px 8px}.attendance-table .sticky-col{position:sticky;left:0;background:#fff;z-index:2;text-align:left;min-width:180px}.attendance-table .employee-col{font-weight:800}.attendance-table .weekend-head{background:#9fc5e8;color:#0f172a}.attendance-cell.weekend{background:#9fc5e8}.attendance-cell.single{background:#f6b26b}.attendance-cell.absent{color:#b91c1c;font-weight:800}.attendance-cell.leave{color:#1d4ed8;font-weight:800}.attendance-cell.hours{font-weight:700}.warning-box{padding:12px 14px;border-radius:14px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:13px;margin-bottom:14px}.permissions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}.permission-pill{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #e6edf5;border-radius:12px;background:#fff;font-size:12px}
 .status-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid transparent}.status-badge.success{background:#ecfdf5;color:#047857;border-color:#a7f3d0}.status-badge.warning{background:#fffbeb;color:#b45309;border-color:#fde68a}.status-badge.danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca}.status-badge.info{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.status-badge.neutral{background:#f8fafc;color:#475569;border-color:#e2e8f0}
-@media (max-width:1200px){.dashboard-grid-a,.two-col,.section-hero,.hero-card{grid-template-columns:1fr}.page-title{max-width:100%}.hero-mini-grid,.permissions-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:960px){.app-shell{grid-template-columns:1fr}.sidebar{position:fixed;left:0;top:0;bottom:0;width:290px;z-index:100;transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}.menu-btn{display:inline-flex}.topbar{flex-direction:column}.topbar-actions{width:100%}.search-box{min-width:100%}.form-grid,.hero-mini-grid,.module-grid,.project-tabs,.permissions-grid{grid-template-columns:1fr}.page-title{font-size:24px}.login-copy h1{font-size:34px}}
-@media (max-width:640px){.login-page,.main-shell{padding:12px}.glass-card,.login-panel,.login-left{padding:16px}.kpi-grid,.module-grid,.project-tabs,.permissions-grid{grid-template-columns:1fr}.page-title{font-size:22px}.hero-card h2,.section-hero h2{font-size:24px}.login-copy h1{font-size:26px}}
+@media (max-width:1200px){.kpi-grid,.two-col,.section-hero,.hero-card{grid-template-columns:1fr}.page-title{max-width:100%}.hero-mini-grid,.permissions-grid,.project-tabs{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:960px){.app-shell{grid-template-columns:1fr}.sidebar{position:fixed;left:0;top:0;bottom:0;width:290px;z-index:100;transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}.menu-btn{display:inline-flex}.topbar{flex-direction:column}.topbar-actions{width:100%}.search-box{min-width:100%}.form-grid,.hero-mini-grid,.permissions-grid,.project-tabs,.kpi-grid{grid-template-columns:1fr}.page-title{font-size:24px}.login-copy h1{font-size:34px}}
+@media (max-width:640px){.login-page,.main-shell{padding:12px}.glass-card,.login-panel,.login-left{padding:16px}.kpi-grid,.permissions-grid,.project-tabs{grid-template-columns:1fr}.page-title{font-size:22px}.hero-card h2,.section-hero h2{font-size:24px}.login-copy h1{font-size:26px}}
 `;
