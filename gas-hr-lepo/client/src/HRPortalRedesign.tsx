@@ -443,7 +443,7 @@ function buildAttendanceState(records) {
 
     const exception = String(row["Exception"] || "").trim();
     const leave = String(row["Leave"] || "").trim();
-    const totalHours = parseHours(row["Total Work Hours"]);
+    const totalHours = parseHours(row["Regular hours"] || row["Regular Hours"] || row["Total Work Hours"]);
     const inTime = String(row["In"] || "").trim();
     const outTime = String(row["Out"] || "").trim();
 
@@ -498,11 +498,13 @@ function AttendancePage({ currentAccount }) {
   const [attendanceState, setAttendanceState] = useState({ days: [], rows: [], monthTitle: "Attendance" });
   const [fileName, setFileName] = useState("");
   const [monthName, setMonthName] = useState("Attendance");
+  const [employeeFilter, setEmployeeFilter] = useState("");
 
-  const totalEmployees = attendanceState.rows.length;
-  const totalHours = attendanceState.rows.reduce((sum, row) => sum + row.totalHours, 0);
-  const absentCount = attendanceState.rows.reduce((sum, row) => sum + row.absentCount, 0);
-  const singlePunchCount = attendanceState.rows.reduce((sum, row) => sum + row.singlePunchCount, 0);
+  const filteredRows = attendanceState.rows.filter((row) => row.name.toLowerCase().includes(employeeFilter.toLowerCase()));
+  const totalEmployees = filteredRows.length;
+  const totalHours = filteredRows.reduce((sum, row) => sum + row.totalHours, 0);
+  const absentCount = filteredRows.reduce((sum, row) => sum + row.absentCount, 0);
+  const singlePunchCount = filteredRows.reduce((sum, row) => sum + row.singlePunchCount, 0);
 
   const onFileUpload = (event) => {
     const file = event.target.files?.[0];
@@ -521,7 +523,7 @@ function AttendancePage({ currentAccount }) {
 
   const exportRows = [
     ["Employee", ...attendanceState.days.map((day) => day.label), "Total Hours", "Absent", "Single Punch"],
-    ...attendanceState.rows.map((row) => [row.name, ...row.cells.map((cell) => cell.value), Number(row.totalHours.toFixed(2)), row.absentCount, row.singlePunchCount]),
+    ...filteredRows.map((row) => [row.name, ...row.cells.map((cell) => cell.value), Number(row.totalHours.toFixed(2)), row.absentCount, row.singlePunchCount]),
   ];
 
   return (
@@ -541,11 +543,15 @@ function AttendancePage({ currentAccount }) {
       </GlassCard>
       <GlassCard>
         <SectionTitle title="Biometric Import" description="Upload the raw CSV exported from your attendance device." action={<ExportButtons rows={exportRows} fileName="attendance-sheet.xlsx" sheetName="Attendance" />} />
+        <div className="form-grid" style={{ marginBottom: 14 }}>
+          <div className="field"><label>Filter Employee</label><input value={employeeFilter} onChange={(e) => setEmployeeFilter(e.target.value)} placeholder="Search employee name" /></div>
+          <div className="field"><label>Detected Month</label><input value={monthName} readOnly /></div>
+        </div>
         {!currentAccount.isAdminView ? <div className="empty-box">Attendance import is available to administrative HR roles only.</div> : <div className="upload-box"><label className="upload-btn"><Upload size={14} /> Upload CSV<input type="file" accept=".csv" hidden onChange={onFileUpload} /></label><div className="upload-note">{fileName || "No file uploaded yet"}</div></div>}
       </GlassCard>
       <GlassCard>
         <SectionTitle title={monthName} description="Generated monthly attendance sheet ready for HR review and Excel download." />
-        {attendanceState.rows.length === 0 ? <div className="empty-box">Upload the attendance CSV file to generate the monthly grid.</div> : (
+        {filteredRows.length === 0 ? <div className="empty-box">Upload the attendance CSV file to generate the monthly grid.</div> : (
           <div className="attendance-table-wrap">
             <table className="attendance-table">
               <thead>
@@ -558,7 +564,7 @@ function AttendancePage({ currentAccount }) {
                 </tr>
               </thead>
               <tbody>
-                {attendanceState.rows.map((row) => (
+                {filteredRows.map((row) => (
                   <tr key={row.name}>
                     <td className="sticky-col employee-col">{row.name}</td>
                     {row.cells.map((cell, i) => <td key={i} className={`attendance-cell ${cell.type}`}>{cell.value}</td>)}
@@ -582,6 +588,16 @@ function RequestsPage({ currentAccount, employees, requests, setRequests, projec
   const rows = visibleRequests.map((req) => [req.employee, req.type, projectName(projects, req.projectId), req.days, req.date, req.status, req.attachmentName || "-"]);
   const [form, setForm] = useState({ type: "Annual Leave", days: 1, note: "", attachmentName: "" });
 
+  const onAttachmentChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+      window.alert("Please upload a PDF file only.");
+      return;
+    }
+    setForm((prev) => ({ ...prev, attachmentName: file.name }));
+  };
+
   const submitRequest = () => {
     const targetEmployee = currentAccount.isAdminView ? employees[0] : employeeSelf;
     if (!targetEmployee) return;
@@ -599,7 +615,7 @@ function RequestsPage({ currentAccount, employees, requests, setRequests, projec
             <div className="field"><label>Request Type</label><select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}><option>Annual Leave</option><option>Salary Certificate</option><option>Salary Transfer</option><option>Takleef</option></select></div>
             <div className="field"><label>Days</label><input type="number" value={form.days} onChange={(e) => setForm({ ...form, days: Number(e.target.value) })} disabled={!(form.type === "Annual Leave" || form.type === "Takleef")} /></div>
             <div className="field full-span"><label>Note</label><textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div>
-            <div className="field full-span"><label>PDF Attachment Name</label><input value={form.attachmentName} onChange={(e) => setForm({ ...form, attachmentName: e.target.value })} placeholder="example.pdf" /></div>
+            <div className="field full-span"><label>PDF Attachment</label><input type="file" accept="application/pdf,.pdf" onChange={onAttachmentChange} /></div><div className="field full-span"><label>Attached File Name</label><input value={form.attachmentName} readOnly placeholder="No PDF selected" /></div>
           </div>
           <button className="btn primary full" onClick={submitRequest}><Plus size={14} /> Submit Request</button>
         </GlassCard>
