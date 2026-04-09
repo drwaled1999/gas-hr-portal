@@ -207,7 +207,16 @@ function StatusBadge({ status }) {
   return <span className={`status-badge ${statusClass(status)}`}>{status}</span>;
 }
 
-function BrandMark({ small = false }) {
+function BrandMark() {
+  return (
+    <div className="brandmark">
+      <div className="brandmark-circle">
+        <span className="brandmark-gas">GAS</span>
+        <span className="brandmark-sub">HR</span>
+      </div>
+    </div>
+  );
+}) {
   return (
     <div className={`brand-mark ${small ? "small" : ""}`}>
       <div className="brand-inner">
