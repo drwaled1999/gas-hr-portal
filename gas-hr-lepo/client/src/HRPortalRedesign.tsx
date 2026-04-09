@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 
 const ADMIN_TITLES = ["HR Manager", "HR Admin", "HR Assistant", "Admin Assistant", "Site Administrator"];
+const SAUDI_BANKS = ["Al Rajhi Bank", "SNB", "Riyad Bank", "Bank Albilad", "Banque Saudi Fransi", "Saudi Investment Bank", "Arab National Bank", "SABB", "Bank AlJazira", "Emirates NBD", "Alinma Bank"];
 
 const PERMISSIONS = {
   dashboard: "dashboard",
@@ -800,6 +801,8 @@ export default function HRPortalRedesign() {
   const [requests, setRequests] = useState(() => (typeof window !== "undefined" ? storage.get("hr_requests", initialRequests) : initialRequests));
   const [filesByProject, setFilesByProject] = useState(() => (typeof window !== "undefined" ? storage.get("hr_files", initialFiles) : initialFiles));
   const [portalLocked, setPortalLocked] = useState(() => (typeof window !== "undefined" ? storage.get("hr_portal_locked", false) : false));
+  const [language, setLanguage] = useState(() => (typeof window !== "undefined" ? storage.get("hr_language", "ar") : "ar"));
+  const [themeMode, setThemeMode] = useState(() => (typeof window !== "undefined" ? storage.get("hr_theme", "light") : "light"));
   const [currentAccount, setCurrentAccount] = useState(null);
   const [activePage, setActivePage] = useState("dashboard");
   const [mobileSidebar, setMobileSidebar] = useState(false);
@@ -824,7 +827,9 @@ export default function HRPortalRedesign() {
     storage.set("hr_requests", requests);
     storage.set("hr_files", filesByProject);
     storage.set("hr_portal_locked", portalLocked);
-  }, [accounts, employees, projects, requests, filesByProject, portalLocked]);
+    storage.set("hr_language", language);
+    storage.set("hr_theme", themeMode);
+  }, [accounts, employees, projects, requests, filesByProject, portalLocked, language, themeMode]);
 
   const visibleSidebar = currentAccount ? sidebarCatalog.filter((item) => hasPermission(currentAccount, item.permission)) : [];
 
@@ -840,17 +845,17 @@ export default function HRPortalRedesign() {
   }
 
   if (!currentAccount) {
-    return <><style>{styles}</style><LoginScreen accounts={accounts} onLogin={setCurrentAccount} /></>;
+    return <><style>{styles}</style><LoginScreen accounts={accounts} onLogin={setCurrentAccount} language={language} setLanguage={setLanguage} themeMode={themeMode} setThemeMode={setThemeMode} /></>;
   }
 
   if (portalLocked && currentAccount && !currentAccount.isAdminView) {
-    return <><style>{styles}</style><PortalLoader mode="restricted" title="Portal Restricted" subtitle="Only HR Manager and administrative accounts can access the portal right now." onBack={() => { setCurrentAccount(null); setActivePage("dashboard"); }} /></>;
+    return <><style>{styles}</style><div className={themeMode === "dark" ? "theme-dark" : "theme-light"}><PortalLoader mode="restricted" title={language === "ar" ? "الدخول مقيد" : "Portal Restricted"} subtitle={language === "ar" ? "فقط مدير الموارد البشرية والحسابات الإدارية يمكنهم الدخول الآن" : "Only HR Manager and administrative accounts can access the portal right now."} onBack={() => { setCurrentAccount(null); setActivePage("dashboard"); }} /></div></>;
   }
 
   return (
     <>
       <style>{styles}</style>
-      <div className="app-shell">
+      <div className={`${themeMode === "dark" ? "theme-dark" : "theme-light"} app-shell`} dir={language === "ar" ? "rtl" : "ltr"}>
         {(!isMobile || mobileSidebar) && (
           <aside className={`sidebar ${isMobile ? "mobile-open" : ""}`}>
             <div className="sidebar-userhead">
@@ -873,7 +878,7 @@ export default function HRPortalRedesign() {
               <button className="menu-btn" onClick={() => setMobileSidebar((v) => !v)}><Menu size={16} /></button>
               <div className="eyebrow dark">Human Resources Platform</div>
               <h1 className="page-title">{visibleSidebar.find((s) => s.key === activePage)?.label || "Dashboard"}</h1>
-              <p className="page-sub">Signed in as {currentAccount.name} ({currentAccount.title})</p>
+              <p className="page-sub">{language === "ar" ? (new Date().getHours() < 12 ? `صباح الخير ${currentAccount.name}` : `مساء الخير ${currentAccount.name}`) : (new Date().getHours() < 12 ? `Good morning, ${currentAccount.name}` : `Good evening, ${currentAccount.name}`)}</p><p className="page-sub">{language === "ar" ? `تم تسجيل الدخول بواسطة ${currentAccount.name} (${currentAccount.title})` : `Signed in as ${currentAccount.name} (${currentAccount.title})`}</p>
             </div>
             <div className="topbar-actions">
               <div className="search-box"><Search size={14} /><input placeholder="Search employees, projects, approvals..." /></div>
@@ -906,6 +911,7 @@ export default function HRPortalRedesign() {
 }
 
 const styles = `
+.theme-dark{--bg:#071120;--bg2:#0b1730;--line:#1c2b47;--text:#eaf0ff;--muted:#9fb1cf}.theme-dark .glass-card,.theme-dark .login-panel,.theme-dark .mini-stat,.theme-dark .approval-card,.theme-dark .attendance-table-wrap,.theme-dark .project-tab,.theme-dark .summary-box,.theme-dark .contact-pill,.theme-dark .search-box,.theme-dark .field input,.theme-dark .field select,.theme-dark .field textarea,.theme-dark .upload-btn,.theme-dark .demo-box{background:rgba(10,20,40,.88);color:#eaf0ff;border-color:#223656}.theme-dark .section-title p,.theme-dark .page-sub,.theme-dark .sub,.theme-dark .mini-stat-label,.theme-dark .login-head p,.theme-dark .summary-box,.theme-dark .upload-note{color:#9fb1cf}.theme-dark .topbar,.theme-dark .hero-card,.theme-dark .section-hero{background:linear-gradient(135deg,rgba(8,18,35,.94),rgba(12,31,62,.88));border-color:#223656}.theme-dark .nav-btn.active{background:#dbe7ff;color:#0f172a}.theme-dark .btn.secondary{background:rgba(10,20,40,.88);color:#eaf0ff;border-color:#223656}
 :root{--bg:#edf2f7;--bg2:#f7f9fc;--line:#e5ecf4;--text:#0c1628;--muted:#66758b;font-family:Inter,Arial,sans-serif}
 *{box-sizing:border-box}html,body,#root{margin:0;min-height:100%;background:linear-gradient(180deg,var(--bg),var(--bg2))}body{margin:0;color:var(--text)}button,input,select,textarea,a{font:inherit}a{color:#184c90;text-decoration:none}
 .btn{height:40px;border:none;border-radius:12px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:700;cursor:pointer}.btn.primary{background:linear-gradient(135deg,#0c1630,#184c90);color:#fff}.btn.secondary{background:#fff;color:#0f172a;border:1px solid #dce4ef}.btn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.16)}.btn.success{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}.btn.danger{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}.full{width:100%}
